@@ -15,6 +15,7 @@ import userRoutes from './routes/userRoutes.js';
 import confiRoutes from './routes/confiRoutes.js';
 import religionRoutes from './routes/religionRoutes.js';
 import bannerRoutes from './routes/bannerRoutes.js';
+import analyticsRoutes from './routes/analyticsRoutes.js';
 
 dotenv.config();
 
@@ -43,6 +44,7 @@ app.use('/api/users', userRoutes);
 app.use('/api/confi', confiRoutes);
 app.use('/api/religions', religionRoutes);
 app.use('/api/banners', bannerRoutes);
+app.use('/api/analytics', analyticsRoutes);
 
 app.get('/api/ping', (req, res) => res.status(200).send('✅ Backend is alive!'));
 

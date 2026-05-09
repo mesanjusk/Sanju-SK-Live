@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { FaWhatsapp, FaArrowRight, FaStar } from 'react-icons/fa';
+import { FaWhatsapp, FaArrowRight } from 'react-icons/fa';
 import api from '../api';
 import Navbar from './Navbar';
 import HeroSection from './HeroSection';
@@ -8,6 +8,10 @@ import Footer from './Footer';
 import ProductCard from './ProductCard';
 import WhyChooseUs from './WhyChooseUs';
 import Testimonials from './Testimonials';
+import ServicesGrid from './ServicesGrid';
+import StatsCounter from './StatsCounter';
+import GMBSection from './GMBSection';
+import FAQSection from './FAQSection';
 import ContactPreview from './ContactPreview';
 import LoadingSkeleton from './common/LoadingSkeleton';
 
@@ -81,53 +85,63 @@ export default function Home() {
         </div>
       </section>
 
+      {/* ── Services Grid ── */}
+      <ServicesGrid />
+
+      {/* ── Stats Counter ── */}
+      <StatsCounter />
+
       {/* ── Categories ── */}
-      <section className="py-14">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="flex items-end justify-between">
-            <div>
-              <h2 className="section-title">Shop by Category</h2>
-              <p className="section-subtitle">Find the right print for every need.</p>
+      {(loading || categoryCards.length > 0) && (
+        <section className="py-14">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div className="flex items-end justify-between">
+              <div>
+                <span className="section-tag">Collections</span>
+                <h2 className="section-title mt-4">Shop by Category</h2>
+                <p className="mt-2 text-sm text-gray-500">Find the right print for every need.</p>
+              </div>
+              <Link to="/allCategories" className="hidden items-center gap-1 text-sm font-semibold text-[#128C7E] hover:text-[#075E54] sm:flex">
+                View all <FaArrowRight className="text-xs" />
+              </Link>
             </div>
-            <Link to="/allCategories" className="hidden items-center gap-1 text-sm font-semibold text-[#128C7E] hover:text-[#075E54] sm:flex">
-              View all <FaArrowRight className="text-xs" />
-            </Link>
+
+            {loading ? (
+              <div className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
+                {[...Array(6)].map((_, i) => <LoadingSkeleton key={i} />)}
+              </div>
+            ) : (
+              <div className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
+                {categoryCards.map((cat) => (
+                  <button
+                    key={cat.id}
+                    onClick={() => navigate(`/subcategory/${cat.categoryUuid}`)}
+                    className="group flex flex-col items-center rounded-2xl border border-gray-100 bg-white p-4 text-center shadow-sm transition-all duration-300 hover:border-[#25D366]/30 hover:shadow-md hover:-translate-y-0.5"
+                  >
+                    <div className="h-16 w-16 overflow-hidden rounded-xl bg-green-50">
+                      {cat.imageUrl ? (
+                        <img src={cat.imageUrl} alt={cat.title} className="h-full w-full object-cover" />
+                      ) : (
+                        <div className="flex h-full w-full items-center justify-center text-2xl">📇</div>
+                      )}
+                    </div>
+                    <h3 className="mt-3 line-clamp-2 text-sm font-semibold text-gray-800 group-hover:text-[#128C7E] transition-colors">{cat.title}</h3>
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
+        </section>
+      )}
 
-          {loading ? (
-            <div className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
-              {[...Array(6)].map((_, i) => <LoadingSkeleton key={i} />)}
-            </div>
-          ) : (
-            <div className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
-              {categoryCards.map((cat) => (
-                <button
-                  key={cat.id}
-                  onClick={() => navigate(`/subcategory/${cat.categoryUuid}`)}
-                  className="group flex flex-col items-center rounded-2xl border border-gray-100 bg-white p-4 text-center shadow-sm transition-all duration-300 hover:border-[#25D366]/30 hover:shadow-md hover:-translate-y-0.5"
-                >
-                  <div className="h-16 w-16 overflow-hidden rounded-xl bg-green-50">
-                    {cat.imageUrl ? (
-                      <img src={cat.imageUrl} alt={cat.title} className="h-full w-full object-cover" />
-                    ) : (
-                      <div className="flex h-full w-full items-center justify-center text-2xl">📇</div>
-                    )}
-                  </div>
-                  <h3 className="mt-3 line-clamp-2 text-sm font-semibold text-gray-800 group-hover:text-[#128C7E] transition-colors">{cat.title}</h3>
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
-      </section>
-
-      {/* ── Featured / Trending Products ── */}
+      {/* ── Trending Products ── */}
       <section className="bg-gray-50 py-14">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="flex items-end justify-between">
             <div>
-              <h2 className="section-title">Trending Products</h2>
-              <p className="section-subtitle">Our most popular printing designs.</p>
+              <span className="section-tag">Popular</span>
+              <h2 className="section-title mt-4">Trending Products</h2>
+              <p className="mt-2 text-sm text-gray-500">Our most popular printing designs.</p>
             </div>
             <Link to="/products" className="hidden items-center gap-1 text-sm font-semibold text-[#128C7E] hover:text-[#075E54] sm:flex">
               View all <FaArrowRight className="text-xs" />
@@ -146,8 +160,8 @@ export default function Home() {
             </div>
           )}
 
-          <div className="mt-8 text-center">
-            <Link to="/products" className="btn-outline">
+          <div className="mt-10 text-center">
+            <Link to="/products" className="btn-outline inline-flex items-center gap-2">
               View All Products <FaArrowRight className="text-xs" />
             </Link>
           </div>
@@ -171,6 +185,12 @@ export default function Home() {
         </section>
       )}
 
+      {/* ── Why Choose Us ── */}
+      <WhyChooseUs />
+
+      {/* ── Testimonials ── */}
+      <Testimonials />
+
       {/* ── WhatsApp CTA Banner ── */}
       <section className="bg-gradient-to-r from-[#075E54] to-[#128C7E] py-16">
         <div className="mx-auto max-w-3xl px-4 text-center sm:px-6">
@@ -193,8 +213,12 @@ export default function Home() {
         </div>
       </section>
 
-      <WhyChooseUs />
-      <Testimonials />
+      {/* ── Google My Business & Reviews ── */}
+      <GMBSection config={config} />
+
+      {/* ── FAQ ── */}
+      <FAQSection />
+
       <ContactPreview />
       <Footer />
     </div>

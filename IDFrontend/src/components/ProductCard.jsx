@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { FaWhatsapp, FaHeart, FaEye } from 'react-icons/fa';
 import LazyImage from './common/LazyImage';
 import { useFavorites } from '../context/FavoritesContext';
+import { trackWhatsAppClick } from '../hooks/useAnalytics';
 
 const getPriceForQty = (product, qty) => {
   const tiers = product?.quantityPricing;
@@ -162,6 +163,7 @@ const ProductCard = ({ product, whatsappNumber }) => {
           href={waHref}
           target="_blank"
           rel="noreferrer"
+          onClick={() => trackWhatsAppClick(product._id)}
           className="mt-4 flex items-center justify-center gap-2 rounded-xl bg-[#25D366] py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-[#128C7E] transition-colors active:scale-95"
         >
           <FaWhatsapp className="text-base" />

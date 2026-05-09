@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { FaWhatsapp, FaTimes } from 'react-icons/fa';
 import api from '../api';
+import { trackWhatsAppClick } from '../hooks/useAnalytics';
 
 const WhatsAppCTA = () => {
   const [waNumber, setWaNumber] = useState('919999999999');
@@ -38,6 +39,7 @@ const WhatsAppCTA = () => {
           target="_blank"
           rel="noreferrer"
           aria-label="Chat on WhatsApp"
+          onClick={() => trackWhatsAppClick()}
           className="relative flex h-14 w-14 items-center justify-center rounded-full bg-[#25D366] text-white shadow-xl hover:bg-[#128C7E] transition-colors"
         >
           <FaWhatsapp className="text-2xl" />

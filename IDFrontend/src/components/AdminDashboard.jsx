@@ -2,8 +2,9 @@ import { useState, useEffect } from 'react';
 import {
   FaBoxOpen, FaThLarge, FaSitemap, FaImages, FaUsers, FaCog,
   FaPrayingHands, FaBars, FaTimes, FaSignOutAlt, FaChartBar,
-  FaWhatsapp,
+  FaWhatsapp, FaChartLine,
 } from 'react-icons/fa';
+import AnalyticsPage from '../pages/admin/AnalyticsPage';
 import CreateListing from './CreateListing';
 import AllListing from './allLisiting';
 import AddUser from '../pages/addUser';
@@ -16,6 +17,7 @@ import api from '../api';
 
 const NAV = [
   { key: 'overview',      label: 'Overview',     Icon: FaChartBar },
+  { key: 'analytics',     label: 'Analytics',    Icon: FaChartLine },
   { key: 'listings',      label: 'Products',      Icon: FaBoxOpen },
   { key: 'categories',    label: 'Categories',    Icon: FaThLarge },
   { key: 'subcategories', label: 'Subcategories', Icon: FaSitemap },
@@ -112,6 +114,7 @@ export default function AdminDashboard() {
   const renderContent = () => {
     switch (activeTab) {
       case 'overview':      return <Overview onNavigate={handleTab} />;
+      case 'analytics':     return <AnalyticsPage />;
       case 'listings':      return <CreateListing />;
       case 'alllistings':   return <AllListing />;
       case 'categories':    return <UploadCategory />;
