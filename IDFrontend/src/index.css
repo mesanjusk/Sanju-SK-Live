@@ -157,6 +157,28 @@
   .badge-new     { @apply rounded-full bg-[#25D366] px-2.5 py-0.5 text-xs font-bold text-white shadow-sm; }
   .badge-popular { @apply rounded-full bg-amber-500 px-2.5 py-0.5 text-xs font-bold text-white shadow-sm; }
   .badge-hot     { @apply rounded-full bg-red-500 px-2.5 py-0.5 text-xs font-bold text-white shadow-sm; }
+
+  /* ── Admin shared utilities ── */
+  .admin-page      { @apply space-y-6; }
+  .admin-header    { @apply flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between; }
+  .admin-title     { @apply font-serif text-2xl font-bold text-gray-900; }
+  .admin-search    { @apply w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-2.5 text-sm text-gray-700 outline-none placeholder-gray-400 transition focus:border-[#25D366] focus:bg-white focus:ring-2 focus:ring-green-100 sm:max-w-xs; }
+  .admin-btn-add   { @apply inline-flex items-center gap-2 rounded-xl bg-[#25D366] px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-[#128C7E] active:scale-95; }
+  .admin-btn-edit  { @apply rounded-lg border border-[#25D366]/40 bg-green-50 px-3 py-1.5 text-xs font-semibold text-[#128C7E] transition hover:bg-[#25D366] hover:text-white; }
+  .admin-btn-del   { @apply rounded-lg border border-red-200 bg-red-50 px-3 py-1.5 text-xs font-semibold text-red-600 transition hover:bg-red-500 hover:text-white; }
+  .admin-btn-save  { @apply rounded-xl bg-[#25D366] px-5 py-2 text-sm font-semibold text-white transition hover:bg-[#128C7E] active:scale-95 disabled:opacity-50; }
+  .admin-btn-cancel { @apply rounded-xl border border-gray-200 bg-gray-50 px-5 py-2 text-sm font-semibold text-gray-600 transition hover:bg-gray-100; }
+  .admin-table-wrap { @apply overflow-x-auto rounded-2xl border border-gray-100 bg-white shadow-sm; }
+  .admin-table     { @apply min-w-full text-sm; }
+  .admin-th        { @apply px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500 bg-gray-50 first:rounded-tl-2xl last:rounded-tr-2xl; }
+  .admin-td        { @apply px-4 py-3 text-gray-700 border-t border-gray-100; }
+  .admin-empty     { @apply py-12 text-center text-sm text-gray-400; }
+  .admin-modal-bg  { @apply fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm; }
+  .admin-modal     { @apply w-full max-w-md rounded-3xl bg-white p-6 shadow-2xl; }
+  .admin-modal-title { @apply mb-5 font-serif text-lg font-bold text-gray-900; }
+  .admin-label     { @apply mb-1 block text-xs font-semibold uppercase tracking-wide text-gray-500; }
+  .admin-input     { @apply w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-2.5 text-sm text-gray-800 outline-none transition focus:border-[#25D366] focus:bg-white focus:ring-2 focus:ring-green-100; }
+  .admin-select    { @apply w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-2.5 text-sm text-gray-800 outline-none transition focus:border-[#25D366] focus:bg-white focus:ring-2 focus:ring-green-100; }
 }
 
 /* ─────────────────────────────────────────────

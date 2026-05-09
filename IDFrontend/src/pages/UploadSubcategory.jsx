@@ -148,184 +148,130 @@ const UploadSubcategory = () => {
   );
 
   return (
-    <div className="p-6 max-w-4xl mx-auto">
-      <h2 className="text-2xl font-semibold text-center mb-6">Subcategory List</h2>
-
-      <div className="flex justify-between items-center mb-4">
-        <input
-          type="text"
-          placeholder="Search Subcategories..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="p-2 border rounded w-full max-w-sm"
-        />
-        <button
-          onClick={() => setModalOpen(true)}
-          className="ml-4 px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
-        >
-          + New Subcategory
-        </button>
+    <div className="admin-page">
+      <div className="admin-header">
+        <h2 className="admin-title">Subcategories</h2>
+        <div className="flex flex-wrap items-center gap-3">
+          <input type="text" placeholder="Search subcategories…" className="admin-search"
+            value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
+          <button onClick={() => setModalOpen(true)} className="admin-btn-add">+ New Subcategory</button>
+        </div>
       </div>
 
-      <div className="overflow-x-auto mt-4">
-        <table className="min-w-full table-auto">
-          <thead className="bg-gray-200">
+      <div className="admin-table-wrap">
+        <table className="admin-table">
+          <thead>
             <tr>
-              <th className="px-4 py-2">Image</th>
-              <th className="px-4 py-2">Name</th>
-              <th className="px-4 py-2">Category</th>
-              <th className="px-4 py-2">Actions</th>
+              <th className="admin-th w-20">Image</th>
+              <th className="admin-th">Name</th>
+              <th className="admin-th">Category</th>
+              <th className="admin-th w-36 text-right">Actions</th>
             </tr>
           </thead>
           <tbody>
-            {filteredSubcategories.length > 0 ? filteredSubcategories.map((sub) => (
-              <tr key={sub._id} className="border-t text-sm text-center">
-                <td className="p-2 border">
-                  <img
-                    src={sub.imageUrl}
-                    alt={sub.name}
-                    width="50"
-                    className="h-12 mx-auto cursor-pointer"
-                    onClick={() => openImageModal(sub.imageUrl)}
-                  />
+            {filteredSubcategories.length === 0 ? (
+              <tr><td colSpan={4} className="admin-empty">No subcategories found.</td></tr>
+            ) : filteredSubcategories.map((sub) => (
+              <tr key={sub._id}>
+                <td className="admin-td">
+                  <img src={sub.imageUrl} alt={sub.name}
+                    className="h-12 w-12 cursor-pointer rounded-xl object-cover"
+                    onClick={() => openImageModal(sub.imageUrl)} />
                 </td>
-                <td className="p-2 border">{sub.name}</td>
-                <td className="p-2 border">
-                  {categories.find(cat => cat.category_uuid === sub.categoryId)?.name || 'N/A'}
+                <td className="admin-td font-medium text-gray-900">{sub.name}</td>
+                <td className="admin-td text-gray-500">
+                  {categories.find(cat => cat.category_uuid === sub.categoryId)?.name || '—'}
                 </td>
-                <td className="p-2 border space-x-2">
-                  <button
-                    onClick={() => openEditModal(sub)}
-                    className="bg-yellow-500 text-white px-3 py-1 rounded hover:bg-yellow-600"
-                  >
-                    Edit
-                  </button>
-                  {!sub.isUsed && (
-                    <button
-                      onClick={() => handleDelete(sub._id)}
-                      className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
-                    >
-                      Delete
-                    </button>
-                  )}
+                <td className="admin-td">
+                  <div className="flex justify-end gap-2">
+                    <button onClick={() => openEditModal(sub)} className="admin-btn-edit">Edit</button>
+                    {!sub.isUsed && (
+                      <button onClick={() => handleDelete(sub._id)} className="admin-btn-del">Delete</button>
+                    )}
+                  </div>
                 </td>
               </tr>
-            )) : (
-              <tr>
-                <td colSpan="4" className="text-center text-gray-500 py-4">No subcategories found.</td>
-              </tr>
-            )}
+            ))}
           </tbody>
         </table>
       </div>
 
-      {/* New Subcategory Modal */}
+      {/* Image preview */}
+      {viewImageModal.open && (
+        <div className="admin-modal-bg" onClick={closeImageModal}>
+          <img src={viewImageModal.imageUrl} alt="Subcategory"
+            className="max-h-[85vh] max-w-[85vw] rounded-2xl shadow-2xl"
+            onClick={(e) => e.stopPropagation()} />
+        </div>
+      )}
+
+      {/* Create Modal */}
       {modalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-60 flex justify-center items-center z-50">
-          <div className="bg-white p-6 rounded-lg shadow-md w-full max-w-lg relative">
-            <button
-              className="absolute top-2 right-4 text-2xl text-gray-500"
-              onClick={() => setModalOpen(false)}
-            >
-              &times;
-            </button>
-            <h3 className="text-xl font-semibold mb-4">New Subcategory</h3>
-            <form onSubmit={handleSubmit} encType="multipart/form-data" className="space-y-4">
-              <input
-                type="text"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder="Subcategory Name"
-                className="w-full p-3 border border-gray-300 rounded-md"
-                required
-              />
-              <select
-                value={categoryId}
-                onChange={(e) => setCategoryId(e.target.value)}
-                className="w-full p-3 border border-gray-300 rounded-md"
-                required
-              >
-                <option value="">-- Select a Category --</option>
-                {categories.map((cat) => (
-                  <option key={cat._id} value={cat.category_uuid}>{cat.name}</option>
-                ))}
-              </select>
-              <input
-                type="file"
-                accept="image/*"
-                onChange={(e) => setImage(e.target.files[0])}
-                className="w-full p-3 border border-gray-300 rounded-md"
-                required
-              />
-              <button
-                type="submit"
-                className={`w-full py-2 text-white rounded-md ${isLoading ? 'bg-gray-400' : 'bg-blue-500 hover:bg-blue-600'}`}
-                disabled={isLoading}
-              >
-                {isLoading ? 'Uploading...' : 'Upload'}
-              </button>
+        <div className="admin-modal-bg">
+          <div className="admin-modal">
+            <h3 className="admin-modal-title">New Subcategory</h3>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div>
+                <label className="admin-label">Name</label>
+                <input type="text" value={name} onChange={(e) => setName(e.target.value)}
+                  placeholder="e.g. Hindu Wedding" className="admin-input" required />
+              </div>
+              <div>
+                <label className="admin-label">Category</label>
+                <select value={categoryId} onChange={(e) => setCategoryId(e.target.value)}
+                  className="admin-select" required>
+                  <option value="">— Select Category —</option>
+                  {categories.map((cat) => (
+                    <option key={cat._id} value={cat.category_uuid}>{cat.name}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="admin-label">Image</label>
+                <input type="file" accept="image/*" onChange={(e) => setImage(e.target.files[0])}
+                  className="admin-input py-1.5" required />
+              </div>
+              <div className="flex justify-end gap-3 pt-2">
+                <button type="button" onClick={() => setModalOpen(false)} className="admin-btn-cancel">Cancel</button>
+                <button type="submit" disabled={isLoading} className="admin-btn-save">
+                  {isLoading ? 'Uploading…' : 'Upload'}
+                </button>
+              </div>
             </form>
           </div>
         </div>
       )}
 
-      {viewImageModal.open && (
-        <div className="fixed inset-0 bg-black bg-opacity-70 flex justify-center items-center z-50" onClick={closeImageModal}>
-          <img
-            src={viewImageModal.imageUrl}
-            alt="Subcategory"
-            className="max-w-full max-h-full rounded"
-            onClick={(e) => e.stopPropagation()}
-          />
-          <button
-            onClick={closeImageModal}
-            className="absolute top-4 right-4 text-white text-3xl font-bold"
-          >
-            &times;
-          </button>
-        </div>
-      )}
-
       {/* Edit Modal */}
       {editModal.open && (
-        <div className="fixed inset-0 bg-black bg-opacity-70 flex justify-center items-center z-50" onClick={closeEditModal}>
-          <div className="bg-white p-6 rounded shadow-lg space-y-4 max-w-md w-full" onClick={e => e.stopPropagation()}>
-            <h3 className="text-xl font-semibold">Edit Subcategory</h3>
-            <form onSubmit={handleEditSubmit} encType="multipart/form-data" className="space-y-4">
-              <input
-                type="text"
-                value={editName}
-                onChange={(e) => setEditName(e.target.value)}
-                className="w-full p-3 border border-gray-300 rounded-md"
-                required
-              />
-              <select
-                value={editCategoryId}
-                onChange={(e) => setEditCategoryId(e.target.value)}
-                className="w-full p-3 border border-gray-300 rounded-md"
-                required
-              >
-                <option value="">-- Select a Category --</option>
-                {categories.map((cat) => (
-                  <option key={cat._id} value={cat.category_uuid}>{cat.name}</option>
-                ))}
-              </select>
-              <input
-                type="file"
-                accept="image/*"
-                onChange={(e) => setEditImage(e.target.files[0])}
-                className="w-full p-3 border border-gray-300 rounded-md"
-              />
-              <div className="flex justify-end gap-2">
-                <button type="button" onClick={closeEditModal} className="px-4 py-2 border rounded">
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={editIsLoading}
-                  className={`px-4 py-2 text-white rounded ${editIsLoading ? 'bg-gray-400' : 'bg-blue-600 hover:bg-blue-700'}`}
-                >
-                  {editIsLoading ? 'Saving...' : 'Save'}
+        <div className="admin-modal-bg" onClick={closeEditModal}>
+          <div className="admin-modal" onClick={(e) => e.stopPropagation()}>
+            <h3 className="admin-modal-title">Edit Subcategory</h3>
+            <form onSubmit={handleEditSubmit} className="space-y-4">
+              <div>
+                <label className="admin-label">Name</label>
+                <input type="text" value={editName} onChange={(e) => setEditName(e.target.value)}
+                  className="admin-input" required />
+              </div>
+              <div>
+                <label className="admin-label">Category</label>
+                <select value={editCategoryId} onChange={(e) => setEditCategoryId(e.target.value)}
+                  className="admin-select" required>
+                  <option value="">— Select Category —</option>
+                  {categories.map((cat) => (
+                    <option key={cat._id} value={cat.category_uuid}>{cat.name}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="admin-label">Replace Image (optional)</label>
+                <input type="file" accept="image/*" onChange={(e) => setEditImage(e.target.files[0])}
+                  className="admin-input py-1.5" />
+              </div>
+              <div className="flex justify-end gap-3 pt-2">
+                <button type="button" onClick={closeEditModal} className="admin-btn-cancel">Cancel</button>
+                <button type="submit" disabled={editIsLoading} className="admin-btn-save">
+                  {editIsLoading ? 'Saving…' : 'Save'}
                 </button>
               </div>
             </form>

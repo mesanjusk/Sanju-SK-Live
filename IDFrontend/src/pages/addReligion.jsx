@@ -110,113 +110,77 @@ const AddReligion = () => {
   };
 
   return (
-    <div className="max-w-4xl mx-auto p-4">
-      <h2 className="text-2xl font-bold mb-6 text-center">Religion</h2>
-
-      <div className="flex items-center gap-4 mb-4">
-        <input
-          type="text"
-          placeholder="Search name..."
-          className="flex-1 p-2 border border-gray-300 rounded-md"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-        />
-        <button
-          onClick={() => setIsCreateModalOpen(true)}
-          className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
-        >
-          + New Religion
-        </button>
+    <div className="admin-page">
+      <div className="admin-header">
+        <h2 className="admin-title">Religions / Occasions</h2>
+        <div className="flex flex-wrap items-center gap-3">
+          <input type="text" placeholder="Search…" className="admin-search"
+            value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
+          <button onClick={() => setIsCreateModalOpen(true)} className="admin-btn-add">+ New Religion</button>
+        </div>
       </div>
 
-      <table className="w-full border border-gray-300 rounded-md">
-        <thead className="bg-gray-100">
-          <tr>
-            <th className="p-2 border">Name</th>
-            <th className="p-2 border">Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {filteredReligions.map((rel) => (
-            <tr key={rel._id} className="text-center">
-              <td className="p-2 border">{rel.name}</td>
-              <td className="p-2 border space-x-2">
-                <button
-                  onClick={() => openEditModal(rel)}
-                  className="bg-yellow-500 text-white px-3 py-1 rounded hover:bg-yellow-600"
-                >
-                  Edit
-                </button>
-                {!rel.isUsed && (
-                  <button
-                    onClick={() => handleDelete(rel._id)}
-                    className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
-                  >
-                    Delete
-                  </button>
-                )}
-              </td>
+      <div className="admin-table-wrap">
+        <table className="admin-table">
+          <thead>
+            <tr>
+              <th className="admin-th">Name</th>
+              <th className="admin-th w-36 text-right">Actions</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {filteredReligions.length === 0 ? (
+              <tr><td colSpan={2} className="admin-empty">No religions found.</td></tr>
+            ) : filteredReligions.map((rel) => (
+              <tr key={rel._id}>
+                <td className="admin-td font-medium text-gray-900">{rel.name}</td>
+                <td className="admin-td">
+                  <div className="flex justify-end gap-2">
+                    <button onClick={() => openEditModal(rel)} className="admin-btn-edit">Edit</button>
+                    {!rel.isUsed && (
+                      <button onClick={() => handleDelete(rel._id)} className="admin-btn-del">Delete</button>
+                    )}
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
 
-      {/* Create Modal */}
       {isCreateModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-70 flex justify-center items-center z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-md shadow-lg">
-            <h3 className="text-xl font-semibold mb-4">New Religion</h3>
+        <div className="admin-modal-bg">
+          <div className="admin-modal">
+            <h3 className="admin-modal-title">New Religion / Occasion</h3>
             <form onSubmit={handleCreateSubmit} className="space-y-4">
-              <input
-                type="text"
-                value={religionName}
-                onChange={(e) => setReligionName(e.target.value)}
-                placeholder="Religion Name"
-                className="w-full p-2 border border-gray-300 rounded-md"
-              />
-             
-              <div className="flex justify-end space-x-4">
-                <button
-                  type="button"
-                  onClick={() => setIsCreateModalOpen(false)}
-                  className="px-4 py-2 border rounded hover:bg-gray-100"
-                >
-                  Cancel
-                </button>
-                <button type="submit" className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
-                 Save
-                </button>
+              <div>
+                <label className="admin-label">Name</label>
+                <input type="text" value={religionName} onChange={(e) => setReligionName(e.target.value)}
+                  placeholder="e.g. Hindu, Christian, Islamic…" className="admin-input" />
+              </div>
+              <div className="flex justify-end gap-3 pt-2">
+                <button type="button" onClick={() => setIsCreateModalOpen(false)} className="admin-btn-cancel">Cancel</button>
+                <button type="submit" className="admin-btn-save">Save</button>
               </div>
             </form>
           </div>
         </div>
       )}
 
-      {/* Edit Modal */}
       {isEditModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-70 flex justify-center items-center z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-md shadow-lg">
-            <h3 className="text-xl font-semibold mb-4">Edit Religion</h3>
-            <input
-              type="text"
-              value={editReligionName}
-              onChange={(e) => setEditReligionName(e.target.value)}
-              className="w-full p-2 border border-gray-300 rounded-md mb-4"
-            />
-           
-            <div className="flex justify-end space-x-4">
-              <button
-                onClick={() => setIsEditModalOpen(false)}
-                className="px-4 py-2 border rounded hover:bg-gray-100"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleEditSubmit}
-                className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-              >
-                Save
-              </button>
+        <div className="admin-modal-bg">
+          <div className="admin-modal">
+            <h3 className="admin-modal-title">Edit Religion</h3>
+            <div className="space-y-4">
+              <div>
+                <label className="admin-label">Name</label>
+                <input type="text" value={editReligionName}
+                  onChange={(e) => setEditReligionName(e.target.value)} className="admin-input" />
+              </div>
+              <div className="flex justify-end gap-3 pt-2">
+                <button onClick={() => setIsEditModalOpen(false)} className="admin-btn-cancel">Cancel</button>
+                <button onClick={handleEditSubmit} className="admin-btn-save">Save</button>
+              </div>
             </div>
           </div>
         </div>
