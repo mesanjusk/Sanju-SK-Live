@@ -140,6 +140,7 @@ export default function Footer() {
         <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-2 px-4 py-4 text-center text-xs text-white/50 sm:flex-row sm:px-6">
           <span>© {year} {config.name || 'SK Cards'}. All rights reserved.</span>
           <span>Designed with ❤️ for beautiful printing</span>
+          <Link to="/login" className="text-white/30 hover:text-white/60 transition-colors">Admin</Link>
         </div>
       </div>
     </footer>

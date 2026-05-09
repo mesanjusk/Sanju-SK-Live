@@ -139,110 +139,81 @@ const UploadCategory = () => {
   };
 
   return (
-    <div className="max-w-4xl mx-auto p-4">
-      <h2 className="text-2xl font-bold mb-6 text-center">Upload Category</h2>
-
-      <div className="flex items-center gap-4 mb-4">
-        <input
-          type="text"
-          placeholder="Search categories..."
-          className="flex-1 p-2 border border-gray-300 rounded-md"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-        />
-        <button
-          onClick={() => setIsCreateModalOpen(true)}
-          className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
-        >
-          + New Category
-        </button>
+    <div className="admin-page">
+      <div className="admin-header">
+        <h2 className="admin-title">Categories</h2>
+        <div className="flex flex-wrap items-center gap-3">
+          <input type="text" placeholder="Search categories…" className="admin-search"
+            value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
+          <button onClick={() => setIsCreateModalOpen(true)} className="admin-btn-add">
+            + New Category
+          </button>
+        </div>
       </div>
 
-      <table className="w-full border border-gray-300 rounded-md">
-        <thead className="bg-gray-100">
-          <tr>
-            <th className="p-2 border">Image</th>
-            <th className="p-2 border">Name</th>
-            <th className="p-2 border">Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {filteredCategories.map((cat) => (
-            <tr key={cat._id} className="text-center">
-              <td className="p-2 border">
-                <img
-                  src={cat.imageUrl}
-                  alt={cat.name}
-                  className="h-12 mx-auto cursor-pointer"
-                  onClick={() => openImageModal(cat.imageUrl)}
-                />
-              </td>
-              <td className="p-2 border">{cat.name}</td>
-              <td className="p-2 border space-x-2">
-                <button
-                  onClick={() => openEditModal(cat)}
-                  className="bg-yellow-500 text-white px-3 py-1 rounded hover:bg-yellow-600"
-                >
-                  Edit
-                </button>
-                {!cat.isUsed && (
-                  <button
-                    onClick={() => handleDelete(cat._id)}
-                    className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
-                  >
-                    Delete
-                  </button>
-                )}
-              </td>
+      <div className="admin-table-wrap">
+        <table className="admin-table">
+          <thead>
+            <tr>
+              <th className="admin-th w-20">Image</th>
+              <th className="admin-th">Name</th>
+              <th className="admin-th w-36 text-right">Actions</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {filteredCategories.length === 0 ? (
+              <tr><td colSpan={3} className="admin-empty">No categories found.</td></tr>
+            ) : filteredCategories.map((cat) => (
+              <tr key={cat._id}>
+                <td className="admin-td">
+                  <img src={cat.imageUrl} alt={cat.name}
+                    className="h-12 w-12 cursor-pointer rounded-xl object-cover"
+                    onClick={() => openImageModal(cat.imageUrl)} />
+                </td>
+                <td className="admin-td font-medium text-gray-900">{cat.name}</td>
+                <td className="admin-td">
+                  <div className="flex justify-end gap-2">
+                    <button onClick={() => openEditModal(cat)} className="admin-btn-edit">Edit</button>
+                    {!cat.isUsed && (
+                      <button onClick={() => handleDelete(cat._id)} className="admin-btn-del">Delete</button>
+                    )}
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
 
-      {/* Image Modal */}
+      {/* Image preview */}
       {isImageModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-70 flex justify-center items-center z-50" onClick={() => setIsImageModalOpen(false)}>
-          <img
-            src={modalImageSrc}
-            alt="Category Full View"
-            className="max-h-[90vh] max-w-[90vw] rounded shadow-lg"
-            onClick={(e) => e.stopPropagation()}
-          />
-          <button className="absolute top-4 right-4 text-white text-3xl font-bold">&times;</button>
+        <div className="admin-modal-bg" onClick={() => setIsImageModalOpen(false)}>
+          <img src={modalImageSrc} alt="Preview"
+            className="max-h-[85vh] max-w-[85vw] rounded-2xl shadow-2xl"
+            onClick={(e) => e.stopPropagation()} />
         </div>
       )}
 
       {/* Create Modal */}
       {isCreateModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-70 flex justify-center items-center z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-md shadow-lg">
-            <h3 className="text-xl font-semibold mb-4">New Category</h3>
+        <div className="admin-modal-bg">
+          <div className="admin-modal">
+            <h3 className="admin-modal-title">New Category</h3>
             <form onSubmit={handleCreateSubmit} className="space-y-4">
-              <input
-                type="text"
-                value={categoryName}
-                onChange={(e) => setCategoryName(e.target.value)}
-                placeholder="Category Name"
-                className="w-full p-2 border border-gray-300 rounded-md"
-              />
-              <input
-                type="file"
-                accept="image/*"
-                onChange={(e) => handleFileChange(e, 'create')}
-                className="w-full p-2 border border-gray-300 rounded-md"
-              />
-              {previewImage && <img src={previewImage} alt="Preview" className="h-24 rounded border" />}
-              <div className="flex justify-end space-x-4">
-                <button
-                  type="button"
-                  onClick={() => setIsCreateModalOpen(false)}
-                  className="px-4 py-2 border rounded hover:bg-gray-100"
-                >
-                  Cancel
-                </button>
-                <button type="submit" className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
-                  Upload
-                </button>
+              <div>
+                <label className="admin-label">Category Name</label>
+                <input type="text" value={categoryName} onChange={(e) => setCategoryName(e.target.value)}
+                  placeholder="e.g. Wedding Cards" className="admin-input" />
+              </div>
+              <div>
+                <label className="admin-label">Image</label>
+                <input type="file" accept="image/*" onChange={(e) => handleFileChange(e, 'create')}
+                  className="admin-input py-1.5" />
+              </div>
+              {previewImage && <img src={previewImage} alt="Preview" className="h-24 rounded-xl object-cover" />}
+              <div className="flex justify-end gap-3 pt-2">
+                <button type="button" onClick={() => setIsCreateModalOpen(false)} className="admin-btn-cancel">Cancel</button>
+                <button type="submit" className="admin-btn-save">Upload</button>
               </div>
             </form>
           </div>
@@ -251,37 +222,25 @@ const UploadCategory = () => {
 
       {/* Edit Modal */}
       {isEditModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-70 flex justify-center items-center z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-md shadow-lg">
-            <h3 className="text-xl font-semibold mb-4">Edit Category</h3>
-            <input
-              type="text"
-              value={editCategoryName}
-              onChange={(e) => setEditCategoryName(e.target.value)}
-              className="w-full p-2 border border-gray-300 rounded-md mb-4"
-            />
-            <input
-              type="file"
-              accept="image/*"
-              onChange={(e) => handleFileChange(e, 'edit')}
-              className="w-full p-2 border border-gray-300 rounded-md mb-2"
-            />
-            {editPreviewImage && (
-              <img src={editPreviewImage} alt="Edit Preview" className="h-24 rounded border mb-2" />
-            )}
-            <div className="flex justify-end space-x-4">
-              <button
-                onClick={() => setIsEditModalOpen(false)}
-                className="px-4 py-2 border rounded hover:bg-gray-100"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleEditSubmit}
-                className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-              >
-                Save
-              </button>
+        <div className="admin-modal-bg">
+          <div className="admin-modal">
+            <h3 className="admin-modal-title">Edit Category</h3>
+            <div className="space-y-4">
+              <div>
+                <label className="admin-label">Name</label>
+                <input type="text" value={editCategoryName}
+                  onChange={(e) => setEditCategoryName(e.target.value)} className="admin-input" />
+              </div>
+              <div>
+                <label className="admin-label">Replace Image (optional)</label>
+                <input type="file" accept="image/*" onChange={(e) => handleFileChange(e, 'edit')}
+                  className="admin-input py-1.5" />
+              </div>
+              {editPreviewImage && <img src={editPreviewImage} alt="Preview" className="h-24 rounded-xl object-cover" />}
+              <div className="flex justify-end gap-3 pt-2">
+                <button onClick={() => setIsEditModalOpen(false)} className="admin-btn-cancel">Cancel</button>
+                <button onClick={handleEditSubmit} className="admin-btn-save">Save</button>
+              </div>
             </div>
           </div>
         </div>

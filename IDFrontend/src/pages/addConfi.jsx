@@ -111,75 +111,71 @@ const AddConfi = () => {
   const filtered = config.filter((c) => c.name?.toLowerCase().includes(searchTerm.toLowerCase()));
 
   return (
-    <div>
+    <div className="admin-page">
       <Toaster position="top-right" />
 
-      <div className="mb-6 flex items-center justify-between">
-        <h2 className="font-serif text-2xl font-bold text-gray-900">Store Settings</h2>
-        <button
-          onClick={() => { resetForm(); setShowModal(true); }}
-          className="flex items-center gap-2 rounded-xl bg-[#25D366] px-4 py-2 text-sm font-semibold text-white hover:bg-[#128C7E] transition-colors"
-        >
-          <FaPlus className="text-xs" /> Add Config
-        </button>
+      <div className="admin-header">
+        <h2 className="admin-title">Store Settings</h2>
+        <div className="flex flex-wrap items-center gap-3">
+          <input type="text" placeholder="Search…" className="admin-search"
+            value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
+          <button onClick={() => { resetForm(); setShowModal(true); }} className="admin-btn-add">
+            <FaPlus className="text-xs" /> Add Config
+          </button>
+        </div>
       </div>
 
-      <input
-        type="text"
-        placeholder="Search..."
-        value={searchTerm}
-        onChange={(e) => setSearchTerm(e.target.value)}
-        className="mb-4 w-full max-w-sm rounded-xl border border-gray-200 px-4 py-2.5 text-sm outline-none focus:border-[#25D366]"
-      />
-
-      <div className="overflow-x-auto rounded-2xl border border-gray-100 bg-white shadow-sm">
-        <table className="min-w-full text-sm">
+      <div className="admin-table-wrap">
+        <table className="admin-table">
           <thead>
-            <tr className="border-b border-gray-100 bg-gray-50 text-xs font-semibold uppercase tracking-wide text-gray-500">
-              <th className="px-4 py-3 text-left">Logo</th>
-              <th className="px-4 py-3 text-left">Name</th>
-              <th className="px-4 py-3 text-left">Phone</th>
-              <th className="px-4 py-3 text-left">WhatsApp</th>
-              <th className="px-4 py-3 text-left">Email</th>
-              <th className="px-4 py-3 text-left">Actions</th>
+            <tr>
+              <th className="admin-th w-16">Logo</th>
+              <th className="admin-th">Name</th>
+              <th className="admin-th">Phone</th>
+              <th className="admin-th hidden sm:table-cell">WhatsApp</th>
+              <th className="admin-th hidden md:table-cell">Email</th>
+              <th className="admin-th w-24 text-right">Actions</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-50">
-            {filtered.map((item) => (
-              <tr key={item._id} className="hover:bg-gray-50 transition-colors">
-                <td className="px-4 py-3">
-                  {item.logo && <img src={item.logo} alt="logo" className="h-12 w-12 cursor-pointer rounded-xl object-cover" onClick={() => setModalImageSrc(item.logo)} />}
+          <tbody>
+            {filtered.length === 0 ? (
+              <tr><td colSpan={6} className="admin-empty">No configuration saved yet.</td></tr>
+            ) : filtered.map((item) => (
+              <tr key={item._id}>
+                <td className="admin-td">
+                  {item.logo
+                    ? <img src={item.logo} alt="logo" className="h-11 w-11 cursor-pointer rounded-xl object-cover" onClick={() => setModalImageSrc(item.logo)} />
+                    : <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-gray-100 text-gray-400 text-lg">🏪</div>
+                  }
                 </td>
-                <td className="px-4 py-3 font-medium text-gray-800">{item.name}</td>
-                <td className="px-4 py-3 text-gray-600">{item.phone}</td>
-                <td className="px-4 py-3 text-gray-600">{item.whatsappNumber || '—'}</td>
-                <td className="px-4 py-3 text-gray-600">{item.email}</td>
-                <td className="px-4 py-3">
-                  <div className="flex gap-2">
-                    <button onClick={() => handleEdit(item)} className="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-50 text-amber-600 hover:bg-amber-100"><FaEdit className="text-xs" /></button>
-                    <button onClick={() => handleDelete(item._id)} className="flex h-8 w-8 items-center justify-center rounded-lg bg-red-50 text-red-500 hover:bg-red-100"><FaTrash className="text-xs" /></button>
+                <td className="admin-td font-semibold text-gray-900">{item.name}</td>
+                <td className="admin-td text-gray-600">{item.phone}</td>
+                <td className="admin-td hidden sm:table-cell text-gray-600">{item.whatsappNumber || '—'}</td>
+                <td className="admin-td hidden md:table-cell text-gray-600">{item.email}</td>
+                <td className="admin-td">
+                  <div className="flex justify-end gap-2">
+                    <button onClick={() => handleEdit(item)} className="admin-btn-edit"><FaEdit /></button>
+                    <button onClick={() => handleDelete(item._id)} className="admin-btn-del"><FaTrash /></button>
                   </div>
                 </td>
               </tr>
             ))}
-            {filtered.length === 0 && (
-              <tr><td colSpan={6} className="py-8 text-center text-gray-400">No configuration saved yet.</td></tr>
-            )}
           </tbody>
         </table>
       </div>
 
-      {/* Image modal */}
+      {/* Logo preview */}
       {modalImageSrc && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80" onClick={() => setModalImageSrc(null)}>
-          <img src={modalImageSrc} alt="Logo" className="max-h-[80vh] max-w-[80vw] rounded-2xl" onClick={(e) => e.stopPropagation()} />
+        <div className="admin-modal-bg" onClick={() => setModalImageSrc(null)}>
+          <img src={modalImageSrc} alt="Logo" className="max-h-[80vh] max-w-[80vw] rounded-2xl shadow-2xl"
+            onClick={(e) => e.stopPropagation()} />
         </div>
       )}
 
-      {/* Modal */}
+      {/* Edit / Add modal */}
       {showModal && (
-        <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/50 px-4 py-8">
-          <div className="w-full max-w-xl rounded-2xl bg-white shadow-2xl" onClick={(e) => e.stopPropagation()}>
+        <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/50 p-4 backdrop-blur-sm">
+          <div className="my-8 w-full max-w-xl rounded-3xl bg-white shadow-2xl" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between border-b border-gray-100 px-6 py-4">
               <h3 className="font-serif text-xl font-bold text-gray-900">{editingId ? 'Edit Configuration' : 'Add Configuration'}</h3>
               <button onClick={resetForm} className="rounded-full p-1.5 text-gray-400 hover:bg-gray-100">✕</button>
@@ -188,64 +184,64 @@ const AddConfi = () => {
             <form onSubmit={handleSubmit} className="space-y-4 px-6 py-5">
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="sm:col-span-2">
-                  <label className="mb-1 block text-xs font-semibold text-gray-600">Store Name *</label>
-                  <input value={form.name} onChange={handleInput('name')} className="input-field" placeholder="SK Cards" required />
+                  <label className="admin-label">Store Name *</label>
+                  <input value={form.name} onChange={handleInput('name')} className="admin-input" placeholder="SANJU SK Digital" required />
                 </div>
                 <div>
-                  <label className="mb-1 block text-xs font-semibold text-gray-600">Phone Number</label>
-                  <input value={form.phone} onChange={handleInput('phone')} className="input-field" placeholder="+91 99999 99999" />
+                  <label className="admin-label">Phone Number</label>
+                  <input value={form.phone} onChange={handleInput('phone')} className="admin-input" placeholder="+91 99999 99999" />
                 </div>
                 <div>
-                  <label className="mb-1 block text-xs font-semibold text-gray-600">WhatsApp Number</label>
-                  <input value={form.whatsappNumber} onChange={handleInput('whatsappNumber')} className="input-field" placeholder="919999999999 (with country code)" />
+                  <label className="admin-label">WhatsApp Number</label>
+                  <input value={form.whatsappNumber} onChange={handleInput('whatsappNumber')} className="admin-input" placeholder="919999999999" />
                 </div>
                 <div>
-                  <label className="mb-1 block text-xs font-semibold text-gray-600">Email</label>
-                  <input value={form.email} onChange={handleInput('email')} className="input-field" placeholder="hello@example.com" />
+                  <label className="admin-label">Email</label>
+                  <input value={form.email} onChange={handleInput('email')} className="admin-input" placeholder="hello@example.com" />
                 </div>
                 <div className="sm:col-span-2">
-                  <label className="mb-1 block text-xs font-semibold text-gray-600">Address</label>
-                  <textarea value={form.address} onChange={handleInput('address')} className="input-field resize-none" rows={2} placeholder="Shop address..." />
+                  <label className="admin-label">Address</label>
+                  <textarea value={form.address} onChange={handleInput('address')} className="admin-input resize-none" rows={2} placeholder="Shop address…" />
                 </div>
 
                 <div className="sm:col-span-2">
-                  <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-400">Social Media Links</p>
+                  <p className="admin-label">Social Media Links</p>
                 </div>
                 <div>
-                  <label className="mb-1 block text-xs font-semibold text-gray-600">Facebook URL</label>
-                  <input value={form.fb} onChange={handleInput('fb')} className="input-field" placeholder="https://facebook.com/..." />
+                  <label className="admin-label">Facebook URL</label>
+                  <input value={form.fb} onChange={handleInput('fb')} className="admin-input" placeholder="https://facebook.com/…" />
                 </div>
                 <div>
-                  <label className="mb-1 block text-xs font-semibold text-gray-600">Instagram URL</label>
-                  <input value={form.insta} onChange={handleInput('insta')} className="input-field" placeholder="https://instagram.com/..." />
+                  <label className="admin-label">Instagram URL</label>
+                  <input value={form.insta} onChange={handleInput('insta')} className="admin-input" placeholder="https://instagram.com/…" />
                 </div>
                 <div>
-                  <label className="mb-1 block text-xs font-semibold text-gray-600">YouTube Channel URL</label>
-                  <input value={form.youtube} onChange={handleInput('youtube')} className="input-field" placeholder="https://youtube.com/@..." />
+                  <label className="admin-label">YouTube URL</label>
+                  <input value={form.youtube} onChange={handleInput('youtube')} className="admin-input" placeholder="https://youtube.com/@…" />
                 </div>
                 <div>
-                  <label className="mb-1 block text-xs font-semibold text-gray-600">LinkedIn URL</label>
-                  <input value={form.linkedIn} onChange={handleInput('linkedIn')} className="input-field" placeholder="https://linkedin.com/in/..." />
+                  <label className="admin-label">LinkedIn URL</label>
+                  <input value={form.linkedIn} onChange={handleInput('linkedIn')} className="admin-input" placeholder="https://linkedin.com/in/…" />
                 </div>
                 <div>
-                  <label className="mb-1 block text-xs font-semibold text-gray-600">Twitter / X URL</label>
-                  <input value={form.twitter} onChange={handleInput('twitter')} className="input-field" placeholder="https://twitter.com/..." />
+                  <label className="admin-label">Twitter / X URL</label>
+                  <input value={form.twitter} onChange={handleInput('twitter')} className="admin-input" placeholder="https://twitter.com/…" />
                 </div>
 
                 <div className="sm:col-span-2">
-                  <label className="mb-1 block text-xs font-semibold text-gray-600">Store Logo</label>
-                  <input type="file" ref={fileInputRef} accept="image/*" onChange={handleImageUpload} className="text-sm" />
+                  <label className="admin-label">Store Logo</label>
+                  <input type="file" ref={fileInputRef} accept="image/*" onChange={handleImageUpload} className="admin-input py-1.5" />
                   <div className="mt-2 flex gap-2">
                     {previewImages.map((img, i) => (
-                      <img key={i} src={img.url} className="h-16 w-16 rounded-xl object-cover ring-2 ring-[#25D366]/30" alt="logo preview" />
+                      <img key={i} src={img.url} className="h-16 w-16 rounded-xl object-cover ring-2 ring-green-200" alt="logo preview" />
                     ))}
                   </div>
                 </div>
               </div>
 
               <div className="flex justify-end gap-3 border-t border-gray-100 pt-4">
-                <button type="button" onClick={resetForm} className="rounded-xl border border-gray-200 px-5 py-2.5 text-sm font-semibold text-gray-600 hover:bg-gray-50">Cancel</button>
-                <button type="submit" disabled={loading} className="rounded-xl bg-[#25D366] px-6 py-2.5 text-sm font-semibold text-white hover:bg-[#128C7E] disabled:opacity-60 transition-colors">
+                <button type="button" onClick={resetForm} className="admin-btn-cancel">Cancel</button>
+                <button type="submit" disabled={loading} className="admin-btn-save">
                   {loading ? `Saving… ${uploadProgress}%` : editingId ? 'Update' : 'Save Settings'}
                 </button>
               </div>

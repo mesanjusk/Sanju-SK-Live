@@ -113,138 +113,100 @@ const UploadBanner = () => {
   );
 
   return (
-    <div className="max-w-4xl mx-auto p-4">
+    <div className="admin-page">
       <Toaster position="top-right" />
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-2xl font-bold">Upload Banner</h2>
-        <button
-          className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
-          onClick={() => setNewBannerModalOpen(true)}
-        >
-          + New Banner
-        </button>
+      <div className="admin-header">
+        <h2 className="admin-title">Banners</h2>
+        <div className="flex flex-wrap items-center gap-3">
+          <input type="text" placeholder="Search banners…" className="admin-search"
+            value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
+          <button onClick={() => setNewBannerModalOpen(true)} className="admin-btn-add">+ New Banner</button>
+        </div>
       </div>
 
-      <input
-        type="text"
-        placeholder="Search banners..."
-        className="w-full p-2 mb-4 border border-gray-300 rounded"
-        value={searchTerm}
-        onChange={(e) => setSearchTerm(e.target.value)}
-      />
-
-      <div className="overflow-x-auto">
-        <table className="min-w-full border border-gray-300 text-sm">
-          <thead className="bg-gray-100">
+      <div className="admin-table-wrap">
+        <table className="admin-table">
+          <thead>
             <tr>
-              <th className="p-2 border">Image</th>
-              <th className="p-2 border">Name</th>
-              <th className="p-2 border">Actions</th>
+              <th className="admin-th w-28">Preview</th>
+              <th className="admin-th">Name</th>
+              <th className="admin-th w-36 text-right">Actions</th>
             </tr>
           </thead>
           <tbody>
-            {filteredBanners.map((ban) => (
-              <tr key={ban._id} className="text-center">
-                <td className="p-2 border">
-                  <img
-                    src={ban.imageUrl}
-                    alt={ban.name}
-                    className="h-12 mx-auto cursor-pointer"
-                    onClick={() => setPreviewImage(ban.imageUrl)}
-                  />
+            {filteredBanners.length === 0 ? (
+              <tr><td colSpan={3} className="admin-empty">No banners found.</td></tr>
+            ) : filteredBanners.map((ban) => (
+              <tr key={ban._id}>
+                <td className="admin-td">
+                  <img src={ban.imageUrl} alt={ban.name}
+                    className="h-14 w-24 cursor-pointer rounded-xl object-cover"
+                    onClick={() => setPreviewImage(ban.imageUrl)} />
                 </td>
-                <td className="p-2 border">{ban.name}</td>
-                <td className="p-2 border space-x-2">
-                  <button
-                    className="bg-yellow-400 px-3 py-1 rounded hover:bg-yellow-500"
-                    onClick={() => setEditModal({ open: true, id: ban._id, name: ban.name })}
-                  >
-                    Edit
-                  </button>
-                  <button
-                    className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
-                    onClick={() => handleDelete(ban._id)}
-                  >
-                    Delete
-                  </button>
+                <td className="admin-td font-medium text-gray-900">{ban.name}</td>
+                <td className="admin-td">
+                  <div className="flex justify-end gap-2">
+                    <button onClick={() => setEditModal({ open: true, id: ban._id, name: ban.name })} className="admin-btn-edit">Edit</button>
+                    <button onClick={() => handleDelete(ban._id)} className="admin-btn-del">Delete</button>
+                  </div>
                 </td>
               </tr>
             ))}
-            {filteredBanners.length === 0 && (
-              <tr>
-                <td colSpan="3" className="p-4 text-center text-gray-500">
-                  No banners found.
-                </td>
-              </tr>
-            )}
           </tbody>
         </table>
       </div>
 
+      {/* Image preview */}
       {previewImage && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="relative bg-white p-4 rounded shadow-lg max-w-lg">
-            <button
-              onClick={() => setPreviewImage(null)}
-              className="absolute top-2 right-2 text-gray-500 text-lg"
-            >✖</button>
-            <img src={previewImage} alt="Preview" className="max-h-[75vh] mx-auto" />
-          </div>
+        <div className="admin-modal-bg" onClick={() => setPreviewImage(null)}>
+          <img src={previewImage} alt="Preview"
+            className="max-h-[85vh] max-w-[90vw] rounded-2xl shadow-2xl"
+            onClick={(e) => e.stopPropagation()} />
         </div>
       )}
 
+      {/* Edit name modal */}
       {editModal.open && (
-        <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded shadow-lg space-y-4 w-full max-w-md">
-            <h2 className="text-lg font-semibold">Edit Banner Name</h2>
-            <input
-              value={editModal.name}
-              onChange={(e) => setEditModal((prev) => ({ ...prev, name: e.target.value }))}
-              className="w-full border p-2 rounded"
-            />
-            <div className="flex justify-end gap-2">
-              <button
-                onClick={() => setEditModal({ open: false, id: null, name: '' })}
-                className="px-3 py-1 border rounded"
-              >Cancel</button>
-              <button
-                onClick={handleEditSubmit}
-                className="bg-blue-600 text-white px-4 py-1 rounded hover:bg-blue-700"
-              >Save</button>
+        <div className="admin-modal-bg">
+          <div className="admin-modal">
+            <h3 className="admin-modal-title">Edit Banner Name</h3>
+            <div className="space-y-4">
+              <div>
+                <label className="admin-label">Name</label>
+                <input value={editModal.name}
+                  onChange={(e) => setEditModal((p) => ({ ...p, name: e.target.value }))}
+                  className="admin-input" />
+              </div>
+              <div className="flex justify-end gap-3 pt-2">
+                <button onClick={() => setEditModal({ open: false, id: null, name: '' })} className="admin-btn-cancel">Cancel</button>
+                <button onClick={handleEditSubmit} className="admin-btn-save">Save</button>
+              </div>
             </div>
           </div>
         </div>
       )}
 
+      {/* New banner modal */}
       {newBannerModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded shadow-lg space-y-4 w-full max-w-md">
-            <h2 className="text-lg font-semibold">New Banner</h2>
+        <div className="admin-modal-bg">
+          <div className="admin-modal">
+            <h3 className="admin-modal-title">New Banner</h3>
             <form onSubmit={handleSubmit} className="space-y-4">
-              <input
-                type="text"
-                value={bannerName}
-                onChange={(e) => setBannerName(e.target.value)}
-                placeholder="Banner Name"
-                className="w-full p-2 border border-gray-300 rounded"
-              />
-              <input
-                type="file"
-                multiple
-                accept="image/*"
-                onChange={handleFileChange}
-                className="w-full p-2 border border-gray-300 rounded"
-              />
-              <div className="flex justify-end gap-2">
-                <button
-                  type="button"
-                  onClick={() => setNewBannerModalOpen(false)}
-                  className="px-3 py-1 border rounded"
-                >Cancel</button>
-                <button
-                  type="submit"
-                  className="bg-blue-600 text-white px-4 py-1 rounded hover:bg-blue-700"
-                >Upload</button>
+              <div>
+                <label className="admin-label">Banner Name</label>
+                <input type="text" value={bannerName} onChange={(e) => setBannerName(e.target.value)}
+                  placeholder="e.g. Summer Sale" className="admin-input" />
+              </div>
+              <div>
+                <label className="admin-label">Images (max 4 MB each)</label>
+                <input type="file" multiple accept="image/*" onChange={handleFileChange}
+                  className="admin-input py-1.5" />
+              </div>
+              <div className="flex justify-end gap-3 pt-2">
+                <button type="button" onClick={() => setNewBannerModalOpen(false)} className="admin-btn-cancel">Cancel</button>
+                <button type="submit" disabled={isLoading} className="admin-btn-save">
+                  {isLoading ? 'Uploading…' : 'Upload'}
+                </button>
               </div>
             </form>
           </div>

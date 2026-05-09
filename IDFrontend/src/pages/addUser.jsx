@@ -133,116 +133,94 @@ const [form, setForm] = useState({ User_name: '', Password: '', Mobile_number: '
   };
 
   return (
-    <div className="max-w-4xl mx-auto p-4">
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="text-xl md:text-2xl font-bold">Add User</h2>
-        <button
-          onClick={() => setIsAddModalOpen(true)}
-          className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-        >
-          + New User
-        </button>
+    <div className="admin-page">
+      <Toaster position="top-right" />
+      <div className="admin-header">
+        <h2 className="admin-title">Users</h2>
+        <div className="flex flex-wrap items-center gap-3">
+          <input type="text" placeholder="Search users…" className="admin-search"
+            value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
+          <button onClick={() => setIsAddModalOpen(true)} className="admin-btn-add">+ New User</button>
+        </div>
       </div>
-{showModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded shadow max-w-xl w-full">
-            <h2 className="text-xl font-semibold mb-4">{editingId ? 'Edit User' : 'Add User'}</h2>
-            <form onSubmit={handleSubmit} className="flex flex-col space-y-4">
-              <input type="text" value={form.User_name} onChange={handleInputChange('User_name')} className="p-2 border rounded" placeholder="Enter name" required />
-            <input type="text" value={form.Password} onChange={handleInputChange('Password')} className="p-2 border rounded" placeholder="Enter password" required />
-             <input type="text" value={form.Mobile_number} onChange={handleInputChange('Mobile_number')} className="p-2 border rounded" placeholder="Enter number" required />
-              <div className="flex justify-end gap-4">
-                <button type="button" onClick={() => setShowModal(false)} className="bg-gray-400 text-white px-4 py-2 rounded">Cancel</button>
-                <button type="submit" className="bg-blue-600 text-white px-4 py-2 rounded">
-                  Save
-                </button>
+
+      <div className="admin-table-wrap">
+        <table className="admin-table">
+          <thead>
+            <tr>
+              <th className="admin-th">Username</th>
+              <th className="admin-th">Mobile</th>
+              <th className="admin-th w-36 text-right">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {filteredUsers.length === 0 ? (
+              <tr><td colSpan={3} className="admin-empty">No users found.</td></tr>
+            ) : filteredUsers.map((user) => (
+              <tr key={user._id}>
+                <td className="admin-td font-medium text-gray-900">{user.User_name}</td>
+                <td className="admin-td text-gray-500">{user.Mobile_number}</td>
+                <td className="admin-td">
+                  <div className="flex justify-end gap-2">
+                    <button onClick={() => handleEdit(user)} className="admin-btn-edit">Edit</button>
+                    <button onClick={() => handleDelete(user._id)} className="admin-btn-del">Delete</button>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Edit modal */}
+      {showModal && (
+        <div className="admin-modal-bg">
+          <div className="admin-modal">
+            <h3 className="admin-modal-title">Edit User</h3>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div>
+                <label className="admin-label">Username</label>
+                <input type="text" value={form.User_name} onChange={handleInputChange('User_name')}
+                  placeholder="Username" className="admin-input" required />
+              </div>
+              <div>
+                <label className="admin-label">Mobile Number</label>
+                <input type="text" value={form.Mobile_number} onChange={handleInputChange('Mobile_number')}
+                  placeholder="Mobile" className="admin-input" required />
+              </div>
+              <div className="flex justify-end gap-3 pt-2">
+                <button type="button" onClick={() => setShowModal(false)} className="admin-btn-cancel">Cancel</button>
+                <button type="submit" className="admin-btn-save">Save</button>
               </div>
             </form>
           </div>
         </div>
       )}
 
-      <input
-        type="text"
-        placeholder="Search users..."
-        className="w-full mb-4 p-2 border border-gray-300 rounded-md"
-        value={searchTerm}
-        onChange={(e) => setSearchTerm(e.target.value)}
-      />
-
-      {error && <p className="text-red-500 mb-2 text-sm">{error}</p>}
-      {success && <p className="text-green-500 mb-2 text-sm">{success}</p>}
-
-      <table className="w-full border text-center">
-        <thead className="bg-gray-100">
-          <tr>
-            <th className="p-2 border">Name</th>
-            <th className="p-2 border">Mobile</th>
-            <th className="p-2 border">Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {filteredUsers.length > 0 ? (
-            filteredUsers.map((user) => (
-              <tr key={user._id}>
-                <td className="p-2 border">{user.User_name}</td>
-                <td className="p-2 border">{user.Mobile_number}</td>
-                 <td className="p-2 border space-x-2">
-                <button onClick={() => handleEdit(user)} className="bg-yellow-500 text-white px-3 py-1 rounded hover:bg-yellow-600">Edit</button>
-                <button onClick={() => handleDelete(user._id)} className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600">Delete</button>
-              </td>
-              </tr>
-            ))
-          ) : (
-            <tr>
-              <td colSpan="2" className="p-4 text-gray-500">
-                No users found.
-              </td>
-            </tr>
-          )}
-        </tbody>
-      </table>
-
+      {/* Add modal */}
       {isAddModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-lg w-full max-w-md">
-            <h3 className="text-lg font-bold mb-4">Add New User</h3>
-            <form onSubmit={submit} className="space-y-3">
-              <input
-                type="text"
-                placeholder="User Name"
-                value={User_name}
-                onChange={(e) => setUser_Name(e.target.value)}
-                className="w-full p-2 border rounded"
-              />
-              <input
-                type="password"
-                placeholder="Password"
-                value={Password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full p-2 border rounded"
-              />
-              <input
-                type="text"
-                placeholder="Mobile Number"
-                value={Mobile_number}
-                onChange={(e) => setMobile_Number(e.target.value)}
-                className="w-full p-2 border rounded"
-              />
-              <div className="flex justify-end gap-2 pt-2">
-                <button
-                  type="button"
-                  onClick={() => setIsAddModalOpen(false)}
-                  className="px-4 py-1 border rounded hover:bg-gray-100"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="px-4 py-1 bg-blue-600 text-white rounded hover:bg-blue-700"
-                >
-                  Submit
-                </button>
+        <div className="admin-modal-bg">
+          <div className="admin-modal">
+            <h3 className="admin-modal-title">Add New User</h3>
+            <form onSubmit={submit} className="space-y-4">
+              <div>
+                <label className="admin-label">Username</label>
+                <input type="text" value={User_name} onChange={(e) => setUser_Name(e.target.value)}
+                  placeholder="Username" className="admin-input" />
+              </div>
+              <div>
+                <label className="admin-label">Password</label>
+                <input type="password" value={Password} onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Password" className="admin-input" />
+              </div>
+              <div>
+                <label className="admin-label">Mobile Number</label>
+                <input type="text" value={Mobile_number} onChange={(e) => setMobile_Number(e.target.value)}
+                  placeholder="Mobile" className="admin-input" />
+              </div>
+              <div className="flex justify-end gap-3 pt-2">
+                <button type="button" onClick={() => setIsAddModalOpen(false)} className="admin-btn-cancel">Cancel</button>
+                <button type="submit" className="admin-btn-save">Submit</button>
               </div>
             </form>
           </div>
