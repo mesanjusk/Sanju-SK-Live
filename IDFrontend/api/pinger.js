@@ -1,4 +1,4 @@
-const API_BASE_URL = process.env.VITE_API_BASE_URL || 'https://idbackend-rf1u.onrender.com';
+const API_BASE_URL = process.env.VITE_API_BASE_URL || 'https://sanju-sk-live.onrender.com';
 const ALLOWED_ORIGINS = (process.env.ALLOWED_ORIGINS || 'https://idfrontend.vercel.app')
   .split(',')
   .map((origin) => origin.trim());
