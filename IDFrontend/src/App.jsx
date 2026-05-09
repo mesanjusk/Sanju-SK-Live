@@ -127,7 +127,7 @@ function AppRoutes() {
           {/* Redirects — removed cart/checkout, redirect to products */}
           <Route path="/cart"      element={<Navigate to="/products" replace />} />
           <Route path="/checkout"  element={<Navigate to="/products" replace />} />
-          <Route path="/home"      element={<Navigate to="/" replace />} />
+          <Route path="/home"      element={<Navigate to={localStorage.getItem('User_name') ? '/admin' : '/'} replace />} />
           <Route path="/product"   element={<Navigate to="/products" replace />} />
           <Route path="/all-listing" element={<Navigate to="/allListing" replace />} />
 

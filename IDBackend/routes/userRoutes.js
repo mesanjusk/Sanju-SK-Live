@@ -1,6 +1,7 @@
 import express from 'express';
 import Users from '../models/User.js';
 import { v4 as uuid } from "uuid";
+import { generateToken } from '../utils/authMiddleware.js';
 
 const router = express.Router();
 
@@ -15,8 +16,10 @@ router.post("/login", async (req, res) => {
       }
 
       if (Password === user.Password) {
+          const token = generateToken({ id: user._id, username: user.User_name });
           res.json({
               status: "exist",
+              token,
               userGroup: user.User_group,
               userMobile: user.Mobile_number,
           });

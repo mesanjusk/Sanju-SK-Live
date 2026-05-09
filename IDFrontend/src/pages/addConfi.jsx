@@ -3,7 +3,7 @@ import api from '../api';
 import { useNavigate, useLocation } from 'react-router-dom';
 import imageCompression from 'browser-image-compression';
 import toast, { Toaster } from 'react-hot-toast';
-import { FaEdit, FaTrash, FaPlus } from 'react-icons/fa';
+import { FaEdit, FaTrash, FaPlus, FaGoogleDrive } from 'react-icons/fa';
 
 const emptyForm = {
   name: '', email: '', phone: '', whatsappNumber: '',
@@ -23,6 +23,7 @@ const AddConfi = () => {
   const [showModal, setShowModal] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [modalImageSrc, setModalImageSrc] = useState(null);
+  const [driveConnected, setDriveConnected] = useState(false);
   const fileInputRef = useRef(null);
 
   useEffect(() => {
@@ -31,6 +32,20 @@ const AddConfi = () => {
     api.get('/api/confi/GetConfiList')
       .then((res) => setConfig(Array.isArray(res.data?.result) ? res.data.result : []))
       .catch(() => {});
+    api.get('/api/google-drive/status')
+      .then((res) => setDriveConnected(res.data?.connected || false))
+      .catch(() => {});
+
+    // Handle OAuth return
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('driveConnected') === 'true') {
+      setDriveConnected(true);
+      toast.success('Google Drive connected successfully!');
+      window.history.replaceState({}, '', window.location.pathname);
+    } else if (params.get('driveError')) {
+      toast.error('Failed to connect Google Drive. Please try again.');
+      window.history.replaceState({}, '', window.location.pathname);
+    }
   }, []);
 
   const handleInput = (field) => (e) => setForm((prev) => ({ ...prev, [field]: e.target.value }));
@@ -101,6 +116,22 @@ const AddConfi = () => {
     setShowModal(true);
   };
 
+  const handleConnectDrive = () => {
+    const token = localStorage.getItem('authToken');
+    if (!token) { toast.error('Please log in again to connect Google Drive.'); return; }
+    const returnTo = encodeURIComponent(`${window.location.origin}/admin`);
+    const baseUrl = import.meta.env.VITE_API_BASE_URL || 'https://sanju-sk-live.onrender.com';
+    window.location.href = `${baseUrl}/api/google-drive/connect?token=${token}&returnTo=${returnTo}`;
+  };
+
+  const handleDisconnectDrive = async () => {
+    try {
+      await api.post('/api/google-drive/disconnect');
+      setDriveConnected(false);
+      toast.success('Google Drive disconnected.');
+    } catch { toast.error('Failed to disconnect Google Drive.'); }
+  };
+
   const handleDelete = async (id) => {
     if (!window.confirm('Delete this configuration?')) return;
     await api.delete(`/api/confi/${id}`);
@@ -119,6 +150,17 @@ const AddConfi = () => {
         <div className="flex flex-wrap items-center gap-3">
           <input type="text" placeholder="Search…" className="admin-search"
             value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
+          {driveConnected ? (
+            <button onClick={handleDisconnectDrive}
+              className="flex items-center gap-2 rounded-xl border border-red-300 bg-red-50 px-3 py-2 text-xs font-semibold text-red-600 hover:bg-red-100 transition-colors">
+              <FaGoogleDrive /> Disconnect Drive
+            </button>
+          ) : (
+            <button onClick={handleConnectDrive}
+              className="flex items-center gap-2 rounded-xl border border-blue-300 bg-blue-50 px-3 py-2 text-xs font-semibold text-blue-600 hover:bg-blue-100 transition-colors">
+              <FaGoogleDrive /> Connect Google Drive
+            </button>
+          )}
           <button onClick={() => { resetForm(); setShowModal(true); }} className="admin-btn-add">
             <FaPlus className="text-xs" /> Add Config
           </button>

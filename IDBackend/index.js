@@ -16,6 +16,7 @@ import confiRoutes from './routes/confiRoutes.js';
 import religionRoutes from './routes/religionRoutes.js';
 import bannerRoutes from './routes/bannerRoutes.js';
 import analyticsRoutes from './routes/analyticsRoutes.js';
+import googleDriveRoutes from './routes/googleDriveRoutes.js';
 
 dotenv.config();
 
@@ -45,6 +46,7 @@ app.use('/api/confi', confiRoutes);
 app.use('/api/religions', religionRoutes);
 app.use('/api/banners', bannerRoutes);
 app.use('/api/analytics', analyticsRoutes);
+app.use('/api/google-drive', googleDriveRoutes);
 
 app.get('/api/ping', (req, res) => res.status(200).send('✅ Backend is alive!'));
 

@@ -108,6 +108,7 @@ export default function AdminDashboard() {
   const handleLogout = () => {
     localStorage.removeItem('User_name');
     localStorage.removeItem('adminTab');
+    localStorage.removeItem('authToken');
     window.location.href = '/';
   };
 

@@ -20,6 +20,7 @@ export default function Login() {
       if (data.status === 'notexist') { setError('User not found. Please check your username.'); return; }
       if (data.status === 'invalid')  { setError('Incorrect password. Please try again.'); return; }
       localStorage.setItem('User_name', User_name);
+      if (data.token) localStorage.setItem('authToken', data.token);
       navigate('/admin', { state: { id: User_name } });
     } catch {
       setError('Login failed. Please try again.');
