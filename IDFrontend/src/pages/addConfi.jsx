@@ -1,221 +1,256 @@
 import { useState, useRef, useEffect } from 'react';
-import api from '../api'
+import api from '../api';
 import { useNavigate, useLocation } from 'react-router-dom';
 import imageCompression from 'browser-image-compression';
 import toast, { Toaster } from 'react-hot-toast';
+import { FaEdit, FaTrash, FaPlus } from 'react-icons/fa';
+
+const emptyForm = {
+  name: '', email: '', phone: '', whatsappNumber: '',
+  address: '', fb: '', insta: '', youtube: '', twitter: '', linkedIn: '',
+};
 
 const AddConfi = () => {
   const navigate = useNavigate();
   const location = useLocation();
-
-  const [form, setForm] = useState({ name: '', email: '', phone: '', address: '', fb: '', insta: '', twitter: '', linkedIn: '' });
+  const [form, setForm] = useState(emptyForm);
   const [logo, setLogo] = useState([]);
   const [previewImages, setPreviewImages] = useState([]);
   const [loading, setLoading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
-  const [loggedInUser, setLoggedInUser] = useState(null);
   const [config, setConfig] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [editingId, setEditingId] = useState(null);
-  const [isImageModalOpen, setIsImageModalOpen] = useState(false);
-    const [modalImageSrc, setModalImageSrc] = useState(null);
-
+  const [modalImageSrc, setModalImageSrc] = useState(null);
   const fileInputRef = useRef(null);
 
-  const safeExtract = (res) => Array.isArray(res) ? res : res?.result || [];
-
   useEffect(() => {
-    const userNameFromState = location.state?.id;
-    const user = userNameFromState || localStorage.getItem('User_name');
-    if (user) setLoggedInUser(user);
-    else navigate('/login');
-
+    const user = location.state?.id || localStorage.getItem('User_name');
+    if (!user) navigate('/login');
     api.get('/api/confi/GetConfiList')
-  .then(res => {
-    const result = res.data?.result || res.data || [];
-    setConfig(Array.isArray(result) ? result : []);
-  })
+      .then((res) => setConfig(Array.isArray(res.data?.result) ? res.data.result : []))
+      .catch(() => {});
+  }, []);
 
-    setTimeout(() => setLoading(false), 2000);
-  }, [location.state, navigate]);
-
-
-  const handleInputChange = (field) => (e) => {
-    const value = e?.target?.value ?? e;
-    if (field === 'price' && value && !/^\d*\.?\d*$/.test(value)) return;
-    setForm({ ...form, [field]: value });
-  };
+  const handleInput = (field) => (e) => setForm((prev) => ({ ...prev, [field]: e.target.value }));
 
   const handleImageUpload = async (e) => {
     const files = Array.from(e.target.files);
-    const validTypes = ['image/jpeg', 'image/png', 'image/webp'];
-    const filtered = files.filter(file => validTypes.includes(file.type));
-    if (filtered.length !== files.length) toast('Some files were skipped.');
-    if (filtered.length + logo.length > 10) return toast.error('Max 10 images allowed.');
+    const valid = files.filter((f) => ['image/jpeg','image/png','image/webp'].includes(f.type));
     setLoading(true);
-    const newImages = [];
-    for (const file of filtered) {
-      const compressedBlob = await imageCompression(file, { maxSizeMB: 1, maxWidthOrHeight: 1920, useWebWorker: true });
-      const compressedFile = new File([compressedBlob], `${Date.now()}-${file.name}`, { type: compressedBlob.type });
-      newImages.push(compressedFile);
+    const compressed = [];
+    for (const file of valid) {
+      const blob = await imageCompression(file, { maxSizeMB: 0.5, maxWidthOrHeight: 400, useWebWorker: true });
+      compressed.push(new File([blob], `logo-${Date.now()}.${file.name.split('.').pop()}`, { type: blob.type }));
     }
-    const all = [...logo, ...newImages];
-    setLogo(all);
-    setPreviewImages(all.map(file => ({ url: URL.createObjectURL(file) })));
+    setLogo(compressed);
+    setPreviewImages(compressed.map((f) => ({ url: URL.createObjectURL(f) })));
     setLoading(false);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!form.name || !form.email || !form.phone || !form.address) {
-      return toast.error('Fill all fields');
-    }
-
+    if (!form.name || !form.phone) return toast.error('Name and phone are required.');
     const formData = new FormData();
     Object.entries(form).forEach(([k, v]) => formData.append(k, v));
-    logo.forEach(img => formData.append('logo', img));
-
+    logo.forEach((img) => formData.append('logo', img));
     try {
       if (editingId) {
-        await api.put(`/api/confi/${editingId}`, formData, {
-          headers: { 'Content-Type': 'multipart/form-data' }
-        });
-        toast.success('Config updated');
+        await api.put(`/api/confi/${editingId}`, formData, { headers: { 'Content-Type': 'multipart/form-data' } });
+        toast.success('Settings updated');
       } else {
         await api.post('/api/confi/add', formData, {
           headers: { 'Content-Type': 'multipart/form-data' },
-          onUploadProgress: (e) => setUploadProgress(Math.round((e.loaded * 100) / e.total))
+          onUploadProgress: (ev) => setUploadProgress(Math.round((ev.loaded * 100) / ev.total)),
         });
-        toast.success('Config added');
+        toast.success('Settings saved');
       }
-
-      setForm({ name: '', email: '', phone: '', address: '', fb: '', insta: '', twitter: '', linkedIn: '' });
-      setLogo([]);
-      setPreviewImages([]);
-      setUploadProgress(0);
-      fileInputRef.current.value = '';
-      
-    } catch (err) {
-      toast.error('Submit failed.');
-    }
+      resetForm();
+      const res = await api.get('/api/confi/GetConfiList');
+      setConfig(Array.isArray(res.data?.result) ? res.data.result : []);
+    } catch { toast.error('Save failed.'); }
   };
 
-  const handleDelete = async (id) => {
-    if (!window.confirm('Are you sure you want to delete this config?')) return;
-    await api.delete(`/api/confi/${id}`);
-    setConfig(config.filter(item => item._id !== id));
-    toast.success('Config deleted');
+  const resetForm = () => {
+    setForm(emptyForm);
+    setLogo([]);
+    setPreviewImages([]);
+    setUploadProgress(0);
+    setEditingId(null);
+    setShowModal(false);
+    if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
   const handleEdit = (item) => {
     setEditingId(item._id);
     setForm({
-      name: item.name,
-      email: item.email,
-      phone: item.phone,
-      address: item.address,
-      fb: item.fb,
-      insta: item.insta,
-      twitter: item.twitter,
-      linkedIn: item.linkedIn
+      name:           item.name || '',
+      email:          item.email || '',
+      phone:          item.phone || '',
+      whatsappNumber: item.whatsappNumber || '',
+      address:        item.address || '',
+      fb:             item.fb || '',
+      insta:          item.insta || '',
+      youtube:        item.youtube || '',
+      twitter:        item.twitter || '',
+      linkedIn:       item.linkedIn || '',
     });
     setPreviewImages(item.logo ? [{ url: item.logo }] : []);
+    setLogo([]);
     setShowModal(true);
   };
 
-   const openImageModal = (src) => {
-    setModalImageSrc(src);
-    setIsImageModalOpen(true);
+  const handleDelete = async (id) => {
+    if (!window.confirm('Delete this configuration?')) return;
+    await api.delete(`/api/confi/${id}`);
+    setConfig(config.filter((c) => c._id !== id));
+    toast.success('Deleted');
   };
 
-  const filteredConfig = config.filter(item =>
-    item.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filtered = config.filter((c) => c.name?.toLowerCase().includes(searchTerm.toLowerCase()));
 
   return (
-    <div className="min-h-screen bg-gray-100 p-6">
+    <div>
       <Toaster position="top-right" />
 
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold text-gray-800">Configuration</h1>
-        <button onClick={() => setShowModal(true)} className="bg-green-600 text-white px-4 py-2 rounded">+ New Config</button>
+      <div className="mb-6 flex items-center justify-between">
+        <h2 className="font-serif text-2xl font-bold text-gray-900">Store Settings</h2>
+        <button
+          onClick={() => { resetForm(); setShowModal(true); }}
+          className="flex items-center gap-2 rounded-xl bg-[#25D366] px-4 py-2 text-sm font-semibold text-white hover:bg-[#128C7E] transition-colors"
+        >
+          <FaPlus className="text-xs" /> Add Config
+        </button>
       </div>
 
+      <input
+        type="text"
+        placeholder="Search..."
+        value={searchTerm}
+        onChange={(e) => setSearchTerm(e.target.value)}
+        className="mb-4 w-full max-w-sm rounded-xl border border-gray-200 px-4 py-2.5 text-sm outline-none focus:border-[#25D366]"
+      />
+
+      <div className="overflow-x-auto rounded-2xl border border-gray-100 bg-white shadow-sm">
+        <table className="min-w-full text-sm">
+          <thead>
+            <tr className="border-b border-gray-100 bg-gray-50 text-xs font-semibold uppercase tracking-wide text-gray-500">
+              <th className="px-4 py-3 text-left">Logo</th>
+              <th className="px-4 py-3 text-left">Name</th>
+              <th className="px-4 py-3 text-left">Phone</th>
+              <th className="px-4 py-3 text-left">WhatsApp</th>
+              <th className="px-4 py-3 text-left">Email</th>
+              <th className="px-4 py-3 text-left">Actions</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-gray-50">
+            {filtered.map((item) => (
+              <tr key={item._id} className="hover:bg-gray-50 transition-colors">
+                <td className="px-4 py-3">
+                  {item.logo && <img src={item.logo} alt="logo" className="h-12 w-12 cursor-pointer rounded-xl object-cover" onClick={() => setModalImageSrc(item.logo)} />}
+                </td>
+                <td className="px-4 py-3 font-medium text-gray-800">{item.name}</td>
+                <td className="px-4 py-3 text-gray-600">{item.phone}</td>
+                <td className="px-4 py-3 text-gray-600">{item.whatsappNumber || '—'}</td>
+                <td className="px-4 py-3 text-gray-600">{item.email}</td>
+                <td className="px-4 py-3">
+                  <div className="flex gap-2">
+                    <button onClick={() => handleEdit(item)} className="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-50 text-amber-600 hover:bg-amber-100"><FaEdit className="text-xs" /></button>
+                    <button onClick={() => handleDelete(item._id)} className="flex h-8 w-8 items-center justify-center rounded-lg bg-red-50 text-red-500 hover:bg-red-100"><FaTrash className="text-xs" /></button>
+                  </div>
+                </td>
+              </tr>
+            ))}
+            {filtered.length === 0 && (
+              <tr><td colSpan={6} className="py-8 text-center text-gray-400">No configuration saved yet.</td></tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Image modal */}
+      {modalImageSrc && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80" onClick={() => setModalImageSrc(null)}>
+          <img src={modalImageSrc} alt="Logo" className="max-h-[80vh] max-w-[80vw] rounded-2xl" onClick={(e) => e.stopPropagation()} />
+        </div>
+      )}
+
+      {/* Modal */}
       {showModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded shadow max-w-xl w-full">
-            <h2 className="text-xl font-semibold mb-4">{editingId ? 'Edit Config' : 'Add Configuration'}</h2>
-            <form onSubmit={handleSubmit} className="flex flex-col space-y-4">
-              <input type="text" value={form.name} onChange={handleInputChange('name')} className="p-2 border rounded" placeholder="Enter name" required />
-             <input type="text" value={form.email} onChange={handleInputChange('email')} className="p-2 border rounded" placeholder="Enter email" required />
-             <input type="text" value={form.phone} onChange={handleInputChange('phone')} className="p-2 border rounded" placeholder="Enter Mobile No." required />
-             <input type="text" value={form.address} onChange={handleInputChange('address')} className="p-2 border rounded" placeholder="Enter address" required />
-             <input type="text" value={form.fb} onChange={handleInputChange('fb')} className="p-2 border rounded" placeholder="Enter fb link" />
-             <input type="text" value={form.insta} onChange={handleInputChange('insta')} className="p-2 border rounded" placeholder="Enter insta link" />
-             <input type="text" value={form.twitter} onChange={handleInputChange('twitter')} className="p-2 border rounded" placeholder="Enter twitter link" />
-              <input type="text" value={form.linkedIn} onChange={handleInputChange('linkedIn')} className="p-2 border rounded" placeholder="Enter linkedIn link" />
-              <input type="file" ref={fileInputRef} accept="image/*" onChange={handleImageUpload} className="mb-2" />
-              <div className="flex gap-2 flex-wrap">
-                {previewImages.map((img, idx) => <img key={idx} src={img.url} className="w-20 h-20 object-cover rounded" alt="preview" />)}
+        <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/50 px-4 py-8">
+          <div className="w-full max-w-xl rounded-2xl bg-white shadow-2xl" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between border-b border-gray-100 px-6 py-4">
+              <h3 className="font-serif text-xl font-bold text-gray-900">{editingId ? 'Edit Configuration' : 'Add Configuration'}</h3>
+              <button onClick={resetForm} className="rounded-full p-1.5 text-gray-400 hover:bg-gray-100">✕</button>
+            </div>
+
+            <form onSubmit={handleSubmit} className="space-y-4 px-6 py-5">
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="sm:col-span-2">
+                  <label className="mb-1 block text-xs font-semibold text-gray-600">Store Name *</label>
+                  <input value={form.name} onChange={handleInput('name')} className="input-field" placeholder="SK Cards" required />
+                </div>
+                <div>
+                  <label className="mb-1 block text-xs font-semibold text-gray-600">Phone Number</label>
+                  <input value={form.phone} onChange={handleInput('phone')} className="input-field" placeholder="+91 99999 99999" />
+                </div>
+                <div>
+                  <label className="mb-1 block text-xs font-semibold text-gray-600">WhatsApp Number</label>
+                  <input value={form.whatsappNumber} onChange={handleInput('whatsappNumber')} className="input-field" placeholder="919999999999 (with country code)" />
+                </div>
+                <div>
+                  <label className="mb-1 block text-xs font-semibold text-gray-600">Email</label>
+                  <input value={form.email} onChange={handleInput('email')} className="input-field" placeholder="hello@example.com" />
+                </div>
+                <div className="sm:col-span-2">
+                  <label className="mb-1 block text-xs font-semibold text-gray-600">Address</label>
+                  <textarea value={form.address} onChange={handleInput('address')} className="input-field resize-none" rows={2} placeholder="Shop address..." />
+                </div>
+
+                <div className="sm:col-span-2">
+                  <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-400">Social Media Links</p>
+                </div>
+                <div>
+                  <label className="mb-1 block text-xs font-semibold text-gray-600">Facebook URL</label>
+                  <input value={form.fb} onChange={handleInput('fb')} className="input-field" placeholder="https://facebook.com/..." />
+                </div>
+                <div>
+                  <label className="mb-1 block text-xs font-semibold text-gray-600">Instagram URL</label>
+                  <input value={form.insta} onChange={handleInput('insta')} className="input-field" placeholder="https://instagram.com/..." />
+                </div>
+                <div>
+                  <label className="mb-1 block text-xs font-semibold text-gray-600">YouTube Channel URL</label>
+                  <input value={form.youtube} onChange={handleInput('youtube')} className="input-field" placeholder="https://youtube.com/@..." />
+                </div>
+                <div>
+                  <label className="mb-1 block text-xs font-semibold text-gray-600">LinkedIn URL</label>
+                  <input value={form.linkedIn} onChange={handleInput('linkedIn')} className="input-field" placeholder="https://linkedin.com/in/..." />
+                </div>
+                <div>
+                  <label className="mb-1 block text-xs font-semibold text-gray-600">Twitter / X URL</label>
+                  <input value={form.twitter} onChange={handleInput('twitter')} className="input-field" placeholder="https://twitter.com/..." />
+                </div>
+
+                <div className="sm:col-span-2">
+                  <label className="mb-1 block text-xs font-semibold text-gray-600">Store Logo</label>
+                  <input type="file" ref={fileInputRef} accept="image/*" onChange={handleImageUpload} className="text-sm" />
+                  <div className="mt-2 flex gap-2">
+                    {previewImages.map((img, i) => (
+                      <img key={i} src={img.url} className="h-16 w-16 rounded-xl object-cover ring-2 ring-[#25D366]/30" alt="logo preview" />
+                    ))}
+                  </div>
+                </div>
               </div>
-              <div className="flex justify-end gap-4">
-                <button type="button" onClick={() => setShowModal(false)} className="bg-gray-400 text-white px-4 py-2 rounded">Cancel</button>
-                <button type="submit" className="bg-blue-600 text-white px-4 py-2 rounded">
-                  {loading ? `Uploading... ${uploadProgress}%` : editingId ? 'Update' : 'Save'}
+
+              <div className="flex justify-end gap-3 border-t border-gray-100 pt-4">
+                <button type="button" onClick={resetForm} className="rounded-xl border border-gray-200 px-5 py-2.5 text-sm font-semibold text-gray-600 hover:bg-gray-50">Cancel</button>
+                <button type="submit" disabled={loading} className="rounded-xl bg-[#25D366] px-6 py-2.5 text-sm font-semibold text-white hover:bg-[#128C7E] disabled:opacity-60 transition-colors">
+                  {loading ? `Saving… ${uploadProgress}%` : editingId ? 'Update' : 'Save Settings'}
                 </button>
               </div>
             </form>
           </div>
-        </div>
-      )}
-
-      <input type="text" placeholder="Search name..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="mb-4 p-2 border rounded w-full max-w-md" />
-
-      <table className="min-w-full bg-white shadow rounded">
-        <thead>
-          <tr className="bg-gray-200">
-            <th className="px-3 py-2">Logo</th>
-            <th className="px-3 py-2">Name</th>
-            <th className="px-3 py-2">Mobile</th>
-            <th className="px-3 py-2">Email</th>
-            <th className="px-3 py-2">Address</th>
-            <th className="px-3 py-2">Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {filteredConfig.map((item, i) => (
-            <tr key={i} className="border-t text-sm text-center">
-              <td className="p-2 border">
-                 <img
-        src={item.logo}
-        alt={item.name}
-        className="h-12 mx-auto cursor-pointer"
-        onClick={() => openImageModal(item.logo)}
-      />
-              </td>
-              <td className="p-2 border">{item.name}</td>
-              <td className="p-2 border">{item.phone}</td>
-              <td className="p-2 border">{item.email}</td>
-              <td className="p-2 border">{item.address}</td>
-              <td className="p-2 border space-x-2">
-                <button onClick={() => handleEdit(item)} className="bg-yellow-500 text-white px-3 py-1 rounded hover:bg-yellow-600">Edit</button>
-                <button onClick={() => handleDelete(item._id)} className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600">Delete</button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-       {/* Image Modal */}
-      {isImageModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-70 flex justify-center items-center z-50" onClick={() => setIsImageModalOpen(false)}>
-          <img
-            src={modalImageSrc}
-            alt="Config Full View"
-            className="max-h-[90vh] max-w-[90vw] rounded shadow-lg"
-            onClick={(e) => e.stopPropagation()}
-          />
-          <button className="absolute top-4 right-4 text-white text-3xl font-bold">&times;</button>
         </div>
       )}
     </div>

@@ -3,299 +3,402 @@ import api from '../api';
 import { useNavigate, useLocation } from 'react-router-dom';
 import imageCompression from 'browser-image-compression';
 import toast, { Toaster } from 'react-hot-toast';
+import { FaPlus, FaTrash, FaEdit, FaEye } from 'react-icons/fa';
+
+const BADGE_OPTIONS = ['', 'NEW', 'POPULAR', 'HOT', 'HOT DEAL'];
+
+const emptyForm = {
+  title: '', description: '', category: '', subcategory: '', religions: '',
+  price: '', badge: '', youtubeUrl: '', instagramUrl: '', favorite: '0',
+  seoTitle: '', seoDescription: '', seoKeywords: '',
+};
 
 const CreateListing = () => {
   const navigate = useNavigate();
   const location = useLocation();
-const [existingImageURLs, setExistingImageURLs] = useState([]);
-
-  const [form, setForm] = useState({ title: '', category: '', subcategory: '', religions: '', price: '', favorite: '' });
+  const [existingImageURLs, setExistingImageURLs] = useState([]);
+  const [form, setForm] = useState(emptyForm);
+  const [quantityPricing, setQuantityPricing] = useState([]);
   const [images, setImages] = useState([]);
   const [previewImages, setPreviewImages] = useState([]);
   const [loading, setLoading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
-  const [loggedInUser, setLoggedInUser] = useState(null);
   const [dropdownData, setDropdownData] = useState({ categories: [], subcategories: [], religions: [] });
   const [listings, setListings] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [editingId, setEditingId] = useState(null);
-   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
-    const [modalImageSrc, setModalImageSrc] = useState(null);
-  
-
+  const [modalImageSrc, setModalImageSrc] = useState(null);
+  const [seoOpen, setSeoOpen] = useState(false);
   const fileInputRef = useRef(null);
 
-  const safeExtract = (res) => Array.isArray(res) ? res : res?.result || [];
-
   useEffect(() => {
-    const userNameFromState = location.state?.id;
-    const user = userNameFromState || localStorage.getItem('User_name');
-    if (user) setLoggedInUser(user);
-    else navigate('/login');
-    setTimeout(() => setLoading(false), 2000);
-  }, [location.state, navigate]);
+    const user = location.state?.id || localStorage.getItem('User_name');
+    if (!user) navigate('/login');
+  }, []);
 
   useEffect(() => {
     const fetchDropdowns = async () => {
       try {
-        const [categoryRes, subcategoryRes, religionRes, listingRes] = await Promise.all([
-          api.get('/api/categories/with-usage'),
+        const [catRes, subRes, relRes, listRes] = await Promise.all([
+          api.get('/api/categories'),
           api.get('/api/subcategories'),
           api.get('/api/religions/GetReligionList'),
-          api.get('/api/listings')
+          api.get('/api/listings'),
         ]);
         setDropdownData({
-          categories: safeExtract(categoryRes.data),
-          subcategories: safeExtract(subcategoryRes.data),
-          religions: safeExtract(religionRes.data)
+          categories:   Array.isArray(catRes.data) ? catRes.data : catRes.data?.result || [],
+          subcategories:Array.isArray(subRes.data) ? subRes.data : subRes.data?.result || [],
+          religions:    relRes.data?.result || [],
         });
-        setListings(listingRes.data || []);
-      } catch (error) {
-        toast.error('Failed to fetch dropdown or listings.');
-      }
-      
+        setListings(listRes.data || []);
+      } catch { toast.error('Failed to load dropdown data.'); }
     };
     fetchDropdowns();
   }, []);
 
-  const handleInputChange = (field) => (e) => {
-    const value = e?.target?.value ?? e;
-    if (field === 'price' && value && !/^\d*\.?\d*$/.test(value)) return;
-    setForm({ ...form, [field]: value });
+  const handleInput = (field) => (e) => {
+    const v = e?.target?.value ?? e;
+    if (field === 'price' && v && !/^\d*\.?\d*$/.test(v)) return;
+    setForm((prev) => ({ ...prev, [field]: v }));
   };
 
   const handleImageUpload = async (e) => {
     const files = Array.from(e.target.files);
-    const validTypes = ['image/jpeg', 'image/png', 'image/webp'];
-    const filtered = files.filter(file => validTypes.includes(file.type));
-    if (filtered.length !== files.length) toast('Some files were skipped.');
-    if (filtered.length + images.length > 10) return toast.error('Max 10 images allowed.');
-    setLoading(true);
-    const newImages = [];
-    for (const file of filtered) {
-      const compressedBlob = await imageCompression(file, { maxSizeMB: 1, maxWidthOrHeight: 1920, useWebWorker: true });
-      const compressedFile = new File([compressedBlob], `${Date.now()}-${file.name}`, { type: compressedBlob.type });
-      newImages.push(compressedFile);
+    const valid = files.filter((f) => ['image/jpeg','image/png','image/webp'].includes(f.type));
+    if (valid.length !== files.length) toast('Some files skipped (invalid type).');
+    const totalAllowed = 4 - existingImageURLs.length - images.length;
+    if (valid.length > totalAllowed) {
+      toast.error(`Max 4 images total. You can add ${totalAllowed} more.`);
+      return;
     }
-    const all = [...images, ...newImages];
+    setLoading(true);
+    const compressed = [];
+    for (const file of valid) {
+      const blob = await imageCompression(file, { maxSizeMB: 1, maxWidthOrHeight: 1920, useWebWorker: true });
+      compressed.push(new File([blob], `${Date.now()}-${file.name}`, { type: blob.type }));
+    }
+    const all = [...images, ...compressed];
     setImages(all);
-    setPreviewImages(all.map(file => ({ url: URL.createObjectURL(file) })));
+    setPreviewImages(all.map((f) => ({ url: URL.createObjectURL(f) })));
     setLoading(false);
   };
 
-  const removeImage = (index) => {
-    const updated = images.filter((_, i) => i !== index);
+  const removeNewImage = (idx) => {
+    const updated = images.filter((_, i) => i !== idx);
     setImages(updated);
-    setPreviewImages(updated.map(file => ({ url: URL.createObjectURL(file) })));
-    if (fileInputRef.current) fileInputRef.current.value = '';
+    setPreviewImages(updated.map((f) => ({ url: URL.createObjectURL(f) })));
   };
 
- const handleSubmit = async (e) => {
-  e.preventDefault();
+  const removeExistingImage = (idx) => {
+    setExistingImageURLs((prev) => prev.filter((_, i) => i !== idx));
+  };
 
-  if (!form.title || !form.category || !form.subcategory || !form.price) {
-    return toast.error('Fill all fields');
-  }
+  /* Quantity pricing helpers */
+  const addTier = () => setQuantityPricing((prev) => [...prev, { minQty: '', maxQty: '', price: '' }]);
+  const removeTier = (i) => setQuantityPricing((prev) => prev.filter((_, idx) => idx !== i));
+  const updateTier = (i, field, value) => {
+    setQuantityPricing((prev) => prev.map((t, idx) => idx === i ? { ...t, [field]: value } : t));
+  };
 
-  const formData = new FormData();
-  Object.entries(form).forEach(([key, value]) => {
-    formData.append(key, value);
-  });
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!form.title || !form.category || !form.price) return toast.error('Title, category and price are required.');
 
-  images.forEach((img) => formData.append("images", img));
+    const formData = new FormData();
+    Object.entries(form).forEach(([k, v]) => formData.append(k, v));
+    images.forEach((img) => formData.append('images', img));
+    if (existingImageURLs.length) formData.append('existingImages', JSON.stringify(existingImageURLs));
 
-  // Include existing image URLs during update
-  if (editingId && existingImageURLs.length > 0) {
-    formData.append("existingImages", JSON.stringify(existingImageURLs));
-  }
+    const cleanedTiers = quantityPricing.filter((t) => t.minQty && t.price);
+    if (cleanedTiers.length) formData.append('quantityPricing', JSON.stringify(cleanedTiers));
 
-  try {
-    if (editingId) {
-      await api.put(`/api/listings/${editingId}`, formData, {
-        headers: { "Content-Type": "multipart/form-data" }
-      });
-      toast.success("Listing updated");
-    } else {
-      await api.post("/api/listings", formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-        onUploadProgress: (e) =>
-          setUploadProgress(Math.round((e.loaded * 100) / e.total))
-      });
-      toast.success("Listing created");
-    }
+    try {
+      if (editingId) {
+        await api.put(`/api/listings/${editingId}`, formData, { headers: { 'Content-Type': 'multipart/form-data' } });
+        toast.success('Product updated');
+      } else {
+        await api.post('/api/listings', formData, {
+          headers: { 'Content-Type': 'multipart/form-data' },
+          onUploadProgress: (ev) => setUploadProgress(Math.round((ev.loaded * 100) / ev.total)),
+        });
+        toast.success('Product created');
+      }
+      resetForm();
+      const updated = await api.get('/api/listings');
+      setListings(updated.data || []);
+    } catch { toast.error('Submit failed.'); }
+  };
 
-    // Reset
-    setForm({ title: '', category: '', subcategory: '', religions: '', price: '', favorite: '' });
+  const resetForm = () => {
+    setForm(emptyForm);
     setImages([]);
     setExistingImageURLs([]);
     setPreviewImages([]);
-    fileInputRef.current.value = '';
+    setQuantityPricing([]);
     setUploadProgress(0);
     setEditingId(null);
     setShowModal(false);
-
-    const updated = await api.get("/api/listings");
-    setListings(updated.data || []);
-  } catch (error) {
-    console.error(error);
-    toast.error("Submit failed.");
-  }
-};
-
-
-  const getName = (uuid, type) => {
-    const list = dropdownData[type];
-    const keyMap = { categories: 'category_uuid', subcategories: 'subcategory_uuid', religions: 'religion_uuid' };
-    const key = keyMap[type];
-    const found = Array.isArray(list) ? list.find(item => item[key] === uuid) : null;
-    return found?.name || '';
-  };
-
-   const openImageModal = (src) => {
-    setModalImageSrc(src);
-    setIsImageModalOpen(true);
-  };
-
-  const handleDelete = async (id) => {
-    if (!window.confirm('Are you sure you want to delete this listing?')) return;
-    await api.delete(`/api/listings/${id}`);
-    setListings(listings.filter(item => item._id !== id));
-    toast.success('Listing deleted');
+    if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
   const handleEdit = (item) => {
-  setEditingId(item._id);
-  setForm({
-    title: item.title || '',
-    category: item.category_uuid || '',
-    subcategory: item.subcategory_uuid || '',
-    religions: item.religion_uuid || '',
-    price: item.price || '',
-    favorite: item.favorite || ''
-  });
+    setEditingId(item._id);
+    setForm({
+      title:          item.title || '',
+      description:    item.description || '',
+      category:       item.category || '',
+      subcategory:    item.subcategory || '',
+      religions:      item.religions || '',
+      price:          item.price || '',
+      badge:          item.badge || '',
+      youtubeUrl:     item.youtubeUrl || '',
+      instagramUrl:   item.instagramUrl || '',
+      favorite:       item.favorite || '0',
+      seoTitle:       item.seoTitle || '',
+      seoDescription: item.seoDescription || '',
+      seoKeywords:    item.seoKeywords || '',
+    });
+    setExistingImageURLs(item.images || []);
+    setImages([]);
+    setPreviewImages((item.images || []).map((url) => ({ url, existing: true })));
+    setQuantityPricing(item.quantityPricing || []);
+    setShowModal(true);
+  };
 
-  setImages([]); 
-  setExistingImageURLs(item.images || []); 
-  setPreviewImages(
-    (item.images || []).map((url) => ({ url })) 
-  );
+  const handleDelete = async (id) => {
+    if (!window.confirm('Delete this product?')) return;
+    await api.delete(`/api/listings/${id}`);
+    setListings(listings.filter((l) => l._id !== id));
+    toast.success('Deleted');
+  };
 
-  setShowModal(true);
-};
+  const getName = (uuid, type) => {
+    const list = dropdownData[type];
+    const key = { categories: 'category_uuid', subcategories: 'subcategory_uuid', religions: 'religion_uuid' }[type];
+    return list.find((i) => i[key] === uuid)?.name || uuid || '—';
+  };
 
-  const filteredListings = listings.filter(item =>
-    item.title.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filtered = listings.filter((l) => l.title?.toLowerCase().includes(searchTerm.toLowerCase()));
 
   return (
-    <div className="min-h-screen bg-gray-100 p-6">
+    <div>
       <Toaster position="top-right" />
 
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold text-gray-800">Upload Design</h1>
-        <button onClick={() => setShowModal(true)} className="bg-green-600 text-white px-4 py-2 rounded">+ New Listing</button>
+      <div className="mb-6 flex items-center justify-between">
+        <h2 className="font-serif text-2xl font-bold text-gray-900">Products</h2>
+        <button
+          onClick={() => { resetForm(); setShowModal(true); }}
+          className="flex items-center gap-2 rounded-xl bg-[#25D366] px-4 py-2 text-sm font-semibold text-white hover:bg-[#128C7E] transition-colors"
+        >
+          <FaPlus className="text-xs" /> Add Product
+        </button>
       </div>
 
+      {/* Search */}
+      <input
+        type="text"
+        placeholder="Search products..."
+        value={searchTerm}
+        onChange={(e) => setSearchTerm(e.target.value)}
+        className="mb-4 w-full max-w-sm rounded-xl border border-gray-200 px-4 py-2.5 text-sm outline-none focus:border-[#25D366]"
+      />
+
+      {/* Table */}
+      <div className="overflow-x-auto rounded-2xl border border-gray-100 bg-white shadow-sm">
+        <table className="min-w-full text-sm">
+          <thead>
+            <tr className="border-b border-gray-100 bg-gray-50 text-xs font-semibold uppercase tracking-wide text-gray-500">
+              <th className="px-4 py-3 text-left">Images</th>
+              <th className="px-4 py-3 text-left">Title</th>
+              <th className="px-4 py-3 text-left">Category</th>
+              <th className="px-4 py-3 text-left">Price</th>
+              <th className="px-4 py-3 text-left">Badge</th>
+              <th className="px-4 py-3 text-left">Actions</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-gray-50">
+            {filtered.map((item) => (
+              <tr key={item._id} className="hover:bg-gray-50 transition-colors">
+                <td className="px-4 py-3">
+                  <div className="flex gap-1">
+                    {(item.images || []).slice(0, 4).map((url, i) => (
+                      <img key={i} src={url} alt="" className="h-10 w-10 cursor-pointer rounded-lg object-cover" onClick={() => setModalImageSrc(url)} />
+                    ))}
+                  </div>
+                </td>
+                <td className="max-w-[160px] truncate px-4 py-3 font-medium text-gray-800">{item.title}</td>
+                <td className="px-4 py-3 text-gray-600">{getName(item.category, 'categories')}</td>
+                <td className="px-4 py-3 font-semibold text-[#128C7E]">₹{item.price}</td>
+                <td className="px-4 py-3">
+                  {item.badge && <span className="rounded-full bg-green-100 px-2 py-0.5 text-xs font-semibold text-[#128C7E]">{item.badge}</span>}
+                </td>
+                <td className="px-4 py-3">
+                  <div className="flex gap-2">
+                    <button onClick={() => handleEdit(item)} className="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-50 text-amber-600 hover:bg-amber-100 transition-colors"><FaEdit className="text-xs" /></button>
+                    <button onClick={() => handleDelete(item._id)} className="flex h-8 w-8 items-center justify-center rounded-lg bg-red-50 text-red-500 hover:bg-red-100 transition-colors"><FaTrash className="text-xs" /></button>
+                  </div>
+                </td>
+              </tr>
+            ))}
+            {filtered.length === 0 && (
+              <tr><td colSpan={6} className="py-10 text-center text-gray-400">No products found.</td></tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Image preview modal */}
+      {modalImageSrc && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80" onClick={() => setModalImageSrc(null)}>
+          <img src={modalImageSrc} alt="Preview" className="max-h-[90vh] max-w-[90vw] rounded-2xl shadow-2xl" onClick={(e) => e.stopPropagation()} />
+          <button className="absolute right-5 top-5 text-3xl text-white">&times;</button>
+        </div>
+      )}
+
+      {/* Add/Edit Modal */}
       {showModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded shadow max-w-xl w-full">
-            <h2 className="text-xl font-semibold mb-4">{editingId ? 'Edit Listing' : 'Create New Listing'}</h2>
-            <form onSubmit={handleSubmit} className="flex flex-col space-y-4">
-              <input type="text" value={form.title} onChange={handleInputChange('title')} className="p-2 border rounded" placeholder="Enter title" required />
-              <select value={form.category} onChange={handleInputChange('category')} className="p-2 border rounded" required>
-                <option value="">Select Category</option>
-                {dropdownData.categories.map(c => <option key={c.category_uuid} value={c.category_uuid}>{c.name}</option>)}
-              </select>
-              <select value={form.subcategory} onChange={handleInputChange('subcategory')} className="p-2 border rounded" required>
-                <option value="">Select Subcategory</option>
-                {dropdownData.subcategories.map(s => <option key={s.subcategory_uuid} value={s.subcategory_uuid}>{s.name}</option>)}
-              </select>
-              <select value={form.religions} onChange={handleInputChange('religions')} className="p-2 border rounded" required>
-                <option value="">Select Religion</option>
-                {dropdownData.religions.map(r => <option key={r.religion_uuid} value={r.religion_uuid}>{r.name}</option>)}
-              </select>
-              <input type="text" value={form.price} onChange={handleInputChange('price')} className="p-2 border rounded" placeholder="Enter price (numeric only)" required />
-              <select value={form.favorite} onChange={handleInputChange('favorite')} className="p-2 border rounded" required>
-                <option value="">Select Favorite</option>
-                <option value="1">1</option>
-                <option value="0">0</option>
-              </select>
-              <input type="file" ref={fileInputRef} multiple accept="image/*" onChange={handleImageUpload} className="mb-2" />
-              <div className="flex gap-2 flex-wrap">
-                {previewImages.map((img, idx) => (
-                  <img key={idx} src={img.url} className="w-20 h-20 object-cover rounded" alt="preview" />
-                ))}
+        <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/50 px-4 py-8">
+          <div className="relative w-full max-w-2xl rounded-2xl bg-white shadow-2xl" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between border-b border-gray-100 px-6 py-4">
+              <h3 className="font-serif text-xl font-bold text-gray-900">{editingId ? 'Edit Product' : 'Add New Product'}</h3>
+              <button onClick={resetForm} className="rounded-full p-1.5 text-gray-400 hover:bg-gray-100"><FaPlus className="rotate-45" /></button>
+            </div>
+
+            <form onSubmit={handleSubmit} className="space-y-4 px-6 py-5">
+              {/* Basic info */}
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="sm:col-span-2">
+                  <label className="mb-1 block text-xs font-semibold text-gray-600">Title *</label>
+                  <input value={form.title} onChange={handleInput('title')} className="input-field" placeholder="Product title" required />
+                </div>
+                <div className="sm:col-span-2">
+                  <label className="mb-1 block text-xs font-semibold text-gray-600">Description</label>
+                  <textarea value={form.description} onChange={handleInput('description')} className="input-field min-h-[80px] resize-y" placeholder="Product description..." />
+                </div>
+
+                <div>
+                  <label className="mb-1 block text-xs font-semibold text-gray-600">Category *</label>
+                  <select value={form.category} onChange={handleInput('category')} className="input-field" required>
+                    <option value="">Select category</option>
+                    {dropdownData.categories.map((c) => <option key={c._id} value={c.category_uuid || c._id}>{c.name}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label className="mb-1 block text-xs font-semibold text-gray-600">Subcategory</label>
+                  <select value={form.subcategory} onChange={handleInput('subcategory')} className="input-field">
+                    <option value="">Select subcategory</option>
+                    {dropdownData.subcategories.map((s) => <option key={s._id} value={s.subcategory_uuid || s._id}>{s.name}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label className="mb-1 block text-xs font-semibold text-gray-600">Religion / Occasion</label>
+                  <select value={form.religions} onChange={handleInput('religions')} className="input-field">
+                    <option value="">Select</option>
+                    {dropdownData.religions.map((r) => <option key={r._id} value={r.religion_uuid || r._id}>{r.name}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label className="mb-1 block text-xs font-semibold text-gray-600">Base Price (₹) *</label>
+                  <input value={form.price} onChange={handleInput('price')} className="input-field" placeholder="e.g. 49" required />
+                </div>
+                <div>
+                  <label className="mb-1 block text-xs font-semibold text-gray-600">Badge</label>
+                  <select value={form.badge} onChange={handleInput('badge')} className="input-field">
+                    {BADGE_OPTIONS.map((b) => <option key={b} value={b}>{b || '— None —'}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label className="mb-1 block text-xs font-semibold text-gray-600">Featured</label>
+                  <select value={form.favorite} onChange={handleInput('favorite')} className="input-field">
+                    <option value="1">Yes — Featured</option>
+                    <option value="0">No</option>
+                  </select>
+                </div>
               </div>
-              <div className="flex justify-end gap-4">
-                <button type="button" onClick={() => setShowModal(false)} className="bg-gray-400 text-white px-4 py-2 rounded">Cancel</button>
-                <button type="submit" className="bg-blue-600 text-white px-4 py-2 rounded">
-                  {loading ? `Uploading... ${uploadProgress}%` : editingId ? 'Update' : 'Save'}
+
+              {/* Quantity pricing tiers */}
+              <div>
+                <div className="mb-2 flex items-center justify-between">
+                  <label className="text-xs font-semibold text-gray-600">Quantity Pricing Tiers</label>
+                  <button type="button" onClick={addTier} className="rounded-lg bg-green-50 px-2.5 py-1 text-xs font-semibold text-[#128C7E] hover:bg-green-100">+ Add Tier</button>
+                </div>
+                {quantityPricing.map((tier, i) => (
+                  <div key={i} className="mb-2 flex items-center gap-2">
+                    <input type="number" placeholder="Min qty" value={tier.minQty} onChange={(e) => updateTier(i, 'minQty', e.target.value)} className="input-field w-24" />
+                    <input type="number" placeholder="Max qty" value={tier.maxQty} onChange={(e) => updateTier(i, 'maxQty', e.target.value)} className="input-field w-24" />
+                    <input type="number" placeholder="Price ₹" value={tier.price} onChange={(e) => updateTier(i, 'price', e.target.value)} className="input-field w-24" />
+                    <button type="button" onClick={() => removeTier(i)} className="text-red-400 hover:text-red-600"><FaTrash className="text-xs" /></button>
+                  </div>
+                ))}
+                {quantityPricing.length === 0 && <p className="text-xs text-gray-400">No tiers. Base price will be used.</p>}
+              </div>
+
+              {/* Images — up to 4 */}
+              <div>
+                <label className="mb-1 block text-xs font-semibold text-gray-600">
+                  Product Images (max 4)
+                </label>
+                <input type="file" ref={fileInputRef} multiple accept="image/*" onChange={handleImageUpload} className="mb-3 text-sm" />
+                <div className="flex flex-wrap gap-2">
+                  {existingImageURLs.map((url, i) => (
+                    <div key={`ex-${i}`} className="group relative">
+                      <img src={url} className="h-20 w-20 rounded-xl object-cover ring-2 ring-gray-200" alt="" />
+                      <button type="button" onClick={() => removeExistingImage(i)} className="absolute -right-1.5 -top-1.5 hidden h-5 w-5 items-center justify-center rounded-full bg-red-500 text-white group-hover:flex">
+                        <FaTrash className="text-[8px]" />
+                      </button>
+                    </div>
+                  ))}
+                  {previewImages.filter((p) => !p.existing).map((img, i) => (
+                    <div key={`new-${i}`} className="group relative">
+                      <img src={img.url} className="h-20 w-20 rounded-xl object-cover ring-2 ring-[#25D366]/40" alt="" />
+                      <button type="button" onClick={() => removeNewImage(i)} className="absolute -right-1.5 -top-1.5 hidden h-5 w-5 items-center justify-center rounded-full bg-red-500 text-white group-hover:flex">
+                        <FaTrash className="text-[8px]" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+                <p className="mt-1 text-xs text-gray-400">{4 - existingImageURLs.length - images.length} slot(s) remaining</p>
+              </div>
+
+              {/* Media links */}
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div>
+                  <label className="mb-1 block text-xs font-semibold text-gray-600">YouTube Video URL</label>
+                  <input value={form.youtubeUrl} onChange={handleInput('youtubeUrl')} className="input-field" placeholder="https://youtube.com/watch?v=..." />
+                </div>
+                <div>
+                  <label className="mb-1 block text-xs font-semibold text-gray-600">Instagram Post URL</label>
+                  <input value={form.instagramUrl} onChange={handleInput('instagramUrl')} className="input-field" placeholder="https://instagram.com/p/..." />
+                </div>
+              </div>
+
+              {/* SEO — collapsible */}
+              <div>
+                <button type="button" onClick={() => setSeoOpen((p) => !p)} className="flex items-center gap-2 text-xs font-semibold text-gray-500 hover:text-gray-700">
+                  {seoOpen ? '▼' : '▶'} SEO Settings (optional)
+                </button>
+                {seoOpen && (
+                  <div className="mt-3 space-y-3 rounded-xl border border-gray-100 bg-gray-50 p-4">
+                    <input value={form.seoTitle} onChange={handleInput('seoTitle')} className="input-field" placeholder="SEO Title" />
+                    <textarea value={form.seoDescription} onChange={handleInput('seoDescription')} className="input-field resize-none" rows={2} placeholder="SEO Description" />
+                    <input value={form.seoKeywords} onChange={handleInput('seoKeywords')} className="input-field" placeholder="keyword1, keyword2, ..." />
+                  </div>
+                )}
+              </div>
+
+              {/* Actions */}
+              <div className="flex justify-end gap-3 border-t border-gray-100 pt-4">
+                <button type="button" onClick={resetForm} className="rounded-xl border border-gray-200 px-5 py-2.5 text-sm font-semibold text-gray-600 hover:bg-gray-50">Cancel</button>
+                <button type="submit" disabled={loading} className="rounded-xl bg-[#25D366] px-6 py-2.5 text-sm font-semibold text-white hover:bg-[#128C7E] disabled:opacity-60 transition-colors">
+                  {loading ? `Uploading… ${uploadProgress}%` : editingId ? 'Update Product' : 'Save Product'}
                 </button>
               </div>
             </form>
           </div>
         </div>
       )}
-
-      <input type="text" placeholder="Search title..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="mb-4 p-2 border rounded w-full max-w-md" />
-
-      <table className="w-full border border-gray-300 rounded-md">
-        <thead>
-          <tr className="bg-gray-100">
-            <th className="p-2 border">Image</th>
-            <th className="p-2 border">Title</th>
-            <th className="p-2 border">Category</th>
-           
-            <th className="p-2 border">Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {filteredListings.map((item, i) => (
-            <tr key={i} className="text-center">
-              <td className="p-2 border">
-                 {Array.isArray(item.images) && item.images.length > 0 ? (
-                    <div className="flex gap-2 justify-center">
-                      {item.images.map((imgUrl, index) => (
-                        <img
-                          key={index}
-                          src={imgUrl}
-                          alt="Thumb"
-                         className="h-12 mx-auto cursor-pointer" 
-                         onClick={() => openImageModal(imgUrl)}
-                        />
-                      ))}
-                    </div>
-                  ) : (
-                    <span>No image</span>
-                  )}
-              </td>
-              <td className="p-2 border">{item.title}</td>
-              <td className="p-2 border">{getName(item.category, 'categories')}</td>
-             
-              <td className="p-2 border space-x-2">
-                <button onClick={() => handleEdit(item)} className="bg-yellow-500 text-white px-3 py-1 rounded hover:bg-yellow-600">Edit</button>
-                <button onClick={() => handleDelete(item._id)} className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600">Delete</button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-
-       {/* Image Modal */}
-      {isImageModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-70 flex justify-center items-center z-50" onClick={() => setIsImageModalOpen(false)}>
-          <img
-            src={modalImageSrc}
-            alt="Banner Full View"
-            className="max-h-[90vh] max-w-[90vw] rounded shadow-lg"
-            onClick={(e) => e.stopPropagation()}
-          />
-          <button className="absolute top-4 right-4 text-white text-3xl font-bold">&times;</button>
-        </div>
-      )}
     </div>
-    
   );
 };
 

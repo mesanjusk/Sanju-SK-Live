@@ -1,161 +1,197 @@
 import { useEffect, useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { FaWhatsapp, FaArrowRight, FaStar } from 'react-icons/fa';
 import api from '../api';
-
 import Navbar from './Navbar';
 import HeroSection from './HeroSection';
-import FeaturedProducts from './FeaturedProducts';
+import Footer from './Footer';
+import ProductCard from './ProductCard';
 import WhyChooseUs from './WhyChooseUs';
 import Testimonials from './Testimonials';
 import ContactPreview from './ContactPreview';
-import Footer from './Footer';
-
-const categoryIcons = ['📇', '📘', '🪧', '📦', '📣', '🎁'];
+import LoadingSkeleton from './common/LoadingSkeleton';
 
 export default function Home() {
   const navigate = useNavigate();
   const [listings, setListings] = useState([]);
   const [categories, setCategories] = useState([]);
-  const [visibleCount, setVisibleCount] = useState(8);
+  const [config, setConfig] = useState({});
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchListings = async () => {
-      try {
-        const response = await api.get('/api/listings');
-        const payload = Array.isArray(response.data)
-          ? response.data
-          : response.data?.result || [];
-        setListings(payload);
-      } catch (error) {
-        console.error('Failed to fetch listings:', error);
+    Promise.all([
+      api.get('/api/listings'),
+      api.get('/api/categories'),
+      api.get('/api/confi/GetConfiList'),
+    ]).then(([listRes, catRes, confiRes]) => {
+      setListings(Array.isArray(listRes.data) ? listRes.data : []);
+      setCategories(Array.isArray(catRes.data) ? catRes.data : catRes.data?.result || []);
+      if (confiRes.data?.success && confiRes.data.result.length > 0) {
+        setConfig(confiRes.data.result[0]);
       }
-    };
-
-    const fetchCategories = async () => {
-      try {
-        const response = await api.get('/api/categories');
-        const payload = Array.isArray(response.data)
-          ? response.data
-          : response.data?.result || [];
-        setCategories(payload);
-      } catch (error) {
-        console.error('Failed to fetch categories:', error);
-      }
-    };
-
-    fetchListings();
-    fetchCategories();
+    }).catch(() => {})
+      .finally(() => setLoading(false));
   }, []);
 
-  // Create category map for quick lookup
   const categoriesByUuid = useMemo(() => {
     const map = new Map();
-    categories.forEach((category) => {
-      if (category?.category_uuid) {
-        map.set(category.category_uuid, category);
-      }
-    });
+    categories.forEach((c) => { if (c?.category_uuid) map.set(c.category_uuid, c); });
     return map;
   }, [categories]);
 
-  // Build unique category cards
   const categoryCards = useMemo(() => {
-    const uniqueCategoryUuids = [
-      ...new Set(
-        listings.map((listing) => listing?.category).filter(Boolean)
-      ),
-    ];
-
-    return uniqueCategoryUuids.map((categoryUuid, index) => {
-      const categoryDetails = categoriesByUuid.get(categoryUuid);
-
-      return {
-        id: categoryDetails?._id || `${categoryUuid}-${index}`,
-        title: categoryDetails?.name || categoryUuid,
-        icon: categoryIcons[index % categoryIcons.length],
-        imageUrl: categoryDetails?.imageUrl || '',
-        categoryUuid,
-      };
-    });
+    const seen = new Set();
+    return listings
+      .filter((l) => l?.category && !seen.has(l.category) && seen.add(l.category))
+      .map((l) => {
+        const cat = categoriesByUuid.get(l.category);
+        return { id: cat?._id || l.category, title: cat?.name || l.category, imageUrl: cat?.imageUrl || l.images?.[0] || '', categoryUuid: l.category };
+      });
   }, [listings, categoriesByUuid]);
 
-  // Normalize listings for ProductCard
-  const featuredProducts = useMemo(() => {
-    return listings.map((listing) => ({
-      ...listing,
-      description: listing?.description || listing?.Description || '',
-      images: Array.isArray(listing?.images) ? listing.images : [],
-      price: listing?.price ?? 0,
-    }));
-  }, [listings]);
+  const featuredProducts = useMemo(() => listings.slice(0, 8), [listings]);
+  const newArrivals = useMemo(() => [...listings].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, 4), [listings]);
+
+  const waNumber = String(config.whatsappNumber || config.phone || '919999999999').replace(/\D/g, '');
+  const waHref = `https://wa.me/${waNumber}?text=${encodeURIComponent('Hi! I need help with a printing order.')}`;
 
   return (
-    <div className="bg-white font-sans text-gray-900">
+    <div className="bg-white">
       <Navbar />
-      <HeroSection />
+      <HeroSection whatsappNumber={config.whatsappNumber || config.phone} />
 
-      {/* Categories Section */}
-      <section className="py-16">
+      {/* ── How it works ── */}
+      <section className="border-b border-gray-100 bg-gradient-to-r from-[#f0fdf4] to-white py-10">
+        <div className="mx-auto max-w-5xl px-4 sm:px-6">
+          <div className="grid grid-cols-3 gap-4 text-center sm:gap-8">
+            {[
+              { step: '1', icon: '🔍', title: 'Browse', desc: 'Find your perfect design' },
+              { step: '2', icon: '💬', title: 'WhatsApp Us', desc: 'Send your order details' },
+              { step: '3', icon: '🎉', title: 'Receive', desc: 'Get your prints delivered' },
+            ].map((s) => (
+              <div key={s.step} className="flex flex-col items-center">
+                <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[#25D366]/10 text-2xl">
+                  {s.icon}
+                </div>
+                <div className="mt-2 text-sm font-bold text-gray-800">{s.title}</div>
+                <div className="mt-0.5 hidden text-xs text-gray-500 sm:block">{s.desc}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── Categories ── */}
+      <section className="py-14">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="text-center">
-            <h2 className="text-3xl font-bold text-gray-900">
-              Explore Categories
-            </h2>
-            <p className="mt-3 text-gray-600">
-              Find the right print product for every business need.
-            </p>
+          <div className="flex items-end justify-between">
+            <div>
+              <h2 className="section-title">Shop by Category</h2>
+              <p className="section-subtitle">Find the right print for every need.</p>
+            </div>
+            <Link to="/allCategories" className="hidden items-center gap-1 text-sm font-semibold text-[#128C7E] hover:text-[#075E54] sm:flex">
+              View all <FaArrowRight className="text-xs" />
+            </Link>
           </div>
 
-          {categoryCards.length > 0 ? (
-            <div className="mt-10 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-              {categoryCards.map((category) => (
-                <article
-                  key={category.id}
-                  role="button"
-                  tabIndex={0}
-                  onClick={() =>
-                    navigate(`/subcategory/${category.categoryUuid}`)
-                  }
-                  onKeyDown={(event) => {
-                    if (event.key === 'Enter' || event.key === ' ') {
-                      event.preventDefault();
-                      navigate(`/subcategory/${category.categoryUuid}`);
-                    }
-                  }}
-                  className="cursor-pointer rounded-xl border border-gray-100 bg-white p-6 text-center shadow-sm transition-all duration-300 hover:scale-[1.02] hover:shadow-lg"
-                >
-                  <div className="mx-auto mb-4 flex h-20 w-20 items-center justify-center overflow-hidden rounded-xl bg-red-50 text-3xl">
-                    {category.imageUrl ? (
-                      <img
-                        src={category.imageUrl}
-                        alt={category.title}
-                        className="h-full w-full object-cover"
-                      />
-                    ) : (
-                      category.icon
-                    )}
-                  </div>
-
-                  <h3 className="text-lg font-bold text-gray-800">
-                    {category.title}
-                  </h3>
-                </article>
-              ))}
+          {loading ? (
+            <div className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
+              {[...Array(6)].map((_, i) => <LoadingSkeleton key={i} />)}
             </div>
           ) : (
-            <p className="mt-8 text-center text-gray-500">
-              Categories will appear here soon.
-            </p>
+            <div className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
+              {categoryCards.map((cat) => (
+                <button
+                  key={cat.id}
+                  onClick={() => navigate(`/subcategory/${cat.categoryUuid}`)}
+                  className="group flex flex-col items-center rounded-2xl border border-gray-100 bg-white p-4 text-center shadow-sm transition-all duration-300 hover:border-[#25D366]/30 hover:shadow-md hover:-translate-y-0.5"
+                >
+                  <div className="h-16 w-16 overflow-hidden rounded-xl bg-green-50">
+                    {cat.imageUrl ? (
+                      <img src={cat.imageUrl} alt={cat.title} className="h-full w-full object-cover" />
+                    ) : (
+                      <div className="flex h-full w-full items-center justify-center text-2xl">📇</div>
+                    )}
+                  </div>
+                  <h3 className="mt-3 line-clamp-2 text-sm font-semibold text-gray-800 group-hover:text-[#128C7E] transition-colors">{cat.title}</h3>
+                </button>
+              ))}
+            </div>
           )}
         </div>
       </section>
 
-      {/* Featured Products */}
-      <FeaturedProducts
-        products={featuredProducts}
-        visibleCount={visibleCount}
-        onLoadMore={() => setVisibleCount((prev) => prev + 4)}
-      />
+      {/* ── Featured / Trending Products ── */}
+      <section className="bg-gray-50 py-14">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="flex items-end justify-between">
+            <div>
+              <h2 className="section-title">Trending Products</h2>
+              <p className="section-subtitle">Our most popular printing designs.</p>
+            </div>
+            <Link to="/products" className="hidden items-center gap-1 text-sm font-semibold text-[#128C7E] hover:text-[#075E54] sm:flex">
+              View all <FaArrowRight className="text-xs" />
+            </Link>
+          </div>
+
+          {loading ? (
+            <div className="mt-8 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+              {[...Array(4)].map((_, i) => <LoadingSkeleton key={i} />)}
+            </div>
+          ) : (
+            <div className="mt-8 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+              {featuredProducts.map((p) => (
+                <ProductCard key={p._id} product={p} whatsappNumber={config.whatsappNumber || config.phone} />
+              ))}
+            </div>
+          )}
+
+          <div className="mt-8 text-center">
+            <Link to="/products" className="btn-outline">
+              View All Products <FaArrowRight className="text-xs" />
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* ── New Arrivals ── */}
+      {newArrivals.length > 0 && (
+        <section className="py-14">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div className="mb-8 flex items-center gap-3">
+              <span className="rounded-full bg-[#25D366] px-3 py-1 text-xs font-bold text-white">NEW</span>
+              <h2 className="font-serif text-2xl font-bold text-gray-900">New Arrivals</h2>
+            </div>
+            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+              {newArrivals.map((p) => (
+                <ProductCard key={p._id} product={p} whatsappNumber={config.whatsappNumber || config.phone} />
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* ── WhatsApp CTA Banner ── */}
+      <section className="bg-gradient-to-r from-[#075E54] to-[#128C7E] py-16">
+        <div className="mx-auto max-w-3xl px-4 text-center sm:px-6">
+          <div className="mb-4 flex justify-center text-5xl text-[#25D366]">
+            <FaWhatsapp />
+          </div>
+          <h2 className="font-serif text-3xl font-bold text-white">Need a Custom Design?</h2>
+          <p className="mt-3 text-white/80">
+            Chat with us on WhatsApp and we'll create the perfect print for your occasion.
+          </p>
+          <a
+            href={waHref}
+            target="_blank"
+            rel="noreferrer"
+            className="mt-6 inline-flex items-center gap-2 rounded-xl bg-white px-8 py-3.5 font-bold text-[#128C7E] shadow-lg hover:bg-green-50 transition-colors"
+          >
+            <FaWhatsapp className="text-xl text-[#25D366]" />
+            Start WhatsApp Chat
+          </a>
+        </div>
+      </section>
 
       <WhyChooseUs />
       <Testimonials />
