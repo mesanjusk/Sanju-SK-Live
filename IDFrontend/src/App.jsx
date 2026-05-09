@@ -6,6 +6,7 @@ import LoadingSkeleton from './components/common/LoadingSkeleton';
 import { routeMeta } from './config/routeMeta';
 import WhatsAppCTA from './components/WhatsAppCTA';
 import NotFound from './pages/NotFound';
+import { useAnalytics } from './hooks/useAnalytics';
 
 const Home           = lazy(() => import('./components/Home'));
 const AllListing     = lazy(() => import('./components/allLisiting'));
@@ -75,6 +76,7 @@ const PageWithSeo = ({ children }) => {
 };
 
 function AppRoutes() {
+  useAnalytics();
   return (
     <PageWithSeo>
       <Suspense fallback={<div className="p-8"><LoadingSkeleton count={3} /></div>}>

@@ -2,167 +2,221 @@
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=DM+Sans:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@300;400;500;600;700&display=swap');
 
+/* ─────────────────────────────────────────────
+   DESIGN TOKENS
+───────────────────────────────────────────── */
 :root {
-  /* WhatsApp Green palette */
-  --color-green-50: #f0fdf4;
-  --color-green-100: #dcfce7;
-  --color-green-200: #bbf7d0;
-  --color-green-300: #86efac;
-  --color-green-400: #4ade80;
-  --color-green-500: #25D366;
-  --color-green-600: #128C7E;
-  --color-green-700: #075E54;
-  --color-green-800: #054d44;
-  --color-green-900: #03302b;
-
-  /* Gray / Neutral */
-  --color-gray-50:  #f9fafb;
-  --color-gray-100: #f3f4f6;
-  --color-gray-200: #e5e7eb;
-  --color-gray-300: #d1d5db;
-  --color-gray-400: #9ca3af;
-  --color-gray-500: #6b7280;
-  --color-gray-600: #4b5563;
-  --color-gray-700: #374151;
-  --color-gray-800: #1f2937;
-  --color-gray-900: #111827;
-
-  /* Accent */
-  --color-accent-50:  #f7fef9;
-  --color-accent-100: #dcf8c6;
-  --color-accent-200: #c3f0a0;
-  --color-accent-300: #a0e07a;
-  --color-accent-400: #78cc52;
-  --color-accent-500: #53b62e;
-  --color-accent-600: #3a8f1c;
-  --color-accent-700: #276b10;
-  --color-accent-800: #1a4d09;
-  --color-accent-900: #0f3004;
-
-  /* RGB versions for Tailwind opacity */
-  --color-green-50-rgb:  240 253 244;
-  --color-green-100-rgb: 220 252 231;
-  --color-green-200-rgb: 187 247 208;
-  --color-green-300-rgb: 134 239 172;
-  --color-green-400-rgb: 74 222 128;
-  --color-green-500-rgb: 37 211 102;
-  --color-green-600-rgb: 18 140 126;
-  --color-green-700-rgb: 7 94 84;
-  --color-green-800-rgb: 5 77 68;
-  --color-green-900-rgb: 3 48 43;
-
-  --color-gray-50-rgb:  249 250 251;
-  --color-gray-100-rgb: 243 244 246;
-  --color-gray-200-rgb: 229 231 235;
-  --color-gray-300-rgb: 209 213 219;
-  --color-gray-400-rgb: 156 163 175;
-  --color-gray-500-rgb: 107 114 128;
-  --color-gray-600-rgb: 75 85 99;
-  --color-gray-700-rgb: 55 65 81;
-  --color-gray-800-rgb: 31 41 55;
-  --color-gray-900-rgb: 17 24 39;
-
-  --color-accent-50-rgb:  247 254 249;
-  --color-accent-100-rgb: 220 248 198;
-  --color-accent-200-rgb: 195 240 160;
-  --color-accent-300-rgb: 160 224 122;
-  --color-accent-400-rgb: 120 204 82;
-  --color-accent-500-rgb: 83 182 46;
-  --color-accent-600-rgb: 58 143 28;
-  --color-accent-700-rgb: 39 107 16;
-  --color-accent-800-rgb: 26 77 9;
-  --color-accent-900-rgb: 15 48 4;
-
-  /* Semantic tokens */
-  --surface-bg:      #ffffff;
-  --surface-card:    #ffffff;
-  --surface-inverse: var(--color-gray-900);
-  --text-heading:    var(--color-gray-900);
-  --text-body:       var(--color-gray-700);
-  --text-muted:      var(--color-gray-500);
-  --border-default:  var(--color-gray-200);
-
-  /* WhatsApp brand */
-  --wa-green:    #25D366;
+  /* WhatsApp Green */
+  --wa:          #25D366;
   --wa-dark:     #128C7E;
   --wa-darkest:  #075E54;
   --wa-bubble:   #DCF8C6;
+
+  /* Premium Gold */
+  --gold:        #C9A227;
+  --gold-light:  #E8C547;
+  --gold-dark:   #9A7A1A;
+  --gold-muted:  #F5E6B8;
+
+  /* Neutrals */
+  --gray-50:   #FAFAFA;
+  --gray-100:  #F4F4F5;
+  --gray-200:  #E4E4E7;
+  --gray-300:  #D1D5DB;
+  --gray-400:  #9CA3AF;
+  --gray-500:  #6B7280;
+  --gray-600:  #4B5563;
+  --gray-700:  #374151;
+  --gray-800:  #1F2937;
+  --gray-900:  #111827;
+
+  /* Surfaces */
+  --surface:      #FFFFFF;
+  --surface-soft: #F8FAF9;
+
+  /* RGB for Tailwind opacity */
+  --green-50-rgb:  240 253 244;
+  --green-100-rgb: 220 252 231;
+  --green-200-rgb: 187 247 208;
+  --green-300-rgb: 134 239 172;
+  --green-400-rgb: 74 222 128;
+  --green-500-rgb: 37 211 102;
+  --green-600-rgb: 18 140 126;
+  --green-700-rgb: 7 94 84;
+  --green-800-rgb: 5 77 68;
+  --green-900-rgb: 3 48 43;
+
+  --gray-50-rgb:  250 250 250;
+  --gray-100-rgb: 244 244 245;
+  --gray-200-rgb: 228 228 231;
+  --gray-300-rgb: 209 213 219;
+  --gray-400-rgb: 156 163 175;
+  --gray-500-rgb: 107 114 128;
+  --gray-600-rgb: 75 85 99;
+  --gray-700-rgb: 55 65 81;
+  --gray-800-rgb: 31 41 55;
+  --gray-900-rgb: 17 24 39;
+
+  --gold-rgb:      201 162 39;
 }
 
+/* ─────────────────────────────────────────────
+   BASE
+───────────────────────────────────────────── */
 @layer base {
-  * { box-sizing: border-box; }
+  *, *::before, *::after { box-sizing: border-box; }
 
   html {
     font-family: 'DM Sans', system-ui, sans-serif;
     scroll-behavior: smooth;
-  }
-
-  body {
-    background-color: var(--surface-bg);
-    color: var(--text-body);
     -webkit-font-smoothing: antialiased;
   }
 
-  h1, h2, h3, h4, h5, h6 {
-    font-family: 'Playfair Display', serif;
-    color: var(--text-heading);
+  body { background: #ffffff; color: var(--gray-700); }
+
+  h1,h2,h3,h4,h5,h6 {
+    font-family: 'Playfair Display', Georgia, serif;
+    color: var(--gray-900);
     line-height: 1.2;
+    letter-spacing: -0.01em;
   }
+
+  ::selection { background: var(--wa); color: #fff; }
 }
 
+/* ─────────────────────────────────────────────
+   COMPONENTS
+───────────────────────────────────────────── */
 @layer components {
-  .btn-whatsapp {
-    @apply inline-flex items-center gap-2 rounded-xl bg-[#25D366] px-6 py-3 font-semibold text-white shadow-md transition-all duration-300 hover:bg-[#128C7E] hover:shadow-lg active:scale-95;
+
+  /* ── Buttons ── */
+  .btn-wa {
+    @apply inline-flex items-center gap-2 rounded-2xl bg-[#25D366] px-6 py-3 font-semibold text-white shadow-lg shadow-[#25D366]/30 transition-all duration-300 hover:bg-[#128C7E] hover:shadow-xl hover:shadow-[#128C7E]/30 hover:-translate-y-0.5 active:scale-95;
+  }
+
+  .btn-gold {
+    @apply inline-flex items-center gap-2 rounded-2xl bg-[#C9A227] px-6 py-3 font-semibold text-white shadow-lg shadow-[#C9A227]/30 transition-all duration-300 hover:bg-[#9A7A1A] hover:-translate-y-0.5 active:scale-95;
   }
 
   .btn-outline {
-    @apply inline-flex items-center gap-2 rounded-xl border-2 border-[#25D366] px-6 py-3 font-semibold text-[#25D366] transition-all duration-300 hover:bg-[#25D366] hover:text-white active:scale-95;
+    @apply inline-flex items-center gap-2 rounded-2xl border-2 border-[#25D366] px-6 py-3 font-semibold text-[#25D366] transition-all duration-300 hover:bg-[#25D366] hover:text-white active:scale-95;
   }
 
-  .card {
-    @apply overflow-hidden rounded-2xl bg-white shadow-sm transition-all duration-300 hover:shadow-lg;
+  .btn-ghost {
+    @apply inline-flex items-center gap-2 rounded-2xl border border-gray-200 px-5 py-2.5 text-sm font-semibold text-gray-600 transition-all hover:border-[#25D366] hover:text-[#25D366];
+  }
+
+  /* ── Cards ── */
+  .card-premium {
+    @apply relative overflow-hidden rounded-3xl bg-white shadow-[0_2px_20px_-4px_rgba(0,0,0,0.08),0_1px_4px_-2px_rgba(0,0,0,0.04)] transition-all duration-400 hover:shadow-[0_20px_60px_-12px_rgba(0,0,0,0.15)] hover:-translate-y-1;
+  }
+
+  .card-glass {
+    @apply rounded-3xl border border-white/30 bg-white/60 shadow-[0_8px_32px_rgba(0,0,0,0.08)] backdrop-blur-xl;
+  }
+
+  .card-dark {
+    @apply rounded-3xl bg-[#075E54] text-white shadow-xl;
+  }
+
+  /* ── Inputs ── */
+  .input-field {
+    @apply w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-900 placeholder-gray-400 outline-none transition-all focus:border-[#25D366] focus:bg-white focus:ring-3 focus:ring-[#25D366]/15;
+  }
+
+  /* ── Section headings ── */
+  .section-tag {
+    @apply inline-flex items-center gap-2 rounded-full border border-[#25D366]/30 bg-[#25D366]/8 px-4 py-1.5 text-xs font-bold uppercase tracking-widest text-[#128C7E];
   }
 
   .section-title {
-    @apply text-3xl font-bold text-gray-900 sm:text-4xl;
+    @apply font-serif text-3xl font-bold leading-tight text-gray-900 sm:text-4xl md:text-5xl;
   }
 
   .section-subtitle {
-    @apply mt-3 text-base text-gray-500 sm:text-lg;
+    @apply mt-4 max-w-2xl text-base leading-relaxed text-gray-500 sm:text-lg;
   }
 
-  .input-field {
-    @apply w-full rounded-xl border border-gray-200 px-4 py-3 text-sm text-gray-900 placeholder-gray-400 outline-none transition-all duration-200 focus:border-[#25D366] focus:ring-2 focus:ring-[#25D366]/20;
+  /* ── Gold gradient text ── */
+  .text-gold-gradient {
+    @apply bg-gradient-to-r from-[#C9A227] to-[#E8C547] bg-clip-text text-transparent;
   }
+
+  .text-green-gradient {
+    @apply bg-gradient-to-r from-[#25D366] to-[#128C7E] bg-clip-text text-transparent;
+  }
+
+  /* ── Divider ── */
+  .gold-divider {
+    @apply mx-auto mt-4 h-1 w-16 rounded-full bg-gradient-to-r from-[#C9A227] to-[#E8C547];
+  }
+
+  /* ── Badges ── */
+  .badge-new     { @apply rounded-full bg-[#25D366] px-2.5 py-0.5 text-xs font-bold text-white shadow-sm; }
+  .badge-popular { @apply rounded-full bg-amber-500 px-2.5 py-0.5 text-xs font-bold text-white shadow-sm; }
+  .badge-hot     { @apply rounded-full bg-red-500 px-2.5 py-0.5 text-xs font-bold text-white shadow-sm; }
 }
 
+/* ─────────────────────────────────────────────
+   UTILITIES
+───────────────────────────────────────────── */
 @layer utilities {
-  .text-balance { text-wrap: balance; }
 
-  .wa-pulse {
-    animation: waPulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-  }
-
+  /* WhatsApp pulse */
+  .wa-pulse { animation: waPulse 2.5s ease-in-out infinite; }
   @keyframes waPulse {
-    0%, 100% { box-shadow: 0 0 0 0 rgba(37, 211, 102, 0.7); }
-    50%       { box-shadow: 0 0 0 14px rgba(37, 211, 102, 0); }
+    0%,100% { box-shadow: 0 0 0 0 rgba(37,211,102,.6); }
+    50%      { box-shadow: 0 0 0 16px rgba(37,211,102,0); }
   }
 
+  /* Scroll-in animations */
   @keyframes fadeInUp {
-    from { opacity: 0; transform: translateY(20px); }
-    to   { opacity: 1; transform: translateY(0); }
+    from { opacity:0; transform:translateY(28px); }
+    to   { opacity:1; transform:translateY(0); }
   }
-
-  .animate-fade-in-up {
-    animation: fadeInUp 0.6s ease-out both;
-  }
-
   @keyframes fadeIn {
-    from { opacity: 0; }
-    to   { opacity: 1; }
+    from { opacity:0; } to { opacity:1; }
+  }
+  @keyframes slideInLeft {
+    from { opacity:0; transform:translateX(-24px); }
+    to   { opacity:1; transform:translateX(0); }
+  }
+  @keyframes scaleIn {
+    from { opacity:0; transform:scale(.92); }
+    to   { opacity:1; transform:scale(1); }
   }
 
-  .animate-fade-in { animation: fadeIn 0.5s ease-out both; }
+  .animate-fade-in-up   { animation: fadeInUp 0.65s ease-out both; }
+  .animate-fade-in      { animation: fadeIn 0.5s ease-out both; }
+  .animate-slide-in-left{ animation: slideInLeft 0.55s ease-out both; }
+  .animate-scale-in     { animation: scaleIn 0.5s ease-out both; }
+
+  /* Grain texture overlay */
+  .grain::after {
+    content:'';
+    position:absolute;
+    inset:0;
+    background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events:none;
+    border-radius:inherit;
+  }
+
+  /* Premium number counter */
+  .counter-number {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum";
+  }
+
+  /* Glow effects */
+  .glow-green { filter: drop-shadow(0 0 12px rgba(37,211,102,.4)); }
+  .glow-gold  { filter: drop-shadow(0 0 12px rgba(201,162,39,.4)); }
+
+  /* Scrollbar hide */
+  .scrollbar-hide::-webkit-scrollbar { display:none; }
+  .scrollbar-hide { -ms-overflow-style:none; scrollbar-width:none; }
+
+  /* Text balance */
+  .text-balance { text-wrap: balance; }
 }

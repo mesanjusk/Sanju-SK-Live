@@ -6,6 +6,7 @@ import LazyImage from '../components/common/LazyImage';
 import LoadingSkeleton from '../components/common/LoadingSkeleton';
 import { useFavorites } from '../context/FavoritesContext';
 import SEO from '../components/SEO';
+import { trackWhatsAppClick } from '../hooks/useAnalytics';
 
 const getPriceForQty = (product, qty) => {
   const tiers = product?.quantityPricing;
@@ -261,6 +262,7 @@ export default function ProductDetail() {
                 href={waHref}
                 target="_blank"
                 rel="noreferrer"
+                onClick={() => trackWhatsAppClick(product._id)}
                 className="flex items-center justify-center gap-3 rounded-2xl bg-[#25D366] py-4 text-base font-bold text-white shadow-lg hover:bg-[#128C7E] transition-colors active:scale-95"
               >
                 <FaWhatsapp className="text-xl" />
@@ -293,6 +295,7 @@ export default function ProductDetail() {
             href={waHref}
             target="_blank"
             rel="noreferrer"
+            onClick={() => trackWhatsAppClick(product._id)}
             className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#25D366] py-3.5 font-bold text-white hover:bg-[#128C7E] transition-colors"
           >
             <FaWhatsapp className="text-lg" />
