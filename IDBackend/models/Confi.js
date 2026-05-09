@@ -12,6 +12,8 @@ const confiSchema = new mongoose.Schema({
   linkedIn: { type: String },
   youtube: { type: String },
   logo: { type: String },
+  googleDriveRefreshToken: { type: String },
+  googleDriveConnected: { type: Boolean, default: false },
   createdAt: { type: Date, default: Date.now },
 });
 
