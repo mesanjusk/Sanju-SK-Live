@@ -1,0 +1,21 @@
+{
+  "name": "Sanju SK",
+  "short_name": "WeddingCards",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f7f9f9",
+  "theme_color": "#2fa89c",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/icon-192x192.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "/icon-512x512.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ]
+}
