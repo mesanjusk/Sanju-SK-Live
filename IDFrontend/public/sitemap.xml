@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url><loc>https://idfrontend.vercel.app/</loc><lastmod>2026-05-09T10:15:07.293Z</lastmod><changefreq>weekly</changefreq></url>
-  <url><loc>https://idfrontend.vercel.app/products</loc><lastmod>2026-05-09T10:15:07.293Z</lastmod><changefreq>weekly</changefreq></url>
-  <url><loc>https://idfrontend.vercel.app/allListing</loc><lastmod>2026-05-09T10:15:07.293Z</lastmod><changefreq>weekly</changefreq></url>
-  <url><loc>https://idfrontend.vercel.app/contact</loc><lastmod>2026-05-09T10:15:07.293Z</lastmod><changefreq>weekly</changefreq></url>
-  <url><loc>https://idfrontend.vercel.app/favorites</loc><lastmod>2026-05-09T10:15:07.293Z</lastmod><changefreq>weekly</changefreq></url>
-  <url><loc>https://idfrontend.vercel.app/cart</loc><lastmod>2026-05-09T10:15:07.293Z</lastmod><changefreq>weekly</changefreq></url>
-  <url><loc>https://idfrontend.vercel.app/checkout</loc><lastmod>2026-05-09T10:15:07.293Z</lastmod><changefreq>weekly</changefreq></url>
+  <url><loc>https://idfrontend.vercel.app/</loc><lastmod>2026-05-10T11:16:22.458Z</lastmod><changefreq>weekly</changefreq></url>
+  <url><loc>https://idfrontend.vercel.app/products</loc><lastmod>2026-05-10T11:16:22.458Z</lastmod><changefreq>weekly</changefreq></url>
+  <url><loc>https://idfrontend.vercel.app/allListing</loc><lastmod>2026-05-10T11:16:22.458Z</lastmod><changefreq>weekly</changefreq></url>
+  <url><loc>https://idfrontend.vercel.app/contact</loc><lastmod>2026-05-10T11:16:22.458Z</lastmod><changefreq>weekly</changefreq></url>
+  <url><loc>https://idfrontend.vercel.app/favorites</loc><lastmod>2026-05-10T11:16:22.458Z</lastmod><changefreq>weekly</changefreq></url>
+  <url><loc>https://idfrontend.vercel.app/cart</loc><lastmod>2026-05-10T11:16:22.458Z</lastmod><changefreq>weekly</changefreq></url>
+  <url><loc>https://idfrontend.vercel.app/checkout</loc><lastmod>2026-05-10T11:16:22.458Z</lastmod><changefreq>weekly</changefreq></url>
 </urlset>
