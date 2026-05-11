@@ -1,5 +1,11 @@
 import { useState, useEffect } from 'react';
+import {
+  Box, Button, TextField, MenuItem, Typography, Table, TableBody, TableCell,
+  TableContainer, TableHead, TableRow, Paper, IconButton, Avatar, CircularProgress,
+} from '@mui/material';
+import DeleteIcon from '@mui/icons-material/Delete';
 import api from '../../api';
+import { ConfirmDialog, Toast } from '../../components/admin/AdminUiKit';
 
 export default function SubcategoryManager() {
   const [subcategories, setSubcategories] = useState([]);
@@ -7,6 +13,11 @@ export default function SubcategoryManager() {
   const [name, setName] = useState('');
   const [categoryId, setCategoryId] = useState('');
   const [image, setImage] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [confirm, setConfirm] = useState({ open: false, id: null });
+  const [toast, setToast] = useState({ open: false, message: '', severity: 'success' });
+
+  const showToast = (message, severity = 'success') => setToast({ open: true, message, severity });
 
   const fetchAll = async () => {
     const [subRes, catRes] = await Promise.all([
@@ -21,81 +32,97 @@ export default function SubcategoryManager() {
 
   const handleUpload = async (e) => {
     e.preventDefault();
-    const formData = new FormData();
-    formData.append('name', name);
-    formData.append('categoryId', categoryId);
-    formData.append('image', image);
-    await api.post('/api/subcategories', formData);
-    setName('');
-    setCategoryId('');
-    setImage(null);
-    fetchAll();
+    setLoading(true);
+    try {
+      const formData = new FormData();
+      formData.append('name', name);
+      formData.append('categoryId', categoryId);
+      formData.append('image', image);
+      await api.post('/api/subcategories', formData);
+      setName(''); setCategoryId(''); setImage(null);
+      await fetchAll();
+      showToast('Subcategory added successfully');
+    } catch {
+      showToast('Failed to add subcategory', 'error');
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleDelete = async (id) => {
-    await api.delete(`/api/subcategories/${id}`);
-    fetchAll();
+  const handleDelete = async () => {
+    try {
+      await api.delete(`/api/subcategories/${confirm.id}`);
+      setConfirm({ open: false, id: null });
+      await fetchAll();
+      showToast('Subcategory deleted');
+    } catch {
+      showToast('Failed to delete', 'error');
+    }
   };
 
   return (
-    <div className="p-6 max-w-4xl mx-auto">
-      <h1 className="text-2xl font-bold mb-4">Subcategory Manager</h1>
-      <form onSubmit={handleUpload} className="mb-6 space-y-4">
-        <input
-          type="text"
-          placeholder="Subcategory Name"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          className="w-full p-2 border rounded"
-          required
-        />
-        <select
-          value={categoryId}
-          onChange={(e) => setCategoryId(e.target.value)}
-          className="w-full p-2 border rounded"
-          required
-        >
-          <option value="">Select Category</option>
-          {categories.map((cat) => (
-            <option key={cat._id} value={cat._id}>{cat.name}</option>
-          ))}
-        </select>
-        <input
-          type="file"
-          onChange={(e) => setImage(e.target.files[0])}
-          className="w-full"
-          required
-        />
-        <button type="submit" className="bg-blue-600 text-white px-4 py-2 rounded">
-          Add Subcategory
-        </button>
-      </form>
-      <table className="w-full table-auto border">
-        <thead>
-          <tr className="bg-gray-100">
-            <th className="p-2 border">Image</th>
-            <th className="p-2 border">Name</th>
-            <th className="p-2 border">Category</th>
-            <th className="p-2 border">Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {subcategories.map((sub) => (
-            <tr key={sub._id}>
-              <td className="border p-2">
-                <img src={sub.imageUrl} alt={sub.name} className="w-12 h-12 object-cover rounded" />
-              </td>
-              <td className="border p-2">{sub.name}</td>
-              <td className="border p-2">{sub.categoryId?.name || '—'}</td>
-              <td className="border p-2">
-                <button onClick={() => handleDelete(sub._id)} className="text-red-600 hover:underline">
-                  Delete
-                </button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
+    <Box sx={{ maxWidth: 860, mx: 'auto' }}>
+      <Typography variant="h5" fontWeight={600} mb={3}>Subcategory Manager</Typography>
+
+      <Paper elevation={0} variant="outlined" sx={{ p: 3, mb: 4, borderRadius: 3 }}>
+        <Typography variant="subtitle2" fontWeight={600} mb={2}>Add Subcategory</Typography>
+        <Box component="form" onSubmit={handleUpload} sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+          <TextField label="Subcategory Name" size="small" required fullWidth value={name} onChange={(e) => setName(e.target.value)} />
+          <TextField select label="Select Category" size="small" required fullWidth value={categoryId} onChange={(e) => setCategoryId(e.target.value)}>
+            {categories.map((cat) => (
+              <MenuItem key={cat._id} value={cat._id}>{cat.name}</MenuItem>
+            ))}
+          </TextField>
+          <Button variant="outlined" component="label" sx={{ alignSelf: 'flex-start', textTransform: 'none' }}>
+            {image ? image.name : 'Choose Image'}
+            <input type="file" hidden accept="image/*" onChange={(e) => setImage(e.target.files[0])} required />
+          </Button>
+          <Box>
+            <Button type="submit" variant="contained" disabled={loading} sx={{ textTransform: 'none' }}>
+              {loading ? <CircularProgress size={18} color="inherit" /> : 'Add Subcategory'}
+            </Button>
+          </Box>
+        </Box>
+      </Paper>
+
+      <TableContainer component={Paper} elevation={0} variant="outlined" sx={{ borderRadius: 3 }}>
+        <Table size="small">
+          <TableHead sx={{ bgcolor: 'primary.light' }}>
+            <TableRow>
+              <TableCell sx={{ fontWeight: 600 }}>Image</TableCell>
+              <TableCell sx={{ fontWeight: 600 }}>Name</TableCell>
+              <TableCell sx={{ fontWeight: 600 }}>Category</TableCell>
+              <TableCell sx={{ fontWeight: 600 }} align="right">Actions</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {subcategories.map((sub) => (
+              <TableRow key={sub._id} hover>
+                <TableCell><Avatar src={sub.imageUrl} alt={sub.name} variant="rounded" sx={{ width: 48, height: 48 }} /></TableCell>
+                <TableCell>{sub.name}</TableCell>
+                <TableCell>{sub.categoryId?.name || '—'}</TableCell>
+                <TableCell align="right">
+                  <IconButton size="small" color="error" onClick={() => setConfirm({ open: true, id: sub._id })}>
+                    <DeleteIcon fontSize="small" />
+                  </IconButton>
+                </TableCell>
+              </TableRow>
+            ))}
+            {subcategories.length === 0 && (
+              <TableRow><TableCell colSpan={4} align="center" sx={{ py: 4, color: 'text.secondary' }}>No subcategories yet</TableCell></TableRow>
+            )}
+          </TableBody>
+        </Table>
+      </TableContainer>
+
+      <ConfirmDialog
+        open={confirm.open}
+        title="Delete Subcategory"
+        message="Are you sure you want to delete this subcategory?"
+        onConfirm={handleDelete}
+        onCancel={() => setConfirm({ open: false, id: null })}
+      />
+      <Toast open={toast.open} message={toast.message} severity={toast.severity} onClose={() => setToast((t) => ({ ...t, open: false }))} />
+    </Box>
   );
 }
