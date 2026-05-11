@@ -5,21 +5,33 @@ import { FaWhatsapp, FaHeart } from 'react-icons/fa';
 import LazyImage from './common/LazyImage';
 import { useFavorites } from '../context/FavoritesContext';
 import { trackWhatsAppClick } from '../hooks/useAnalytics';
+import { useWhatsAppNumber, saveEnquiryLead } from '../hooks/useWhatsApp';
 
-const ProductCard = ({ product, whatsappNumber }) => {
+const ProductCard = ({ product }) => {
   const [img, setImg] = useState(0);
   const { favorites, toggleFavorite } = useFavorites();
   const isFav = favorites.some((f) => f._id === product?._id);
   const images = product?.images || [];
-  const wa = String(whatsappNumber || '919999999999').replace(/\D/g, '');
+  const wa = useWhatsAppNumber();
 
-  const waMsg = encodeURIComponent(
+  const msgText =
     `Hi! I'm interested in *${product?.title}*\n` +
     `💰 Price: ₹${product?.price || 0}\n` +
     (product?.category ? `📂 Category: ${product.category}\n` : '') +
-    `\nPlease share more details about this product.`
-  );
-  const waHref = `https://wa.me/${wa}?text=${waMsg}`;
+    `\nPlease share more details.`;
+
+  const waHref = wa
+    ? `https://wa.me/${wa}?text=${encodeURIComponent(msgText)}`
+    : '#';
+
+  const handleWAClick = () => {
+    trackWhatsAppClick(product?._id);
+    saveEnquiryLead({
+      productId: product?._id,
+      productName: product?.title,
+      message: msgText,
+    });
+  };
 
   return (
     <motion.article whileHover={{ y: -6 }} className="lux-card group overflow-hidden">
@@ -47,7 +59,7 @@ const ProductCard = ({ product, whatsappNumber }) => {
             href={waHref}
             target="_blank"
             rel="noreferrer"
-            onClick={() => trackWhatsAppClick(product?._id)}
+            onClick={handleWAClick}
             className="lux-btn-primary !px-4 !py-2"
           >
             <FaWhatsapp />Enquire

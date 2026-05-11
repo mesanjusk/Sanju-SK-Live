@@ -7,6 +7,7 @@ import LoadingSkeleton from '../components/common/LoadingSkeleton';
 import { useFavorites } from '../context/FavoritesContext';
 import SEO from '../components/SEO';
 import { trackWhatsAppClick } from '../hooks/useAnalytics';
+import { useWhatsAppNumber, saveEnquiryLead } from '../hooks/useWhatsApp';
 
 const getPriceForQty = (product, qty) => {
   const tiers = product?.quantityPricing;
@@ -30,22 +31,17 @@ export default function ProductDetail() {
   const [imgIdx, setImgIdx] = useState(0);
   const [qty, setQty] = useState(1);
   const [showVideo, setShowVideo] = useState(false);
-  const [whatsappNumber, setWhatsappNumber] = useState('919999999999');
+  const whatsappNumber = useWhatsAppNumber();
   const { favorites, toggleFavorite } = useFavorites();
 
   useEffect(() => {
-    Promise.all([
-      api.get(`/api/listings/${id}`),
-      api.get('/api/confi/GetConfiList'),
-    ]).then(([prodRes, confiRes]) => {
-      setProduct(prodRes.data);
-      if (confiRes.data?.success && confiRes.data.result.length > 0) {
-        const c = confiRes.data.result[0];
-        setWhatsappNumber(c.whatsappNumber || c.phone || '919999999999');
-      }
-      const tiers = prodRes.data?.quantityPricing;
-      if (Array.isArray(tiers) && tiers.length > 0) setQty(tiers[0].minQty);
-    }).catch(() => {})
+    api.get(`/api/listings/${id}`)
+      .then((prodRes) => {
+        setProduct(prodRes.data);
+        const tiers = prodRes.data?.quantityPricing;
+        if (Array.isArray(tiers) && tiers.length > 0) setQty(tiers[0].minQty);
+      })
+      .catch(() => {})
       .finally(() => setLoading(false));
   }, [id]);
 
@@ -74,11 +70,15 @@ export default function ProductDetail() {
   const ytId = getYouTubeId(product.youtubeUrl);
   const hasTiers = Array.isArray(product.quantityPricing) && product.quantityPricing.length > 0;
 
-  const waNumber = String(whatsappNumber).replace(/\D/g, '');
-  const waMsg = encodeURIComponent(
-    `Hi! I want to order:\n*${product.title}*\nQuantity: ${qty}\nPrice per piece: ₹${price}\nTotal: ₹${total}\n\nProduct link: ${window.location.href}`
-  );
-  const waHref = `https://wa.me/${waNumber}?text=${waMsg}`;
+  const waNumber = String(whatsappNumber || '').replace(/\D/g, '');
+  const waMsgText = `Hi! I want to order:\n*${product.title}*\nQuantity: ${qty}\nPrice per piece: ₹${price}\nTotal: ₹${total}\n\nProduct link: ${window.location.href}`;
+  const waMsg = encodeURIComponent(waMsgText);
+  const waHref = waNumber ? `https://wa.me/${waNumber}?text=${waMsg}` : '#';
+
+  const handleWAClick = () => {
+    trackWhatsAppClick(product._id);
+    saveEnquiryLead({ productId: product._id, productName: product.title, message: waMsgText });
+  };
 
   const shareUrl = window.location.href;
   const handleShare = () => {
@@ -262,7 +262,7 @@ export default function ProductDetail() {
                 href={waHref}
                 target="_blank"
                 rel="noreferrer"
-                onClick={() => trackWhatsAppClick(product._id)}
+                onClick={handleWAClick}
                 className="flex items-center justify-center gap-3 rounded-2xl bg-[#25D366] py-4 text-base font-bold text-white shadow-lg hover:bg-[#128C7E] transition-colors active:scale-95"
               >
                 <FaWhatsapp className="text-xl" />
@@ -295,7 +295,7 @@ export default function ProductDetail() {
             href={waHref}
             target="_blank"
             rel="noreferrer"
-            onClick={() => trackWhatsAppClick(product._id)}
+            onClick={handleWAClick}
             className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#25D366] py-3.5 font-bold text-white hover:bg-[#128C7E] transition-colors"
           >
             <FaWhatsapp className="text-lg" />

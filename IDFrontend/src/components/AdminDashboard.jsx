@@ -21,6 +21,7 @@ import BarChartIcon from '@mui/icons-material/BarChart';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import WhatsAppIcon from '@mui/icons-material/WhatsApp';
 import LeaderboardIcon from '@mui/icons-material/Leaderboard';
+import InboxIcon from '@mui/icons-material/Inbox';
 
 import AnalyticsPage from '../pages/admin/AnalyticsPage';
 import CategoryManager from '../pages/admin/CategoryManager';
@@ -33,6 +34,7 @@ import ReligionManager from '../pages/admin/ReligionManager';
 import ConfiManager from '../pages/admin/ConfiManager';
 import WhatsAppBotManager from '../pages/admin/WhatsAppBotManager';
 import LeadsManager from '../pages/admin/LeadsManager';
+import InboxManager from '../pages/admin/InboxManager';
 import CreateListing from './CreateListing';
 import api from '../api';
 import { StatCard, SurfaceCard, PageContainer } from './admin/AdminUiKit';
@@ -63,6 +65,7 @@ const ALL_NAV = [
   { key: 'overview',      label: 'Dashboard',     Icon: DashboardIcon,       permission: 'canViewDashboard' },
   { key: 'analytics',     label: 'Analytics',     Icon: BarChartIcon,        permission: 'canViewAnalytics' },
   { key: 'leads',         label: 'Leads',         Icon: LeaderboardIcon,     permission: 'canManageLeads' },
+  { key: 'inbox',         label: 'WA Inbox',      Icon: InboxIcon,           permission: 'canManageWhatsApp' },
   { key: 'listings',      label: 'Products',      Icon: Inventory2Icon,      permission: 'canManageProducts' },
   { key: 'categories',    label: 'Categories',    Icon: CategoryIcon,        permission: 'canManageCategories' },
   { key: 'subcategories', label: 'Subcategories', Icon: AccountTreeIcon,     permission: 'canManageCategories' },
@@ -136,6 +139,7 @@ function Overview({ onNavigate, userRole }) {
             { label: '+ Add Category', key: 'categories',    show: permissions.canManageCategories },
             { label: '+ Upload Banner',key: 'banners',       show: permissions.canManageBanners },
             { label: 'View Leads',     key: 'leads',         show: permissions.canManageLeads },
+            { label: 'WA Inbox',       key: 'inbox',         show: permissions.canManageWhatsApp },
             { label: 'WhatsApp Bot',   key: 'whatsapp-bot',  show: permissions.canManageWhatsApp },
             { label: 'Settings',       key: 'confis',        show: permissions.canManageSettings },
           ].filter((a) => a.show).map((a) => (
@@ -218,6 +222,7 @@ export default function AdminDashboard() {
       case 'confis':        return <ConfiManager />;
       case 'religions':     return <ReligionManager />;
       case 'whatsapp-bot':  return <WhatsAppBotManager />;
+      case 'inbox':         return <PageContainer title="WhatsApp Inbox" breadcrumb={['Admin', 'Inbox']}><InboxManager /></PageContainer>;
       default:              return null;
     }
   };
