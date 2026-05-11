@@ -7,6 +7,12 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import api from '../../api';
 import { ConfirmDialog, Toast } from '../../components/admin/AdminUiKit';
 
+const MAX_MB = 1;
+const validateImage = (file, showToast) => {
+  if (file && file.size > MAX_MB * 1024 * 1024) { showToast(`Image must be under ${MAX_MB}MB`, 'error'); return false; }
+  return true;
+};
+
 export default function SubcategoryManager() {
   const [subcategories, setSubcategories] = useState([]);
   const [categories, setCategories] = useState([]);
@@ -74,8 +80,12 @@ export default function SubcategoryManager() {
             ))}
           </TextField>
           <Button variant="outlined" component="label" sx={{ alignSelf: 'flex-start', textTransform: 'none' }}>
-            {image ? image.name : 'Choose Image'}
-            <input type="file" hidden accept="image/*" onChange={(e) => setImage(e.target.files[0])} required />
+            {image ? image.name : 'Choose Image (max 1MB)'}
+            <input type="file" hidden accept="image/*" onChange={(e) => {
+              const f = e.target.files[0];
+              if (f && !validateImage(f, showToast)) { e.target.value = ''; return; }
+              setImage(f);
+            }} required />
           </Button>
           <Box>
             <Button type="submit" variant="contained" disabled={loading} sx={{ textTransform: 'none' }}>

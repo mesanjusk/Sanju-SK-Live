@@ -76,14 +76,12 @@ router.post("/addUser", async (req, res) => {
 
   router.put("/updateUser/:id", async (req, res) => {
     const { id } = req.params;
-    const { User_name, Mobile_number } = req.body;
+    const { User_name, Mobile_number, Password } = req.body;
 
     try {
-        const user = await Users.findByIdAndUpdate(id, {
-            User_name,
-            Password,
-            Mobile_number,
-        }, { new: true }); 
+        const updateData = { User_name, Mobile_number };
+        if (Password) updateData.Password = Password;
+        const user = await Users.findByIdAndUpdate(id, updateData, { new: true });
 
         if (!user) {
             return res.status(404).json({ success: false, message: "User not found" });
@@ -185,17 +183,24 @@ router.get('/getUserByName/:username', async (req, res) => {
 });
 
 router.delete('/DeleteUser/:userUuid', async (req, res) => {
-const { userUuid } = req.params;
-try {
+  const { userUuid } = req.params;
+  try {
     const result = await Users.findOneAndDelete({ User_uuid: userUuid });
-    if (!result) {
-        return res.status(404).json({ success: false, message: 'User not found' });
-    }
+    if (!result) return res.status(404).json({ success: false, message: 'User not found' });
     res.json({ success: true, message: 'User deleted successfully' });
-} catch (error) {
-    console.error('Error deleting user:', error);
+  } catch (error) {
     res.status(500).json({ success: false, message: 'Internal server error' });
-}
+  }
+});
+
+router.delete('/:id', async (req, res) => {
+  try {
+    const result = await Users.findByIdAndDelete(req.params.id);
+    if (!result) return res.status(404).json({ success: false, message: 'User not found' });
+    res.json({ success: true });
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Internal server error' });
+  }
 });
 
 

@@ -17,11 +17,15 @@ const storage = new CloudinaryStorage({
 
 const upload = multer({ storage });
 
+const WA_FIELDS = ['whatsappProvider', 'metaAccessToken', 'metaPhoneNumberId', 'metaWebhookToken'];
+
 router.post('/add', upload.single('logo'), async (req, res) => {
   try {
-    const { name, email, phone, whatsappNumber, address, fb, insta, twitter, linkedIn, youtube } = req.body;
+    const { name, email, phone, whatsappNumber, address, fb, insta, twitter, linkedIn, youtube,
+            whatsappProvider, metaAccessToken, metaPhoneNumberId, metaWebhookToken } = req.body;
     const logo = req.file ? req.file.path : '';
-    const confi = new Confi({ name, email, phone, whatsappNumber, address, fb, insta, twitter, linkedIn, youtube, logo });
+    const confi = new Confi({ name, email, phone, whatsappNumber, address, fb, insta, twitter, linkedIn, youtube, logo,
+                               whatsappProvider, metaAccessToken, metaPhoneNumberId, metaWebhookToken });
     await confi.save();
     res.status(201).json({ success: true, result: confi });
   } catch (err) {
@@ -40,8 +44,10 @@ router.get('/GetConfiList', async (req, res) => {
 
 router.put('/:id', upload.single('logo'), async (req, res) => {
   try {
-    const { name, email, phone, whatsappNumber, address, fb, insta, twitter, linkedIn, youtube } = req.body;
-    const update = { name, email, phone, whatsappNumber, address, fb, insta, twitter, linkedIn, youtube };
+    const { name, email, phone, whatsappNumber, address, fb, insta, twitter, linkedIn, youtube,
+            whatsappProvider, metaAccessToken, metaPhoneNumberId, metaWebhookToken } = req.body;
+    const update = { name, email, phone, whatsappNumber, address, fb, insta, twitter, linkedIn, youtube,
+                     whatsappProvider, metaAccessToken, metaPhoneNumberId, metaWebhookToken };
     if (req.file) update.logo = req.file.path;
     const confi = await Confi.findByIdAndUpdate(req.params.id, update, { new: true });
     res.json({ success: true, result: confi });
