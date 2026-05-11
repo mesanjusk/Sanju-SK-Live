@@ -139,19 +139,38 @@ function AppRoutes() {
 
 function App() {
   const [backendReady, setBackendReady] = useState(false);
+  const [warming, setWarming] = useState(false);
 
   useEffect(() => {
-    const timeout = setTimeout(() => setBackendReady(true), 5000);
+    // After 2 s with no response, show the "waking up" message (Render cold start)
+    const warmTimer = setTimeout(() => setWarming(true), 2000);
+    // Hard fallback — show app after 30 s regardless
+    const fallback = setTimeout(() => { setBackendReady(true); }, 30000);
+
     api.get('/api/ping')
-      .then(() => { clearTimeout(timeout); setBackendReady(true); })
-      .catch(() => { clearTimeout(timeout); setBackendReady(true); });
-    return () => clearTimeout(timeout);
+      .then(() => { clearTimeout(warmTimer); clearTimeout(fallback); setBackendReady(true); })
+      .catch(() => { clearTimeout(warmTimer); clearTimeout(fallback); setBackendReady(true); });
+
+    return () => { clearTimeout(warmTimer); clearTimeout(fallback); };
   }, []);
+
+  // Keepalive: ping every 14 min so Render free server never hits the 15-min idle sleep
+  useEffect(() => {
+    if (!backendReady) return;
+    const id = setInterval(() => { api.get('/api/ping').catch(() => {}); }, 14 * 60 * 1000);
+    return () => clearInterval(id);
+  }, [backendReady]);
 
   if (!backendReady) {
     return (
-      <div className="mx-auto mt-16 max-w-5xl p-4">
-        <LoadingSkeleton />
+      <div className="flex min-h-screen flex-col items-center justify-center bg-white px-4">
+        <p className="font-serif text-2xl font-bold italic text-gray-900">SK Digital</p>
+        <div className="mt-4 h-1 w-20 animate-pulse rounded-full bg-gray-200" />
+        {warming && (
+          <p className="mt-4 animate-pulse text-sm text-gray-400">
+            Server is waking up, please wait a moment…
+          </p>
+        )}
       </div>
     );
   }
