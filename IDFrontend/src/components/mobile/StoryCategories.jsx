@@ -2,7 +2,7 @@ import { memo } from 'react';
 
 function StoryCategories({ categories = [], onSelect, selectedId }) {
   return (
-    <section className="overflow-x-auto border-b border-gray-100 px-4 py-3 scrollbar-hide">
+    <section className="overflow-x-auto px-4 py-3 scrollbar-hide">
       <div className="mx-auto flex max-w-2xl snap-x gap-4">
         {/* All */}
         <button onClick={() => onSelect?.(null)} className="flex-shrink-0 snap-start text-center">

@@ -27,7 +27,7 @@ export default function Profile() {
   return (
     <div className="min-h-screen bg-white pb-24">
       {/* Header */}
-      <header className="sticky top-0 z-40 flex items-center justify-between border-b border-gray-100 bg-white px-4 py-3">
+      <header className="sticky top-0 z-40 flex items-center justify-between bg-white px-4 py-3">
         <span className="text-base font-semibold text-gray-900">
           {config.name || 'SK Digital'}
         </span>
