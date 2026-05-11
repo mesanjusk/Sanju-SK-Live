@@ -1,22 +1,34 @@
-import { memo, useState } from 'react';
+import { memo, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { FaHeart, FaRegHeart, FaShare, FaRegBookmark, FaWhatsapp, FaEllipsisH } from 'react-icons/fa';
 import { useFavorites } from '../../context/FavoritesContext';
 
 function ProductFeedCard({ product, whatsappNumber }) {
-  const { favorites, toggleFavorite } = useFavorites();
+  const { favorites, toggleFavorite, addLiked } = useFavorites();
   const [likedFx, setLikedFx] = useState(false);
   const isFav = favorites.some((f) => f._id === product._id);
   const img = Array.isArray(product.images) ? product.images[0] : product.images;
+
+  // Show the lowest available unit price (best deal)
+  const displayPrice = useMemo(() => {
+    const tiers = product.quantityPricing;
+    if (Array.isArray(tiers) && tiers.length > 0) {
+      const prices = tiers.map((t) => Number(t.price)).filter((p) => p > 0);
+      if (prices.length > 0) return { label: `From ₹${Math.min(...prices)}`, hasRange: true };
+    }
+    return { label: `₹${product.price || 0}`, hasRange: false };
+  }, [product]);
+
   const wa = String(whatsappNumber || '').replace(/\D/g, '');
   const waMsg = encodeURIComponent(
-    `Hi! I'm interested in:\n*${product.title}*\nPrice: ₹${product.price || 0}`
+    `Hi! I'm interested in:\n*${product.title}*\n${displayPrice.label.replace('From ', 'Starting from ')}`
   );
   const waHref = wa ? `https://wa.me/${wa}?text=${waMsg}` : '#';
 
   const onDoubleTap = () => {
     toggleFavorite(product);
+    addLiked(product);
     setLikedFx(true);
     setTimeout(() => setLikedFx(false), 700);
   };
@@ -32,7 +44,7 @@ function ProductFeedCard({ product, whatsappNumber }) {
 
   return (
     <article className="mb-2 bg-white">
-      {/* Post header: item thumbnail + name (Instagram-style) */}
+      {/* Post header: item thumbnail + name */}
       <div className="flex items-center justify-between px-3 py-2.5">
         <Link to={`/products/${product._id}`} className="flex min-w-0 items-center gap-2.5">
           <div className="h-9 w-9 flex-shrink-0 overflow-hidden rounded-full bg-gray-100 ring-2 ring-gray-100">
@@ -56,7 +68,7 @@ function ProductFeedCard({ product, whatsappNumber }) {
         </button>
       </div>
 
-      {/* Full-width image */}
+      {/* Full-width square image */}
       <div className="relative" onDoubleClick={onDoubleTap}>
         <Link to={`/products/${product._id}`}>
           <img
@@ -78,7 +90,7 @@ function ProductFeedCard({ product, whatsappNumber }) {
         )}
       </div>
 
-      {/* Actions: icons left, wide Enquiry button right */}
+      {/* Actions: icons left | Enquiry button right */}
       <div className="flex items-center justify-between px-3 pt-2.5 pb-1">
         <div className="flex items-center gap-4">
           <button
@@ -98,19 +110,25 @@ function ProductFeedCard({ product, whatsappNumber }) {
             <FaRegBookmark className="text-xl text-gray-900" />
           </button>
         </div>
+        {/* Wide Enquiry button — text label before WhatsApp icon */}
         <a
           href={waHref}
           target="_blank"
           rel="noreferrer"
           className="flex items-center gap-1.5 rounded-lg bg-gray-900 px-4 py-2 text-[12px] font-semibold text-white transition-transform active:scale-95"
         >
-          <FaWhatsapp className="text-[#25D366]" /> Enquiry
+          Enquiry <FaWhatsapp className="text-[#25D366]" />
         </a>
       </div>
 
       {/* Price + description */}
       <div className="px-3 pb-3 pt-1">
-        <p className="text-[13px] font-bold text-gray-900">₹{product.price || 0}</p>
+        <p className="text-[13px] font-bold text-gray-900">
+          {displayPrice.label}
+          {displayPrice.hasRange && (
+            <span className="ml-1 text-[11px] font-normal text-gray-400">· volume pricing</span>
+          )}
+        </p>
         {product.description && (
           <p className="mt-0.5 line-clamp-2 text-xs leading-relaxed text-gray-500">
             {product.description}

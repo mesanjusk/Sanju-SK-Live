@@ -1,89 +1,72 @@
-import React, { useState, useEffect } from "react";
+import { useEffect, useMemo, useState } from 'react';
 import api from '../api';
-import { useNavigate } from "react-router-dom";
+import MobileHeader from './mobile/MobileHeader';
+import StoryCategories from './mobile/StoryCategories';
+import ProductFeedCard from './mobile/ProductFeedCard';
+import MobileBottomNav from './mobile/MobileBottomNav';
+import LoadingSkeleton from './common/LoadingSkeleton';
 
 export default function AllCategory() {
   const [categories, setCategories] = useState([]);
+  const [listings, setListings] = useState([]);
+  const [config, setConfig] = useState({});
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const navigate = useNavigate();
+  const [selectedCategory, setSelectedCategory] = useState(null);
 
   useEffect(() => {
-    const fetchCategories = async () => {
-      try {
-        const response = await api.get("/api/categories");
-        setCategories(response.data);
-      } catch (err) {
-        console.error("Error fetching categories:", err);
-        setError("Failed to load categories.");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchCategories();
+    Promise.all([
+      api.get('/api/categories'),
+      api.get('/api/listings'),
+      api.get('/api/confi/GetConfiList'),
+    ]).then(([c, l, conf]) => {
+      setCategories(Array.isArray(c.data) ? c.data : c.data?.result || []);
+      setListings(Array.isArray(l.data) ? l.data : l.data?.result || []);
+      setConfig(conf.data?.result?.[0] || {});
+    }).finally(() => setLoading(false));
   }, []);
 
+  const filtered = useMemo(() => {
+    if (!selectedCategory) return listings.slice(0, 20);
+    return listings.filter(
+      (p) => p.category === selectedCategory.category_uuid || p.category === selectedCategory._id
+    );
+  }, [listings, selectedCategory]);
+
+  const handleCategorySelect = (cat) => {
+    if (!cat) { setSelectedCategory(null); return; }
+    setSelectedCategory((prev) => (prev?._id === cat._id ? null : cat));
+  };
+
   return (
-    <div >
-      <section className="py-4"> 
-  <div className="container mx-auto px-4">
-    {loading ? (
-      <div className="grid grid-cols-3 md:grid-cols-9 gap-6">
-        {[...Array(4)].map((_, i) => (
-          <div
-            key={i}
-            className="bg-gray-100 animate-pulse  p-3"
-          >
-            <div className="aspect-square bg-gray-300 rounded-full mb-2"></div>
-            <div className="h-4 bg-gray-300 rounded w-3/4"></div>
-          </div>
-        ))}
-      </div>
-    ) : error ? (
-      <div className="text-center text-red-500">{error}</div>
-    ) : categories.length === 0 ? (
-      <div className="text-center text-gray-500">No categories found.</div>
-    ) : (
-      <div className="grid grid-cols-3 md:grid-cols-9 gap-3">
-        {categories.map((item) => (
-          <div
-            key={item._id}
-            onClick={() => navigate(`/subcategory/${item.category_uuid}`)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" || e.key === " ") {
-                e.preventDefault();
-                navigate(`/subcategory/${item.category_uuid}`);
-              }
-            }}
-            role="button"
-            tabIndex={0}
-            className="cursor-pointer bg-white p-3  transform hover:scale-105 transition duration-300 ease-in-out text-center rounded-lg"
-          >
-            <div className="aspect-square bg-gray-200 rounded-full mb-2 overflow-hidden relative group mx-auto w-full max-w-[120px]">
-              {item.imageUrl?.length ? (
-                <img
-                  src={item.imageUrl}
-                  alt={item.name || "Category"}
-                  className="absolute inset-0 w-full h-full object-cover transition-transform duration-300 ease-in-out group-hover:scale-110"
-                />
-              ) : (
-                <div className="flex items-center justify-center h-full text-gray-500">
-                  No Image
-                </div>
-              )}
+    <div className="min-h-screen bg-[#fafafa] pb-24">
+      <MobileHeader />
+      <main className="mx-auto w-full max-w-2xl py-1">
+        <StoryCategories
+          categories={categories}
+          onSelect={handleCategorySelect}
+          selectedId={selectedCategory?._id}
+        />
+        <section className="mt-1">
+          {loading ? (
+            <div className="grid gap-4 p-4">
+              {[...Array(4)].map((_, i) => <LoadingSkeleton key={i} />)}
             </div>
-
-            <p className="text-sm font-medium truncate transition-colors duration-300 group-hover:text-blue-600">
-              {item.name}
+          ) : filtered.length > 0 ? (
+            filtered.map((p) => (
+              <ProductFeedCard
+                key={p._id}
+                product={p}
+                whatsappNumber={config.whatsappNumber || config.phone}
+              />
+            ))
+          ) : (
+            <p className="mt-16 text-center text-sm text-gray-400">
+              No products in this category
             </p>
-          </div>
-        ))}
-      </div>
-    )}
-  </div>
-</section>
-
+          )}
+        </section>
+      </main>
+      <MobileBottomNav />
     </div>
   );
 }
