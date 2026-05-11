@@ -7,7 +7,7 @@ import LoadingSkeleton from '../components/common/LoadingSkeleton';
 import { useFavorites } from '../context/FavoritesContext';
 import SEO from '../components/SEO';
 import { trackWhatsAppClick } from '../hooks/useAnalytics';
-import { useWhatsAppNumber, saveEnquiryLead } from '../hooks/useWhatsApp';
+import { useWhatsAppNumber, saveEnquiryLead, resolveCategoryName } from '../hooks/useWhatsApp';
 
 const getPriceForQty = (product, qty) => {
   const tiers = product?.quantityPricing;
@@ -31,6 +31,7 @@ export default function ProductDetail() {
   const [imgIdx, setImgIdx] = useState(0);
   const [qty, setQty] = useState(1);
   const [showVideo, setShowVideo] = useState(false);
+  const [categoryName, setCategoryName] = useState('');
   const whatsappNumber = useWhatsAppNumber();
   const { favorites, toggleFavorite } = useFavorites();
 
@@ -40,6 +41,9 @@ export default function ProductDetail() {
         setProduct(prodRes.data);
         const tiers = prodRes.data?.quantityPricing;
         if (Array.isArray(tiers) && tiers.length > 0) setQty(tiers[0].minQty);
+        if (prodRes.data?.category) {
+          resolveCategoryName(prodRes.data.category).then(setCategoryName);
+        }
       })
       .catch(() => {})
       .finally(() => setLoading(false));
@@ -71,7 +75,15 @@ export default function ProductDetail() {
   const hasTiers = Array.isArray(product.quantityPricing) && product.quantityPricing.length > 0;
 
   const waNumber = String(whatsappNumber || '').replace(/\D/g, '');
-  const waMsgText = `Hi! I want to order:\n*${product.title}*\nQuantity: ${qty}\nPrice per piece: ₹${price}\nTotal: ₹${total}\n\nProduct link: ${window.location.href}`;
+  const waMsgText =
+    `Hi! I want to order:\n*${product.title}*\n` +
+    `🆔 Product ID: ${product._id}\n` +
+    `📦 Quantity: ${qty}\n` +
+    `💰 Price per piece: ₹${price}\n` +
+    `💵 Total: ₹${total}\n` +
+    (categoryName ? `📂 Category: ${categoryName}\n` : '') +
+    (images[imgIdx] ? `🖼️ Image: ${images[imgIdx]}\n` : '') +
+    `🔗 Product link: ${window.location.href}`;
   const waMsg = encodeURIComponent(waMsgText);
   const waHref = waNumber ? `https://wa.me/${waNumber}?text=${waMsg}` : '#';
 

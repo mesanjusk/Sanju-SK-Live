@@ -1,5 +1,7 @@
 import express from 'express';
+import mongoose from 'mongoose';
 import Lead from '../models/Lead.js';
+import Listing from '../models/Listing.js';
 
 const router = express.Router();
 
@@ -51,7 +53,22 @@ router.get('/stats', async (req, res) => {
 // POST /api/leads - create lead
 router.post('/', async (req, res) => {
   try {
-    const lead = new Lead(req.body);
+    const { productId, ...rest } = req.body;
+    const leadData = { ...rest };
+
+    if (productId) {
+      const isValidId = mongoose.Types.ObjectId.isValid(productId);
+      if (isValidId) {
+        const exists = await Listing.exists({ _id: productId });
+        if (exists) {
+          leadData.productId = productId;
+        }
+        // Product ID valid format but not in DB — save lead without reference
+      }
+      // Invalid ObjectId format — skip to avoid cast error
+    }
+
+    const lead = new Lead(leadData);
     await lead.save();
     res.status(201).json({ success: true, result: lead });
   } catch (err) {
