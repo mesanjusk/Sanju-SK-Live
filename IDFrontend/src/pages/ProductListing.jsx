@@ -18,6 +18,11 @@ import ProductCard from '../components/ProductCard';
 import LoadingSkeleton from '../components/common/LoadingSkeleton';
 import api from '../api';
 
+import MobileHeader from '../components/mobile/MobileHeader';
+import MobileBottomNav from '../components/mobile/MobileBottomNav';
+import MobileSearchBar from '../components/mobile/MobileSearchBar';
+import ExploreGrid from '../components/mobile/ExploreGrid';
+
 const SORT_OPTIONS = [
   { value: '', label: 'Newest First' },
   { value: 'price-asc', label: 'Price: Low to High' },
@@ -390,7 +395,9 @@ export default function ProductListing() {
   );
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 pb-24">
+      <MobileHeader />
+      <MobileSearchBar value={searchTerm} onChange={setSearchTerm} />
       {/* Header */}
       <div className="border-b border-gray-200 bg-white">
         <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
@@ -632,6 +639,13 @@ export default function ProductListing() {
           </main>
         </div>
       </div>
+      {!loading && !error && products.length > 0 && (
+        <section className="mt-6">
+          <h3 className="px-4 pb-2 text-xs font-semibold uppercase tracking-[0.2em] text-gray-500">Explore</h3>
+          <ExploreGrid products={products.slice(0, 15)} />
+        </section>
+      )}
+      <MobileBottomNav />
     </div>
   );
 }
