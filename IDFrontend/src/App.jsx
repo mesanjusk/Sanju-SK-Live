@@ -4,7 +4,6 @@ import api from './api';
 import SEO from './components/SEO';
 import LoadingSkeleton from './components/common/LoadingSkeleton';
 import { routeMeta } from './config/routeMeta';
-import WhatsAppCTA from './components/WhatsAppCTA';
 import NotFound from './pages/NotFound';
 import { useAnalytics } from './hooks/useAnalytics';
 
@@ -134,7 +133,6 @@ function AppRoutes() {
           <Route path="*" element={<NotFound />} />
         </Routes>
       </Suspense>
-      <WhatsAppCTA />
     </PageWithSeo>
   );
 }
