@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { FaWhatsapp, FaHeart } from 'react-icons/fa';
 import LazyImage from './common/LazyImage';
 import { useFavorites } from '../context/FavoritesContext';
+import { trackWhatsAppClick } from '../hooks/useAnalytics';
 
 const ProductCard = ({ product, whatsappNumber }) => {
   const [img, setImg] = useState(0);
@@ -12,22 +13,57 @@ const ProductCard = ({ product, whatsappNumber }) => {
   const images = product?.images || [];
   const wa = String(whatsappNumber || '919999999999').replace(/\D/g, '');
 
+  const waMsg = encodeURIComponent(
+    `Hi! I'm interested in *${product?.title}*\n` +
+    `💰 Price: ₹${product?.price || 0}\n` +
+    (product?.category ? `📂 Category: ${product.category}\n` : '') +
+    `\nPlease share more details about this product.`
+  );
+  const waHref = `https://wa.me/${wa}?text=${waMsg}`;
+
   return (
     <motion.article whileHover={{ y: -6 }} className="lux-card group overflow-hidden">
       <div className="relative">
         <Link to={`/products/${product?._id}`}>
-          {images[img] ? <LazyImage src={images[img]} alt={product?.title} className="h-64 w-full object-cover transition duration-500 group-hover:scale-105" /> : <div className="h-64 bg-[#eef5eb]" />}
+          {images[img]
+            ? <LazyImage src={images[img]} alt={product?.title} className="h-64 w-full object-cover transition duration-500 group-hover:scale-105" />
+            : <div className="h-64 bg-[#eef5eb]" />}
         </Link>
-        <button onClick={() => toggleFavorite(product)} className={`absolute right-4 top-4 rounded-full p-2 ${isFav ? 'bg-[#2E3A2F] text-white' : 'bg-white/80'}`}><FaHeart /></button>
+        <button
+          onClick={() => toggleFavorite(product)}
+          className={`absolute right-4 top-4 rounded-full p-2 ${isFav ? 'bg-[#2E3A2F] text-white' : 'bg-white/80'}`}
+        >
+          <FaHeart />
+        </button>
       </div>
       <div className="p-5">
         <h3 className="text-2xl font-semibold">{product?.title}</h3>
-        <p className="mt-1 line-clamp-2 text-sm text-[#607061]">{product?.description || 'Curated luxury print design with premium finishing options.'}</p>
+        <p className="mt-1 line-clamp-2 text-sm text-[#607061]">
+          {product?.description || 'Curated luxury print design with premium finishing options.'}
+        </p>
         <div className="mt-4 flex items-end justify-between">
           <span className="text-2xl font-bold">₹{product?.price || 0}</span>
-          <a href={`https://wa.me/${wa}`} target="_blank" rel="noreferrer" className="lux-btn-primary !px-4 !py-2"><FaWhatsapp />Order</a>
+          <a
+            href={waHref}
+            target="_blank"
+            rel="noreferrer"
+            onClick={() => trackWhatsAppClick(product?._id)}
+            className="lux-btn-primary !px-4 !py-2"
+          >
+            <FaWhatsapp />Enquire
+          </a>
         </div>
-        {images.length > 1 && <div className="mt-3 flex gap-1.5">{images.map((_, i) => <button key={i} onClick={() => setImg(i)} className={`h-1.5 rounded-full ${i===img?'w-8 bg-[#9db69a]':'w-3 bg-[#d9e5d5]'}`} />)}</div>}
+        {images.length > 1 && (
+          <div className="mt-3 flex gap-1.5">
+            {images.map((_, i) => (
+              <button
+                key={i}
+                onClick={() => setImg(i)}
+                className={`h-1.5 rounded-full ${i === img ? 'w-8 bg-[#9db69a]' : 'w-3 bg-[#d9e5d5]'}`}
+              />
+            ))}
+          </div>
+        )}
       </div>
     </motion.article>
   );
