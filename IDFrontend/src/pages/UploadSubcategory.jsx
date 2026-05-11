@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import api from '../api'
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 
 const UploadSubcategory = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [name, setName] = useState('');
   const [image, setImage] = useState(null);
   const [categoryId, setCategoryId] = useState('');
@@ -35,11 +36,18 @@ const UploadSubcategory = () => {
     }
   }, [navigate]);
 
-  const fetchCategories = () => {
-    api
-      .get('/api/categories/with-usage')
-      .then((res) => setCategories(res.data))
-      .catch((err) => console.error('Error fetching categories:', err));
+  const fetchCategories = async () => {
+    try {
+      const res = await api.get('/api/categories/with-usage');
+      setCategories(Array.isArray(res.data) ? res.data : []);
+    } catch (err) {
+      try {
+        const fallback = await api.get('/api/categories');
+        setCategories(Array.isArray(fallback.data) ? fallback.data : []);
+      } catch (fallbackErr) {
+        console.error('Error fetching categories:', fallbackErr);
+      }
+    }
   };
 
   const fetchSubcategories = () => {

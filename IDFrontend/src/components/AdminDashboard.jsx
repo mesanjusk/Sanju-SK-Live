@@ -13,7 +13,6 @@ import UploadCategory from '../pages/UploadCategory';
 import UploadSubcategory from '../pages/UploadSubcategory';
 import UploadBanner from '../pages/UploadBanner';
 import api from '../api';
-import { DashboardLayout, PageContainer, StatCard, SurfaceCard, TopBar } from './admin/AdminUiKit';
 
 const NAV = [
   { key: 'overview', label: 'Dashboard', Icon: FaChartBar },
@@ -71,18 +70,14 @@ function Overview({ onNavigate }) {
 }
 
 function PlaceholderPage({ title }) {
-  return <PageContainer title={title} breadcrumb={['Admin', title]}><SurfaceCard><p className="text-sm text-gray-600">This module is ready for integration with existing business workflows.</p></SurfaceCard></PageContainer>;
+us === status);
+
+  return <PageContainer title="Orders" breadcrumb={["Admin", "Orders"]} actions={<FilterDropdown value={status} onChange={(e) => setStatus(e.target.value)} options={[{ value: 'Active', label: 'Active' }, { value: 'Pending', label: 'Pending' }, { value: 'Draft', label: 'Draft' }]} />}>
+    <SurfaceCard className="overflow-hidden p-0">
+      <div classNam
 }
 
-export default function AdminDashboard() {
-  const [activeTab, setActiveTab] = useState(() => localStorage.getItem('adminTab') || 'overview');
-  const [collapsed, setCollapsed] = useState(false);
-  const handleTab = (key) => { setActiveTab(key); localStorage.setItem('adminTab', key); };
-  const handleLogout = () => { localStorage.removeItem('User_name'); localStorage.removeItem('adminTab'); localStorage.removeItem('authToken'); window.location.href = '/'; };
-
-  const renderContent = () => {
-    switch (activeTab) {
-      case 'overview': return <Overview onNavigate={handleTab} />;
+export default 
       case 'analytics': return <PageContainer title="Analytics" breadcrumb={['Admin', 'Analytics']}><AnalyticsPage /></PageContainer>;
       case 'listings': return <CreateListing />;
       case 'categories': return <UploadCategory />;

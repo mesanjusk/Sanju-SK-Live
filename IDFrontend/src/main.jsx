@@ -19,14 +19,20 @@ ReactDOM.createRoot(document.getElementById('root')).render(
 );
 
 if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker
-      .register('/service-worker.js')
-      .then((registration) => {
-        console.log('✅ ServiceWorker registered:', registration.scope);
-      })
-      .catch((error) => {
-        console.error('❌ ServiceWorker registration failed:', error);
-      });
+  window.addEventListener('load', async () => {
+    try {
+      const response = await fetch('/service-worker.js', { method: 'GET' });
+      const contentType = response.headers.get('content-type') || '';
+
+      if (!response.ok || !contentType.includes('javascript')) {
+        console.warn('⚠️ Skipping ServiceWorker registration: invalid script response.');
+        return;
+      }
+
+      const registration = await navigator.serviceWorker.register('/service-worker.js');
+      console.log('✅ ServiceWorker registered:', registration.scope);
+    } catch (error) {
+      console.warn('⚠️ ServiceWorker registration skipped:', error?.message || error);
+    }
   });
 }
