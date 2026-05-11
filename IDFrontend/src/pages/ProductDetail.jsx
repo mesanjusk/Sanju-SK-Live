@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
+import MobileHeader from '../components/mobile/MobileHeader';
+import MobileBottomNav from '../components/mobile/MobileBottomNav';
 import { FaWhatsapp, FaHeart, FaShare, FaYoutube, FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 import api from '../api';
 import LazyImage from '../components/common/LazyImage';
@@ -110,7 +112,8 @@ export default function ProductDetail() {
         keywords={product.seoKeywords}
       />
 
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-gray-50 pb-24">
+        <MobileHeader />
         {/* Breadcrumb */}
         <div className="border-b border-gray-200 bg-white">
           <div className="mx-auto max-w-7xl px-4 py-3 sm:px-6 lg:px-8">
@@ -314,6 +317,7 @@ export default function ProductDetail() {
             Order on WhatsApp — ₹{total}
           </a>
         </div>
+        <MobileBottomNav />
       </div>
     </>
   );

@@ -1,0 +1,1 @@
+export default function MobileSearchBar({ value, onChange }) { return <div className="sticky top-[74px] z-30 bg-white px-4 py-2"><input value={value} onChange={(e)=>onChange(e.target.value)} placeholder="Search products" className="w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm outline-none focus:border-green-400" /></div>; }
