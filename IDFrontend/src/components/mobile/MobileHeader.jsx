@@ -12,7 +12,7 @@ function MobileHeader() {
         <Link to="/" className="text-base font-semibold tracking-tight text-gray-900">PrintSocial</Link>
         <div className="flex items-center gap-1">
           <Link to="/favorites" aria-label="Favorites" className="rounded-full p-2 text-gray-700 active:scale-95"><FaHeart /></Link>
-          <Link to="/login" aria-label="Profile" className="rounded-full p-2 text-gray-700 active:scale-95"><FaRegUserCircle /></Link>
+          <Link to="/profile" aria-label="Profile" className="rounded-full p-2 text-gray-700 active:scale-95"><FaRegUserCircle /></Link>
         </div>
       </div>
     </header>
