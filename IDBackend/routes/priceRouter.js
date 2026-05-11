@@ -42,4 +42,14 @@ router.post('/add', async (req, res) => {
     }
   });
 
+router.delete('/:id', async (req, res) => {
+  try {
+    await Price.findByIdAndDelete(req.params.id);
+    res.json({ message: 'Price deleted' });
+  } catch (err) {
+    console.error('Error deleting price:', err);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
 export default router;
