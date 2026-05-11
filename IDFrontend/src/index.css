@@ -33,6 +33,9 @@
   .lux-btn-primary { @apply lux-btn bg-gradient-to-r from-[#C8DAC1] to-[#BFD5B9] text-[#263327] shadow-[0_10px_30px_-18px_rgba(46,58,47,.65)] hover:translate-y-[-2px]; }
   .lux-btn-soft { @apply lux-btn border border-[#D6E6D0] bg-white/80 text-[#304032] hover:bg-[#f1f8ef]; }
   .lux-input { @apply w-full rounded-2xl border border-[#D9E4D7] bg-white/85 px-4 py-3 text-sm text-[#2E3A2F] outline-none transition focus:border-[#B9CEB3] focus:ring-2 focus:ring-[#dbead7]; }
+  /* Admin form fields */
+  .input-field { @apply w-full rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm text-gray-800 outline-none transition placeholder:text-gray-400 focus:border-[#25D366] focus:ring-2 focus:ring-[#25D366]/20; }
+  select.input-field { @apply cursor-pointer; }
 }
 
 @layer utilities {
