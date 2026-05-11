@@ -68,7 +68,21 @@ mongoose
   .then(() => {
     console.log('✅ Connected to MongoDB');
     console.log('✅ Routes registered: leads, inbox, confi/effective-wa-number, webhook');
-    app.listen(PORT, '0.0.0.0', () => console.log(`🚀 Server running on 0.0.0.0:${PORT}`));
+    app.listen(PORT, '0.0.0.0', () => {
+      console.log(`🚀 Server running on 0.0.0.0:${PORT}`);
+
+      // Self-ping every 14 min to prevent Render free-tier idle sleep.
+      // Works as long as this process is alive (complements the frontend keepalive).
+      const SELF_URL = process.env.RENDER_EXTERNAL_URL
+        ? `${process.env.RENDER_EXTERNAL_URL}/api/ping`
+        : `http://localhost:${PORT}/api/ping`;
+
+      setInterval(() => {
+        fetch(SELF_URL)
+          .then(() => console.log('🏓 Self-ping OK'))
+          .catch((err) => console.warn('⚠️  Self-ping failed:', err.message));
+      }, 14 * 60 * 1000);
+    });
   })
   .catch((err) => {
     console.error('❌ MongoDB connection error:', err);
