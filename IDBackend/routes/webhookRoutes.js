@@ -1,6 +1,8 @@
 import express from 'express';
 import axios from 'axios';
 import Confi from '../models/Confi.js';
+import Listing from '../models/Listing.js';
+import Lead from '../models/Lead.js';
 import { resolveAutoReply } from '../middleware/autoReply.js';
 
 const router = express.Router();
@@ -8,11 +10,10 @@ const router = express.Router();
 const getWAConfig = async () => {
   const confi = await Confi.findOne().sort({ createdAt: -1 }).lean();
   return {
-    provider:        confi?.whatsappProvider || process.env.WA_PROVIDER || 'official',
-    accessToken:     confi?.metaAccessToken  || process.env.WHATSAPP_ACCESS_TOKEN || '',
-    phoneNumberId:   confi?.metaPhoneNumberId|| process.env.WHATSAPP_PHONE_NUMBER_ID || '',
-    webhookToken:    confi?.metaWebhookToken || process.env.WHATSAPP_WEBHOOK_VERIFY_TOKEN || '',
-    apiVersion:      process.env.WHATSAPP_API_VERSION || 'v19.0',
+    accessToken:   confi?.metaAccessToken   || process.env.WHATSAPP_ACCESS_TOKEN || '',
+    phoneNumberId: confi?.metaPhoneNumberId || process.env.WHATSAPP_PHONE_NUMBER_ID || '',
+    webhookToken:  confi?.metaWebhookToken  || process.env.WHATSAPP_WEBHOOK_VERIFY_TOKEN || '',
+    apiVersion:    process.env.WHATSAPP_API_VERSION || 'v19.0',
   };
 };
 
@@ -28,6 +29,68 @@ const sendMetaText = async ({ to, body, accessToken, phoneNumberId, apiVersion }
     headers: { Authorization: `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
     timeout: 15000,
   });
+};
+
+// Extract product name from incoming message text
+const extractProductFromMessage = (text) => {
+  if (!text) return null;
+  const lower = text.toLowerCase();
+  // Common patterns: "interested in X", "enquiry about X", "want X", product name after *
+  const patterns = [
+    /interested in[:\s*]+([^*\n]+)/i,
+    /enquiry[:\s*]+([^*\n]+)/i,
+    /about[:\s*]+\*([^*]+)\*/i,
+    /\*([^*]+)\*/,  // Bold text in WhatsApp message = product name
+  ];
+  for (const p of patterns) {
+    const m = text.match(p);
+    if (m) return m[1].trim();
+  }
+  return null;
+};
+
+// Auto-save lead when a customer messages
+const autoSaveLead = async (from, text, contactName) => {
+  try {
+    const existing = await Lead.findOne({ phone: from }).sort({ createdAt: -1 });
+    // Don't duplicate leads within 1 hour
+    if (existing && (Date.now() - new Date(existing.createdAt).getTime()) < 60 * 60 * 1000) return;
+
+    const productName = extractProductFromMessage(text);
+    let productId = null;
+    if (productName) {
+      const product = await Listing.findOne({ title: { $regex: productName, $options: 'i' } });
+      if (product) productId = product._id;
+    }
+
+    await Lead.create({
+      phone: from,
+      name: contactName || '',
+      productId,
+      productName: productName || '',
+      message: text,
+      source: 'whatsapp',
+      status: 'new',
+    });
+  } catch (err) {
+    console.error('[webhook] lead save error:', err.message);
+  }
+};
+
+// Build product-specific auto-reply when a customer enquires about a product
+const buildProductReply = async (text) => {
+  const productName = extractProductFromMessage(text);
+  if (!productName) return null;
+  const product = await Listing.findOne({ title: { $regex: productName, $options: 'i' } });
+  if (!product) return null;
+  return (
+    `Thank you for your enquiry! 🙏\n\n` +
+    `*${product.title}*\n` +
+    (product.description ? `${product.description}\n\n` : '\n') +
+    `💰 Price: ₹${product.price}${product.quantityPricing?.length ? ' (bulk discounts available)' : ''}\n` +
+    (product.size ? `📐 Size: ${product.size}\n` : '') +
+    `\nOur team will get back to you shortly with more details. You can also view this product at our website!`
+  );
 };
 
 // GET: webhook verification
@@ -46,7 +109,7 @@ router.get('/', async (req, res) => {
   }
 });
 
-// POST: receive incoming messages and auto-reply
+// POST: receive incoming messages, auto-reply, and capture leads
 router.post('/', async (req, res) => {
   res.sendStatus(200); // Always ack immediately
 
@@ -60,8 +123,13 @@ router.post('/', async (req, res) => {
     const cfg = await getWAConfig();
     if (!cfg.accessToken || !cfg.phoneNumberId) return;
 
+    const contacts = value?.contacts || [];
+
     for (const msg of messages) {
       const from = msg.from;
+      const contact = contacts.find((c) => c.wa_id === from);
+      const contactName = contact?.profile?.name || '';
+
       const text = msg.type === 'text'
         ? msg.text?.body
         : msg.type === 'button'
@@ -69,6 +137,23 @@ router.post('/', async (req, res) => {
         : null;
       if (!text) continue;
 
+      // Auto-save lead to DB
+      await autoSaveLead(from, text, contactName);
+
+      // Try product-specific reply first
+      const productReply = await buildProductReply(text);
+      if (productReply) {
+        await sendMetaText({
+          to: from,
+          body: productReply,
+          accessToken: cfg.accessToken,
+          phoneNumberId: cfg.phoneNumberId,
+          apiVersion: cfg.apiVersion,
+        }).catch((e) => console.error('[webhook] product reply error:', e?.response?.data || e.message));
+        continue;
+      }
+
+      // Fall back to keyword-based auto-reply rules
       const rule = await resolveAutoReply(text);
       if (!rule) continue;
 

@@ -1,19 +1,18 @@
 import { useState, useEffect } from 'react';
 import {
   Box, Button, TextField, Typography, Paper, CircularProgress,
-  Divider, ToggleButtonGroup, ToggleButton, Avatar, InputAdornment,
-  Accordion, AccordionSummary, AccordionDetails, Alert,
+  Avatar, Alert, Divider, Stepper, Step, StepLabel, StepContent,
 } from '@mui/material';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import api from '../../api';
 import { Toast } from '../../components/admin/AdminUiKit';
 
 const MAX_MB = 1;
+
 const FIELDS = [
   { key: 'name',           label: 'Business Name',    required: true },
   { key: 'email',          label: 'Email' },
   { key: 'phone',          label: 'Phone' },
-  { key: 'whatsappNumber', label: 'WhatsApp Number (with country code, e.g. 919876543210)' },
+  { key: 'whatsappNumber', label: 'WhatsApp Number (with country code e.g. 919876543210)' },
   { key: 'address',        label: 'Address' },
   { key: 'fb',             label: 'Facebook URL' },
   { key: 'insta',          label: 'Instagram URL' },
@@ -22,8 +21,12 @@ const FIELDS = [
   { key: 'youtube',        label: 'YouTube URL' },
 ];
 
-const empty = Object.fromEntries([...FIELDS.map((f) => [f.key, '']),
-  ['whatsappProvider', 'official'], ['metaAccessToken', ''], ['metaPhoneNumberId', ''], ['metaWebhookToken', '']]);
+const WEBHOOK_URL = 'https://sanju-sk-live.onrender.com/api/webhook';
+
+const empty = Object.fromEntries([
+  ...FIELDS.map((f) => [f.key, '']),
+  ['metaAccessToken', ''], ['metaPhoneNumberId', ''], ['metaWebhookToken', ''],
+]);
 
 export default function ConfiManager() {
   const [confi, setConfi] = useState(null);
@@ -40,20 +43,19 @@ export default function ConfiManager() {
         const c = r.data.result[0];
         setConfi(c);
         setForm({
-          name:             c.name            || '',
-          email:            c.email           || '',
-          phone:            c.phone           || '',
-          whatsappNumber:   c.whatsappNumber  || '',
-          address:          c.address         || '',
-          fb:               c.fb              || '',
-          insta:            c.insta           || '',
-          twitter:          c.twitter         || '',
-          linkedIn:         c.linkedIn        || '',
-          youtube:          c.youtube         || '',
-          whatsappProvider: c.whatsappProvider || 'official',
-          metaAccessToken:  c.metaAccessToken  || '',
-          metaPhoneNumberId:c.metaPhoneNumberId|| '',
-          metaWebhookToken: c.metaWebhookToken || '',
+          name:              c.name            || '',
+          email:             c.email           || '',
+          phone:             c.phone           || '',
+          whatsappNumber:    c.whatsappNumber  || '',
+          address:           c.address         || '',
+          fb:                c.fb              || '',
+          insta:             c.insta           || '',
+          twitter:           c.twitter         || '',
+          linkedIn:          c.linkedIn        || '',
+          youtube:           c.youtube         || '',
+          metaAccessToken:   c.metaAccessToken  || '',
+          metaPhoneNumberId: c.metaPhoneNumberId || '',
+          metaWebhookToken:  c.metaWebhookToken  || '',
         });
       }
     }).catch(() => {});
@@ -71,6 +73,7 @@ export default function ConfiManager() {
     setLoading(true);
     try {
       const fd = new FormData();
+      fd.append('whatsappProvider', 'official');
       Object.entries(form).forEach(([k, v]) => fd.append(k, v));
       if (logo) fd.append('logo', logo);
 
@@ -86,6 +89,8 @@ export default function ConfiManager() {
     } catch { showToast('Save failed', 'error'); }
     finally { setLoading(false); }
   };
+
+  const metaConfigured = !!(form.metaAccessToken && form.metaPhoneNumberId && form.metaWebhookToken);
 
   return (
     <Box sx={{ maxWidth: 800, mx: 'auto' }}>
@@ -109,45 +114,86 @@ export default function ConfiManager() {
         </Box>
       </Paper>
 
-      {/* WhatsApp Bot Settings */}
+      {/* WhatsApp Automation Setup */}
       <Paper elevation={0} variant="outlined" sx={{ p: 3, mb: 3, borderRadius: 3 }}>
-        <Typography variant="subtitle1" fontWeight={600} mb={1}>WhatsApp Bot Settings</Typography>
-        <Typography variant="body2" color="text.secondary" mb={2}>
-          Choose which WhatsApp API the bot uses to send auto-replies.
-        </Typography>
+        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
+          <Typography variant="subtitle1" fontWeight={600}>WhatsApp Automation (Meta Official API)</Typography>
+          {metaConfigured
+            ? <Alert severity="success" sx={{ py: 0 }}>Connected</Alert>
+            : <Alert severity="warning" sx={{ py: 0 }}>Not configured</Alert>
+          }
+        </Box>
 
-        <ToggleButtonGroup
-          value={form.whatsappProvider}
-          exclusive
-          onChange={(_, v) => { if (v) setForm((p) => ({ ...p, whatsappProvider: v })); }}
-          sx={{ mb: 3 }}
-        >
-          <ToggleButton value="official" sx={{ textTransform: 'none', px: 3 }}>Official Meta API</ToggleButton>
-          <ToggleButton value="baileys"  sx={{ textTransform: 'none', px: 3 }}>Baileys (Unofficial)</ToggleButton>
-        </ToggleButtonGroup>
+        <Alert severity="info" sx={{ mb: 3 }}>
+          This system uses the <strong>Meta (Facebook) Official WhatsApp Business API</strong> for fully automated, serverless WhatsApp messaging — no QR scan needed, runs 24/7 without any human involvement.
+        </Alert>
 
-        {form.whatsappProvider === 'official' && (
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-            <Alert severity="info" sx={{ mb: 1 }}>
-              Set your Meta webhook URL to: <strong>https://sanju-sk-live.onrender.com/api/webhook</strong>
-            </Alert>
-            <TextField label="Phone Number ID" size="small" fullWidth value={form.metaPhoneNumberId}
-              onChange={(e) => setForm((p) => ({ ...p, metaPhoneNumberId: e.target.value }))}
-              helperText="From Meta Business Manager → WhatsApp → API Setup" />
-            <TextField label="Access Token" size="small" fullWidth value={form.metaAccessToken}
-              onChange={(e) => setForm((p) => ({ ...p, metaAccessToken: e.target.value }))}
-              type="password" helperText="Permanent system user token or temporary token" />
-            <TextField label="Webhook Verify Token" size="small" fullWidth value={form.metaWebhookToken}
-              onChange={(e) => setForm((p) => ({ ...p, metaWebhookToken: e.target.value }))}
-              helperText="Any random string you set in Meta webhook configuration" />
-          </Box>
-        )}
+        <Stepper orientation="vertical" nonLinear sx={{ mb: 3 }}>
+          <Step active>
+            <StepLabel>Create a Meta Business Account</StepLabel>
+            <StepContent>
+              <Typography variant="body2" color="text.secondary">
+                Go to <strong>business.facebook.com</strong> → Create account → Add WhatsApp to your business.
+              </Typography>
+            </StepContent>
+          </Step>
+          <Step active>
+            <StepLabel>Get your Phone Number ID & Access Token</StepLabel>
+            <StepContent>
+              <Typography variant="body2" color="text.secondary">
+                In Meta Business Manager → WhatsApp → API Setup → copy <strong>Phone Number ID</strong> and generate a <strong>System User Token</strong> (permanent).
+              </Typography>
+            </StepContent>
+          </Step>
+          <Step active>
+            <StepLabel>Configure Webhook</StepLabel>
+            <StepContent>
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                In Meta → WhatsApp → Configuration → Webhook, set:
+              </Typography>
+              <Alert severity="info" sx={{ py: 0.5, mb: 0.5 }}>
+                <strong>Callback URL:</strong> <code>{WEBHOOK_URL}</code>
+              </Alert>
+              <Alert severity="info" sx={{ py: 0.5 }}>
+                <strong>Verify Token:</strong> Use the "Webhook Verify Token" you enter below.
+              </Alert>
+            </StepContent>
+          </Step>
+        </Stepper>
 
-        {form.whatsappProvider === 'baileys' && (
-          <Alert severity="warning">
-            Baileys (QR-scan) support requires the backend to be running persistently (not serverless). Contact your developer to enable this mode.
-          </Alert>
-        )}
+        <Divider sx={{ mb: 3 }} />
+
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+          <TextField
+            label="Phone Number ID"
+            size="small"
+            fullWidth
+            value={form.metaPhoneNumberId}
+            onChange={(e) => setForm((p) => ({ ...p, metaPhoneNumberId: e.target.value }))}
+            helperText="Meta Business Manager → WhatsApp → API Setup"
+          />
+          <TextField
+            label="Access Token (System User)"
+            size="small"
+            fullWidth
+            type="password"
+            value={form.metaAccessToken}
+            onChange={(e) => setForm((p) => ({ ...p, metaAccessToken: e.target.value }))}
+            helperText="Generate a permanent system user token — do NOT use the temporary test token"
+          />
+          <TextField
+            label="Webhook Verify Token"
+            size="small"
+            fullWidth
+            value={form.metaWebhookToken}
+            onChange={(e) => setForm((p) => ({ ...p, metaWebhookToken: e.target.value }))}
+            helperText="Any random secret string you set in Meta webhook configuration"
+          />
+        </Box>
+
+        <Alert severity="success" sx={{ mt: 2 }}>
+          <strong>Automation is fully zero-human:</strong> When a customer clicks WhatsApp on any product, their enquiry is auto-replied with product details and saved as a lead in your dashboard — no manual intervention needed.
+        </Alert>
       </Paper>
 
       <Button variant="contained" size="large" onClick={handleSave} disabled={loading} sx={{ textTransform: 'none', px: 5 }}>
