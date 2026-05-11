@@ -196,6 +196,16 @@ const CreateListing = () => {
 
   /* ---------------- TIERS ---------------- */
 
+  const QUICK_QTYS = [100, 200, 500, 1000, 2000];
+  const addQuickTiers = () =>
+    setQuantityPricing(
+      QUICK_QTYS.map((qty, i) => ({
+        minQty: qty,
+        maxQty: i < QUICK_QTYS.length - 1 ? QUICK_QTYS[i + 1] - 1 : '',
+        price: '',
+      }))
+    );
+
   const addTier = () =>
     setQuantityPricing((prev) => [
       ...prev,
@@ -731,15 +741,22 @@ const CreateListing = () => {
                   {/* TIERS */}
 
                   <div>
-                    <div className="mb-3 flex items-center justify-between">
+                    <div className="mb-3 flex flex-wrap items-center gap-2">
                       <h4 className="font-semibold">
                         Quantity Pricing
                       </h4>
-
+                      <button
+                        type="button"
+                        onClick={addQuickTiers}
+                        className="rounded-lg border border-gray-300 px-2.5 py-1 text-xs font-semibold text-gray-700 hover:bg-gray-50"
+                        title="Pre-fill tiers: 100 / 200 / 500 / 1000 / 2000 qty — fill in rates"
+                      >
+                        ⚡ Quick: 100/200/500/1000/2000
+                      </button>
                       <button
                         type="button"
                         onClick={addTier}
-                        className="rounded-lg bg-green-50 px-3 py-1 text-sm font-semibold text-[#128C7E]"
+                        className="rounded-lg bg-gray-900 px-3 py-1 text-sm font-semibold text-white"
                       >
                         + Add Tier
                       </button>

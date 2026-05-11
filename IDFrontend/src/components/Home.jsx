@@ -4,7 +4,6 @@ import MobileHeader from './mobile/MobileHeader';
 import StoryCategories from './mobile/StoryCategories';
 import ProductFeedCard from './mobile/ProductFeedCard';
 import MobileBottomNav from './mobile/MobileBottomNav';
-import FloatingActionButtons from './mobile/FloatingActionButtons';
 import LoadingSkeleton from './common/LoadingSkeleton';
 
 export default function Home() {
@@ -61,7 +60,6 @@ export default function Home() {
           )}
         </section>
       </main>
-      <FloatingActionButtons whatsappNumber={config.whatsappNumber || config.phone} />
       <MobileBottomNav />
     </div>
   );
