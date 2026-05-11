@@ -570,12 +570,7 @@ export default function ProductListing() {
                         key={product._id}
                         className="transition-all duration-300 hover:-translate-y-1"
                       >
-                        <ProductCard
-                          product={product}
-                          whatsappNumber={
-                            whatsappNumber
-                          }
-                        />
+                        <ProductCard product={product} />
                       </div>
                     )
                   )}
