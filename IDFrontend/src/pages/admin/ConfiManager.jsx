@@ -124,42 +124,9 @@ export default function ConfiManager() {
           }
         </Box>
 
-        <Alert severity="info" sx={{ mb: 3 }}>
-          This system uses the <strong>Meta (Facebook) Official WhatsApp Business API</strong> for fully automated, serverless WhatsApp messaging — no QR scan needed, runs 24/7 without any human involvement.
-        </Alert>
+        
 
-        <Stepper orientation="vertical" nonLinear sx={{ mb: 3 }}>
-          <Step active>
-            <StepLabel>Create a Meta Business Account</StepLabel>
-            <StepContent>
-              <Typography variant="body2" color="text.secondary">
-                Go to <strong>business.facebook.com</strong> → Create account → Add WhatsApp to your business.
-              </Typography>
-            </StepContent>
-          </Step>
-          <Step active>
-            <StepLabel>Get your Phone Number ID & Access Token</StepLabel>
-            <StepContent>
-              <Typography variant="body2" color="text.secondary">
-                In Meta Business Manager → WhatsApp → API Setup → copy <strong>Phone Number ID</strong> and generate a <strong>System User Token</strong> (permanent).
-              </Typography>
-            </StepContent>
-          </Step>
-          <Step active>
-            <StepLabel>Configure Webhook</StepLabel>
-            <StepContent>
-              <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-                In Meta → WhatsApp → Configuration → Webhook, set:
-              </Typography>
-              <Alert severity="info" sx={{ py: 0.5, mb: 0.5 }}>
-                <strong>Callback URL:</strong> <code>{WEBHOOK_URL}</code>
-              </Alert>
-              <Alert severity="info" sx={{ py: 0.5 }}>
-                <strong>Verify Token:</strong> Use the "Webhook Verify Token" you enter below.
-              </Alert>
-            </StepContent>
-          </Step>
-        </Stepper>
+        
 
         <Divider sx={{ mb: 3 }} />
 
@@ -191,9 +158,7 @@ export default function ConfiManager() {
           />
         </Box>
 
-        <Alert severity="success" sx={{ mt: 2 }}>
-          <strong>Automation is fully zero-human:</strong> When a customer clicks WhatsApp on any product, their enquiry is auto-replied with product details and saved as a lead in your dashboard — no manual intervention needed.
-        </Alert>
+        
       </Paper>
 
       <Button variant="contained" size="large" onClick={handleSave} disabled={loading} sx={{ textTransform: 'none', px: 5 }}>
