@@ -1,23 +1,35 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { FaWhatsapp, FaHeart } from 'react-icons/fa';
 import LazyImage from './common/LazyImage';
 import { useFavorites } from '../context/FavoritesContext';
 import { trackWhatsAppClick } from '../hooks/useAnalytics';
-import { useWhatsAppNumber, saveEnquiryLead } from '../hooks/useWhatsApp';
+import { useWhatsAppNumber, saveEnquiryLead, resolveCategoryName } from '../hooks/useWhatsApp';
 
 const ProductCard = ({ product }) => {
   const [img, setImg] = useState(0);
+  const [categoryName, setCategoryName] = useState('');
   const { favorites, toggleFavorite } = useFavorites();
   const isFav = favorites.some((f) => f._id === product?._id);
   const images = product?.images || [];
   const wa = useWhatsAppNumber();
 
+  useEffect(() => {
+    if (product?.category) {
+      resolveCategoryName(product.category).then(setCategoryName);
+    }
+  }, [product?.category]);
+
+  const productLink = `${window.location.origin}/products/${product?._id}`;
+
   const msgText =
     `Hi! I'm interested in *${product?.title}*\n` +
+    `🆔 Product ID: ${product?._id || ''}\n` +
     `💰 Price: ₹${product?.price || 0}\n` +
-    (product?.category ? `📂 Category: ${product.category}\n` : '') +
+    (categoryName ? `📂 Category: ${categoryName}\n` : '') +
+    (images[0] ? `🖼️ Image: ${images[0]}\n` : '') +
+    `🔗 Link: ${productLink}\n` +
     `\nPlease share more details.`;
 
   const waHref = wa
