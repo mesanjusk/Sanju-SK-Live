@@ -17,6 +17,14 @@ const storage = new CloudinaryStorage({
 
 const upload = multer({ storage });
 
+// Generate next sequential product ID like SK0001
+async function generateProductId() {
+  const last = await Listing.findOne({ productId: { $ne: '' } })
+    .sort({ createdAt: -1 }).lean();
+  const lastNum = last?.productId ? parseInt(last.productId.replace(/\D/g, '')) || 0 : 0;
+  return `SK${String(lastNum + 1).padStart(4, '0')}`;
+}
+
 router.post('/', upload.array('images', 4), async (req, res) => {
   try {
     const {
@@ -29,8 +37,10 @@ router.post('/', upload.array('images', 4), async (req, res) => {
     const existingUrls = existingImages ? JSON.parse(existingImages) : [];
     const images = [...existingUrls, ...uploadedUrls].slice(0, 4);
 
+    const productId = await generateProductId();
+
     const newListing = new Listing({
-      title, description, category, subcategory,
+      title, description, productId, category, subcategory,
       price: Number(price) || 0,
       religions, size, badge, youtubeUrl, instagramUrl,
       seoTitle, seoDescription, seoKeywords, favorite,

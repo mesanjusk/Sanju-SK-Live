@@ -75,21 +75,29 @@ export default function ProductDetail() {
   const hasTiers = Array.isArray(product.quantityPricing) && product.quantityPricing.length > 0;
 
   const waNumber = String(whatsappNumber || '').replace(/\D/g, '');
+  const displayId = product.productId || product._id;
   const waMsgText =
     `Hi! I want to order:\n*${product.title}*\n` +
-    `🆔 Product ID: ${product._id}\n` +
+    `🆔 Product ID: ${displayId}\n` +
     `📦 Quantity: ${qty}\n` +
     `💰 Price per piece: ₹${price}\n` +
     `💵 Total: ₹${total}\n` +
     (categoryName ? `📂 Category: ${categoryName}\n` : '') +
-    (images[imgIdx] ? `🖼️ Image: ${images[imgIdx]}\n` : '') +
     `🔗 Product link: ${window.location.href}`;
   const waMsg = encodeURIComponent(waMsgText);
   const waHref = waNumber ? `https://wa.me/${waNumber}?text=${waMsg}` : '#';
 
   const handleWAClick = () => {
     trackWhatsAppClick(product._id);
-    saveEnquiryLead({ productId: product._id, productName: product.title, message: waMsgText });
+    saveEnquiryLead({
+      productId:    product._id,
+      productName:  product.title,
+      message:      waMsgText,
+      imageUrl:     images[imgIdx] || images[0] || '',
+      categoryName,
+      price,
+      productLink:  window.location.href,
+    });
   };
 
   const shareUrl = window.location.href;

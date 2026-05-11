@@ -4,6 +4,7 @@ import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 import path from 'path';
 
+import Listing from './models/Listing.js';
 import imageRoutes from './routes/imageRoutes.js';
 import listingRoutes from './routes/listing.js';
 import categoryRoutes from './routes/categoryRoutes.js';
@@ -63,10 +64,28 @@ process.on('unhandledRejection', (reason) => {
   console.error('❌ Unhandled rejection:', reason);
 });
 
+async function backfillProductIds() {
+  const listings = await Listing.find({ productId: { $in: ['', null, undefined] } })
+    .sort({ createdAt: 1 }).lean();
+  if (listings.length === 0) return;
+
+  // Find the highest existing SK number to continue from
+  const last = await Listing.findOne({ productId: { $nin: ['', null] } })
+    .sort({ createdAt: -1 }).lean();
+  let counter = last?.productId ? parseInt(last.productId.replace(/\D/g, '')) || 0 : 0;
+
+  for (const l of listings) {
+    counter += 1;
+    await Listing.updateOne({ _id: l._id }, { $set: { productId: `SK${String(counter).padStart(4, '0')}` } });
+  }
+  console.log(`✅ Backfilled productId for ${listings.length} listings`);
+}
+
 mongoose
   .connect(MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
-  .then(() => {
+  .then(async () => {
     console.log('✅ Connected to MongoDB');
+    await backfillProductIds();
     console.log('✅ Routes registered: leads, inbox, confi/effective-wa-number, webhook');
     app.listen(PORT, '0.0.0.0', () => console.log(`🚀 Server running on 0.0.0.0:${PORT}`));
   })

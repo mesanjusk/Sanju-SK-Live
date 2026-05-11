@@ -22,13 +22,13 @@ const ProductCard = ({ product }) => {
   }, [product?.category]);
 
   const productLink = `${window.location.origin}/products/${product?._id}`;
+  const displayId = product?.productId || product?._id || '';
 
   const msgText =
     `Hi! I'm interested in *${product?.title}*\n` +
-    `🆔 Product ID: ${product?._id || ''}\n` +
+    `🆔 Product ID: ${displayId}\n` +
     `💰 Price: ₹${product?.price || 0}\n` +
     (categoryName ? `📂 Category: ${categoryName}\n` : '') +
-    (images[0] ? `🖼️ Image: ${images[0]}\n` : '') +
     `🔗 Link: ${productLink}\n` +
     `\nPlease share more details.`;
 
@@ -39,9 +39,13 @@ const ProductCard = ({ product }) => {
   const handleWAClick = () => {
     trackWhatsAppClick(product?._id);
     saveEnquiryLead({
-      productId: product?._id,
-      productName: product?.title,
-      message: msgText,
+      productId:    product?._id,
+      productName:  product?.title,
+      message:      msgText,
+      imageUrl:     images[0] || '',
+      categoryName,
+      price:        product?.price || 0,
+      productLink,
     });
   };
 

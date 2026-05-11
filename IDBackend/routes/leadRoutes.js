@@ -1,9 +1,55 @@
 import express from 'express';
 import mongoose from 'mongoose';
+import axios from 'axios';
 import Lead from '../models/Lead.js';
 import Listing from '../models/Listing.js';
+import Confi from '../models/Confi.js';
 
 const router = express.Router();
+
+// Send a product enquiry notification to the team via Meta WhatsApp API
+async function notifyTeam({ productName, productId, categoryName, imageUrl, price, productLink }) {
+  try {
+    const confi = await Confi.findOne().sort({ createdAt: -1 }).lean();
+    const accessToken   = confi?.metaAccessToken   || process.env.WHATSAPP_ACCESS_TOKEN || '';
+    const phoneNumberId = confi?.metaPhoneNumberId || process.env.WHATSAPP_PHONE_NUMBER_ID || '';
+    const teamPhone     = (confi?.whatsappNumber || confi?.phone || '').replace(/\D/g, '');
+    const apiVersion    = process.env.WHATSAPP_API_VERSION || 'v19.0';
+
+    if (!accessToken || !phoneNumberId || !teamPhone) return;
+
+    const url     = `https://graph.facebook.com/${apiVersion}/${phoneNumberId}/messages`;
+    const headers = { Authorization: `Bearer ${accessToken}`, 'Content-Type': 'application/json' };
+    const caption =
+      `🛒 *New Enquiry Received*\n` +
+      `📦 Product: *${productName}*\n` +
+      `🆔 Product ID: ${productId || '—'}\n` +
+      (categoryName ? `📂 Category: ${categoryName}\n` : '') +
+      (price ? `💰 Price: ₹${price}\n` : '') +
+      `🔗 ${productLink || ''}`;
+
+    if (imageUrl) {
+      await axios.post(url, {
+        messaging_product: 'whatsapp',
+        recipient_type:    'individual',
+        to:                teamPhone,
+        type:              'image',
+        image:             { link: imageUrl, caption },
+      }, { headers, timeout: 10000 });
+    } else {
+      await axios.post(url, {
+        messaging_product: 'whatsapp',
+        recipient_type:    'individual',
+        to:                teamPhone,
+        type:              'text',
+        text:              { preview_url: false, body: caption },
+      }, { headers, timeout: 10000 });
+    }
+  } catch (err) {
+    // Non-critical — never block lead creation
+    console.error('[leads] team notify error:', err?.response?.data || err.message);
+  }
+}
 
 // GET /api/leads - list all leads with filters
 router.get('/', async (req, res) => {
@@ -53,23 +99,34 @@ router.get('/stats', async (req, res) => {
 // POST /api/leads - create lead
 router.post('/', async (req, res) => {
   try {
-    const { productId, ...rest } = req.body;
-    const leadData = { ...rest };
+    const { productId, productName, message, imageUrl, categoryName, price, productLink, ...rest } = req.body;
+    const leadData = { ...rest, productName, message };
 
+    let listing = null;
     if (productId) {
       const isValidId = mongoose.Types.ObjectId.isValid(productId);
       if (isValidId) {
-        const exists = await Listing.exists({ _id: productId });
-        if (exists) {
-          leadData.productId = productId;
-        }
-        // Product ID valid format but not in DB — save lead without reference
+        listing = await Listing.findById(productId).lean();
+        if (listing) leadData.productId = productId;
+        // Valid ObjectId but not in DB — lead saved without reference
       }
       // Invalid ObjectId format — skip to avoid cast error
     }
 
     const lead = new Lead(leadData);
     await lead.save();
+
+    // Fire-and-forget team notification with actual WhatsApp image
+    const resolvedProductId = listing?.productId || productId || '';
+    notifyTeam({
+      productName: productName || listing?.title || '',
+      productId:   resolvedProductId,
+      categoryName,
+      imageUrl:    imageUrl || (listing?.images?.[0] ?? ''),
+      price:       price || listing?.price || '',
+      productLink,
+    });
+
     res.status(201).json({ success: true, result: lead });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });

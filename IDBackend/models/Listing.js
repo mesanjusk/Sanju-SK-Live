@@ -9,6 +9,7 @@ const quantityPricingSchema = new mongoose.Schema({
 const listingSchema = new mongoose.Schema({
   title: { type: String, required: true },
   description: { type: String, default: '' },
+  productId: { type: String, default: '', index: true },
   category: String,
   subcategory: String,
   price: { type: Number, default: 0 },
