@@ -37,11 +37,20 @@ const UploadCategory = () => {
   const fetchCategories = async () => {
     try {
       const res = await api.get('/api/categories/with-usage');
-      setCategories(res.data);
-      setFilteredCategories(res.data);
-      setUsedCategoryNames(res.data.map((cat) => cat.name.toLowerCase()));
+      const data = Array.isArray(res.data) ? res.data : [];
+      setCategories(data);
+      setFilteredCategories(data);
+      setUsedCategoryNames(data.map((cat) => cat.name.toLowerCase()));
     } catch (err) {
-      toast.error('Failed to fetch categories.');
+      try {
+        const fallback = await api.get('/api/categories');
+        const data = Array.isArray(fallback.data) ? fallback.data : [];
+        setCategories(data);
+        setFilteredCategories(data);
+        setUsedCategoryNames(data.map((cat) => cat.name.toLowerCase()));
+      } catch (fallbackErr) {
+        toast.error('Failed to fetch categories.');
+      }
     }
   };
 
