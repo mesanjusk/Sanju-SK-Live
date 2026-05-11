@@ -21,6 +21,8 @@ export default function Login() {
       if (data.status === 'invalid')  { setError('Incorrect password. Please try again.'); return; }
       localStorage.setItem('User_name', User_name);
       if (data.token) localStorage.setItem('authToken', data.token);
+      if (data.role) localStorage.setItem('userRole', data.role);
+      if (data.permissions) localStorage.setItem('userPermissions', JSON.stringify(data.permissions));
       navigate('/admin', { state: { id: User_name } });
     } catch {
       setError('Login failed. Please try again.');

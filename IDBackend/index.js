@@ -19,6 +19,7 @@ import analyticsRoutes from './routes/analyticsRoutes.js';
 import googleDriveRoutes from './routes/googleDriveRoutes.js';
 import autoReplyRoutes from './routes/autoReplyRoutes.js';
 import webhookRoutes from './routes/webhookRoutes.js';
+import leadRoutes from './routes/leadRoutes.js';
 
 dotenv.config();
 
@@ -51,6 +52,7 @@ app.use('/api/analytics', analyticsRoutes);
 app.use('/api/google-drive', googleDriveRoutes);
 app.use('/api/auto-reply', autoReplyRoutes);
 app.use('/api/webhook', webhookRoutes);
+app.use('/api/leads', leadRoutes);
 
 app.get('/api/ping', (req, res) => res.status(200).send('✅ Backend is alive!'));
 
