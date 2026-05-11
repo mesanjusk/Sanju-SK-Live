@@ -26,6 +26,17 @@ router.get('/GetReligionList', async (req, res) => {
   }
 });
 
+router.put('/:id', async (req, res) => {
+  try {
+    const { name } = req.body;
+    const religion = await Religion.findByIdAndUpdate(req.params.id, { name }, { new: true });
+    if (!religion) return res.status(404).json({ success: false, message: 'Not found' });
+    res.json({ success: true, result: religion });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
 router.delete('/:id', async (req, res) => {
   try {
     await Religion.findByIdAndDelete(req.params.id);

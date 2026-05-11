@@ -14,6 +14,10 @@ const confiSchema = new mongoose.Schema({
   logo: { type: String },
   googleDriveRefreshToken: { type: String },
   googleDriveConnected: { type: Boolean, default: false },
+  whatsappProvider: { type: String, enum: ['official', 'baileys'], default: 'official' },
+  metaAccessToken: { type: String, default: '' },
+  metaPhoneNumberId: { type: String, default: '' },
+  metaWebhookToken: { type: String, default: '' },
   createdAt: { type: Date, default: Date.now },
 });
 

@@ -17,6 +17,8 @@ import religionRoutes from './routes/religionRoutes.js';
 import bannerRoutes from './routes/bannerRoutes.js';
 import analyticsRoutes from './routes/analyticsRoutes.js';
 import googleDriveRoutes from './routes/googleDriveRoutes.js';
+import autoReplyRoutes from './routes/autoReplyRoutes.js';
+import webhookRoutes from './routes/webhookRoutes.js';
 
 dotenv.config();
 
@@ -47,6 +49,8 @@ app.use('/api/religions', religionRoutes);
 app.use('/api/banners', bannerRoutes);
 app.use('/api/analytics', analyticsRoutes);
 app.use('/api/google-drive', googleDriveRoutes);
+app.use('/api/auto-reply', autoReplyRoutes);
+app.use('/api/webhook', webhookRoutes);
 
 app.get('/api/ping', (req, res) => res.status(200).send('✅ Backend is alive!'));
 

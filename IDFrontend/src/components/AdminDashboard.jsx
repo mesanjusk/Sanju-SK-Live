@@ -18,17 +18,19 @@ import SettingsIcon from '@mui/icons-material/Settings';
 import LogoutIcon from '@mui/icons-material/Logout';
 import BarChartIcon from '@mui/icons-material/BarChart';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
+import WhatsAppIcon from '@mui/icons-material/WhatsApp';
 
 import AnalyticsPage from '../pages/admin/AnalyticsPage';
 import CategoryManager from '../pages/admin/CategoryManager';
 import SubcategoryManager from '../pages/admin/SubcategoryManager';
 import TitleManager from '../pages/admin/TitleManager';
 import PriceManager from '../pages/admin/PriceManager';
+import BannerManager from '../pages/admin/BannerManager';
+import UserManager from '../pages/admin/UserManager';
+import ReligionManager from '../pages/admin/ReligionManager';
+import ConfiManager from '../pages/admin/ConfiManager';
+import WhatsAppBotManager from '../pages/admin/WhatsAppBotManager';
 import CreateListing from './CreateListing';
-import AddUser from '../pages/addUser';
-import AddConfi from '../pages/addConfi';
-import AddReligion from '../pages/addReligion';
-import UploadBanner from '../pages/UploadBanner';
 import api from '../api';
 import { StatCard, SurfaceCard, PageContainer } from './admin/AdminUiKit';
 
@@ -62,6 +64,7 @@ const NAV = [
   { key: 'religions',     label: 'Religions',    Icon: SelfImprovementIcon },
   { key: 'banners',       label: 'Banners',      Icon: ImageIcon },
   { key: 'users',         label: 'Users',        Icon: PeopleIcon },
+  { key: 'whatsapp-bot',  label: 'WhatsApp Bot', Icon: WhatsAppIcon },
   { key: 'confis',        label: 'Settings',     Icon: SettingsIcon },
 ];
 
@@ -159,10 +162,11 @@ export default function AdminDashboard() {
       case 'subcategories': return <SubcategoryManager />;
       case 'titles':        return <TitleManager />;
       case 'prices':        return <PriceManager />;
-      case 'banners':       return <UploadBanner />;
-      case 'users':         return <AddUser />;
-      case 'confis':        return <AddConfi />;
-      case 'religions':     return <AddReligion />;
+      case 'banners':       return <BannerManager />;
+      case 'users':         return <UserManager />;
+      case 'confis':        return <ConfiManager />;
+      case 'religions':     return <ReligionManager />;
+      case 'whatsapp-bot':  return <WhatsAppBotManager />;
       default:              return null;
     }
   };
