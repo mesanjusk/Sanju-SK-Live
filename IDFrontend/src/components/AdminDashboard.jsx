@@ -3,14 +3,17 @@ import {
   FaBoxOpen, FaThLarge, FaSitemap, FaImages, FaUsers, FaCog,
   FaPrayingHands, FaSignOutAlt, FaChartBar, FaChartLine, FaClipboardList,
   FaReceipt, FaMoneyBillWave, FaTasks, FaBook, FaEnvelope, FaQrcode, FaExchangeAlt, FaUserCheck,
+  FaTag, FaDollarSign,
 } from 'react-icons/fa';
 import AnalyticsPage from '../pages/admin/AnalyticsPage';
+import CategoryManager from '../pages/admin/CategoryManager';
+import SubcategoryManager from '../pages/admin/SubcategoryManager';
+import TitleManager from '../pages/admin/TitleManager';
+import PriceManager from '../pages/admin/PriceManager';
 import CreateListing from './CreateListing';
 import AddUser from '../pages/addUser';
 import AddConfi from '../pages/addConfi';
 import AddReligion from '../pages/addReligion';
-import UploadCategory from '../pages/UploadCategory';
-import UploadSubcategory from '../pages/UploadSubcategory';
 import UploadBanner from '../pages/UploadBanner';
 import api from '../api';
 import { DashboardLayout, PageContainer, StatCard, SurfaceCard, TopBar } from './admin/AdminUiKit';
@@ -31,6 +34,8 @@ const NAV = [
   { key: 'listings', label: 'Products', Icon: FaBoxOpen },
   { key: 'categories', label: 'Categories', Icon: FaThLarge },
   { key: 'subcategories', label: 'Subcategories', Icon: FaSitemap },
+  { key: 'titles', label: 'Titles', Icon: FaTag },
+  { key: 'prices', label: 'Prices', Icon: FaDollarSign },
   { key: 'religions', label: 'Religions', Icon: FaPrayingHands },
   { key: 'banners', label: 'Banners', Icon: FaImages },
   { key: 'users', label: 'Users', Icon: FaUsers },
@@ -93,8 +98,10 @@ export default function AdminDashboard() {
       case 'overview': return <Overview onNavigate={handleTab} />;
       case 'analytics': return <PageContainer title="Analytics" breadcrumb={['Admin', 'Analytics']}><AnalyticsPage /></PageContainer>;
       case 'listings': return <CreateListing />;
-      case 'categories': return <UploadCategory />;
-      case 'subcategories': return <UploadSubcategory />;
+      case 'categories': return <CategoryManager />;
+      case 'subcategories': return <SubcategoryManager />;
+      case 'titles': return <TitleManager />;
+      case 'prices': return <PriceManager />;
       case 'banners': return <UploadBanner />;
       case 'users': return <AddUser />;
       case 'confis': return <AddConfi />;
@@ -112,5 +119,5 @@ export default function AdminDashboard() {
     <button onClick={handleLogout} className="mt-3 flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-gray-600 hover:bg-red-50 hover:text-red-600"><FaSignOutAlt />{!collapsed && 'Logout'}</button>
   </aside>;
 
-  return <DashboardLayout sidebar={sidebar} header={<TopBar title={title} />}>{renderContent()}</DashboardLayout>;
+  return <DashboardLayout sidebar={sidebar} header={<TopBar title={title} />} collapsed={collapsed}>{renderContent()}</DashboardLayout>;
 }

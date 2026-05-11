@@ -1,10 +1,10 @@
 import { FaBell, FaChevronDown, FaSearch } from 'react-icons/fa';
 
-export function DashboardLayout({ sidebar, header, children }) {
+export function DashboardLayout({ sidebar, header, children, collapsed = false }) {
   return (
     <div className="min-h-screen bg-[#f6faf7] text-[#1f2937]">
       {sidebar}
-      <div className="lg:pl-[260px]">
+      <div className={collapsed ? 'lg:pl-[88px]' : 'lg:pl-[260px]'} style={{ transition: 'padding-left 0.2s' }}>
         {header}
         <main className="p-4 md:p-6 lg:p-8">{children}</main>
       </div>
