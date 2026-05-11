@@ -13,7 +13,6 @@ import UploadCategory from '../pages/UploadCategory';
 import UploadSubcategory from '../pages/UploadSubcategory';
 import UploadBanner from '../pages/UploadBanner';
 import api from '../api';
-import { DashboardLayout, PageContainer, StatCard, SurfaceCard, TopBar, FilterDropdown, StatusBadge, EmptyState } from './admin/AdminUiKit';
 
 const NAV = [
   { key: 'overview', label: 'Dashboard', Icon: FaChartBar },
@@ -71,41 +70,14 @@ function Overview({ onNavigate }) {
 }
 
 function PlaceholderPage({ title }) {
-  return <PageContainer title={title} breadcrumb={['Admin', title]}>
-    <EmptyState title={`${title} module`} description="Module shell is ready. Connect existing APIs/forms to render live data here." />
-  </PageContainer>;
-}
-
-function OrdersPreview() {
-  const [status, setStatus] = useState('');
-  const rows = [
-    { id: '#1048', customer: 'Riya Sharma', amount: '₹7,200', status: 'Active' },
-    { id: '#1047', customer: 'Anil Kumar', amount: '₹3,450', status: 'Pending' },
-    { id: '#1046', customer: 'Pooja Nair', amount: '₹12,300', status: 'Draft' },
-  ].filter((r) => !status || r.status === status);
+us === status);
 
   return <PageContainer title="Orders" breadcrumb={["Admin", "Orders"]} actions={<FilterDropdown value={status} onChange={(e) => setStatus(e.target.value)} options={[{ value: 'Active', label: 'Active' }, { value: 'Pending', label: 'Pending' }, { value: 'Draft', label: 'Draft' }]} />}>
     <SurfaceCard className="overflow-hidden p-0">
-      <div className="overflow-auto">
-        <table className="min-w-full text-sm">
-          <thead className="sticky top-0 bg-[#f6faf7]"><tr className="text-left text-gray-500"><th className="px-4 py-3">Order</th><th className="px-4 py-3">Customer</th><th className="px-4 py-3">Amount</th><th className="px-4 py-3">Status</th></tr></thead>
-          <tbody>{rows.map((row) => <tr key={row.id} className="border-t border-[#edf2ee] hover:bg-[#f8fcf9]"><td className="px-4 py-3 font-medium">{row.id}</td><td className="px-4 py-3">{row.customer}</td><td className="px-4 py-3">{row.amount}</td><td className="px-4 py-3"><StatusBadge status={row.status} /></td></tr>)}</tbody>
-        </table>
-      </div>
-    </SurfaceCard>
-  </PageContainer>;
+      <div classNam
 }
 
-export default function AdminDashboard() {
-  const [activeTab, setActiveTab] = useState(() => localStorage.getItem('adminTab') || 'overview');
-  const [collapsed, setCollapsed] = useState(false);
-  const handleTab = (key) => { setActiveTab(key); localStorage.setItem('adminTab', key); };
-  const handleLogout = () => { localStorage.removeItem('User_name'); localStorage.removeItem('adminTab'); localStorage.removeItem('authToken'); window.location.href = '/'; };
-
-  const renderContent = () => {
-    switch (activeTab) {
-      case 'overview': return <Overview onNavigate={handleTab} />;
-      case 'orders': return <OrdersPreview />;
+export default 
       case 'analytics': return <PageContainer title="Analytics" breadcrumb={['Admin', 'Analytics']}><AnalyticsPage /></PageContainer>;
       case 'listings': return <CreateListing />;
       case 'categories': return <UploadCategory />;
