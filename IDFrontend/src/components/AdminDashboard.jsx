@@ -71,7 +71,15 @@ function Overview({ onNavigate }) {
 }
 
 function PlaceholderPage({ title }) {
-  return <PageContainer title={title} breadcrumb={['Admin', title]}><SurfaceCard><p className="text-sm text-gray-600">This module is ready for integration with existing business workflows.</p></SurfaceCard></PageContainer>;
+  return (
+    <PageContainer title={title} breadcrumb={['Admin', title]}>
+      <SurfaceCard>
+        <p className="text-sm text-gray-600">
+          This module is ready for integration with existing business workflows.
+        </p>
+      </SurfaceCard>
+    </PageContainer>
+  );
 }
 
 export default function AdminDashboard() {
