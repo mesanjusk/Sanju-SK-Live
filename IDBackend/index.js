@@ -58,11 +58,17 @@ app.use('/api/inbox', inboxRoutes);
 
 app.get('/api/ping', (req, res) => res.status(200).send('✅ Backend is alive!'));
 
+// Catch any unhandled promise rejections so they don't silently crash the process
+process.on('unhandledRejection', (reason) => {
+  console.error('❌ Unhandled rejection:', reason);
+});
+
 mongoose
   .connect(MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
   .then(() => {
     console.log('✅ Connected to MongoDB');
-    app.listen(PORT, () => console.log(`🚀 Server running at http://localhost:${PORT}`));
+    console.log('✅ Routes registered: leads, inbox, confi/effective-wa-number, webhook');
+    app.listen(PORT, '0.0.0.0', () => console.log(`🚀 Server running on 0.0.0.0:${PORT}`));
   })
   .catch((err) => {
     console.error('❌ MongoDB connection error:', err);
