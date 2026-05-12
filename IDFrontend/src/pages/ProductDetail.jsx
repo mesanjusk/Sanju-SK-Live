@@ -16,7 +16,9 @@ const getPriceForQty = (product, qty) => {
   const matched = tiers
     .filter((t) => qty >= t.minQty && (!t.maxQty || qty <= t.maxQty))
     .sort((a, b) => b.minQty - a.minQty)[0];
-  return matched ? matched.price : product?.price ?? 0;
+  if (matched) return matched.price;
+  // qty is below all tiers — show the cheapest tier price
+  return Math.min(...tiers.map((t) => Number(t.price)));
 };
 
 const getYouTubeId = (url) => {
@@ -236,6 +238,36 @@ export default function ProductDetail() {
                 )}
               </div>
 
+              {/* Quantity pricing tiers — shown first so user can pick qty before seeing price */}
+              {hasTiers && (
+                <div>
+                  <h3 className="mb-2 text-sm font-semibold text-gray-700">Select Quantity</h3>
+                  <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+                    {product.quantityPricing.map((tier, i) => {
+                      const isActive = qty >= tier.minQty && (!tier.maxQty || qty <= tier.maxQty);
+                      return (
+                        <button
+                          key={i}
+                          onClick={() => setQty(tier.minQty)}
+                          className={`rounded-xl border p-2.5 text-center transition-all ${
+                            isActive
+                              ? 'border-gray-900 bg-gray-900 text-white ring-1 ring-gray-900'
+                              : 'border-gray-200 hover:border-gray-400'
+                          }`}
+                        >
+                          <div className={`text-xs ${isActive ? 'text-gray-300' : 'text-gray-500'}`}>
+                            {tier.minQty}{tier.maxQty ? `–${tier.maxQty}` : '+'} pcs
+                          </div>
+                          <div className={`mt-0.5 text-sm font-bold ${isActive ? 'text-white' : 'text-gray-900'}`}>
+                            ₹{tier.price}
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
               {/* Price */}
               <div className="rounded-2xl border border-gray-100 bg-gray-50 p-4">
                 <div className="flex items-baseline gap-2">
@@ -244,33 +276,6 @@ export default function ProductDetail() {
                 </div>
                 <p className="mt-1 text-sm font-semibold text-gray-600">Total: ₹{total}</p>
               </div>
-
-              {/* Quantity pricing tiers */}
-              {hasTiers && (
-                <div>
-                  <h3 className="mb-2 text-sm font-semibold text-gray-700">Quantity Pricing</h3>
-                  <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
-                    {product.quantityPricing.map((tier, i) => (
-                      <button
-                        key={i}
-                        onClick={() => setQty(tier.minQty)}
-                        className={`rounded-xl border p-2.5 text-center transition-all ${
-                          qty >= tier.minQty && (!tier.maxQty || qty <= tier.maxQty)
-                            ? 'border-gray-900 bg-gray-900 text-white ring-1 ring-gray-900'
-                            : 'border-gray-200 hover:border-gray-400'
-                        }`}
-                      >
-                        <div className={`text-xs ${qty >= tier.minQty && (!tier.maxQty || qty <= tier.maxQty) ? 'text-gray-300' : 'text-gray-500'}`}>
-                          {tier.minQty}{tier.maxQty ? `–${tier.maxQty}` : '+'} pcs
-                        </div>
-                        <div className={`mt-0.5 text-sm font-bold ${qty >= tier.minQty && (!tier.maxQty || qty <= tier.maxQty) ? 'text-white' : 'text-gray-900'}`}>
-                          ₹{tier.price}
-                        </div>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
 
               {/* Quantity input */}
               <div>
