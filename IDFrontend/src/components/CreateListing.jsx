@@ -244,14 +244,6 @@ const CreateListing = () => {
       }
     }
 
-    if (currentStep === 1) {
-      const validTiers = quantityPricing.filter((t) => t.minQty && t.price);
-      if (validTiers.length === 0) {
-        toast.error('At least one quantity pricing tier is required');
-        return false;
-      }
-    }
-
     return true;
   };
 
