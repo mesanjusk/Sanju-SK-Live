@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { FaWhatsapp, FaHeart } from 'react-icons/fa';
@@ -15,6 +15,15 @@ const ProductCard = ({ product }) => {
   const images = product?.images || [];
   const wa = useWhatsAppNumber();
 
+  const displayPrice = useMemo(() => {
+    const tiers = product?.quantityPricing;
+    if (Array.isArray(tiers) && tiers.length > 0) {
+      const prices = tiers.map((t) => Number(t.price)).filter((p) => p > 0);
+      if (prices.length > 0) return { label: `From ₹${Math.min(...prices)}`, value: Math.min(...prices), hasRange: true };
+    }
+    return { label: `₹${product?.price || 0}`, value: product?.price || 0, hasRange: false };
+  }, [product]);
+
   useEffect(() => {
     if (product?.category) {
       resolveCategoryName(product.category).then(setCategoryName);
@@ -26,7 +35,7 @@ const ProductCard = ({ product }) => {
   const msgText =
     `Hi! I'm interested in *${product?.title}*\n` +
     `🆔 Product ID: ${product?._id || ''}\n` +
-    `💰 Price: ₹${product?.price || 0}\n` +
+    `💰 Price: ${displayPrice.label}\n` +
     (categoryName ? `📂 Category: ${categoryName}\n` : '') +
     (images[0] ? `🖼️ Image: ${images[0]}\n` : '') +
     `🔗 Link: ${productLink}\n` +
@@ -66,7 +75,12 @@ const ProductCard = ({ product }) => {
           {product?.description || 'Curated luxury print design with premium finishing options.'}
         </p>
         <div className="mt-4 flex items-end justify-between">
-          <span className="text-2xl font-bold">₹{product?.price || 0}</span>
+          <span className="text-2xl font-bold">
+            {displayPrice.label}
+            {displayPrice.hasRange && (
+              <span className="ml-1 text-sm font-normal text-gray-400">· volume pricing</span>
+            )}
+          </span>
           <a
             href={waHref}
             target="_blank"
