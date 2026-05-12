@@ -1,10 +1,21 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import api from '../api';
 import MobileHeader from './mobile/MobileHeader';
 import StoryCategories from './mobile/StoryCategories';
 import ProductFeedCard from './mobile/ProductFeedCard';
 import MobileBottomNav from './mobile/MobileBottomNav';
 import LoadingSkeleton from './common/LoadingSkeleton';
+import ScrollGatePopup from './ScrollGatePopup';
+
+// Fisher-Yates shuffle — new order on every page load
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
 
 export default function Home() {
   const [listings, setListings] = useState([]);
@@ -12,6 +23,9 @@ export default function Home() {
   const [config, setConfig] = useState({});
   const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState(null);
+  const [viewedIds, setViewedIds] = useState(new Set());
+  const [showPopup, setShowPopup] = useState(false);
+  const hasShownPopup = useRef(false);
 
   useEffect(() => {
     Promise.all([
@@ -25,17 +39,37 @@ export default function Home() {
     }).finally(() => setLoading(false));
   }, []);
 
+  // Shuffle once per page load; re-shuffle when category changes
+  const shuffled = useMemo(() => shuffle(listings), [listings]);
+
   const filtered = useMemo(() => {
-    if (!selectedCategory) return listings.slice(0, 20);
-    return listings.filter(
-      (p) => p.category === selectedCategory.category_uuid || p.category === selectedCategory._id
+    if (!selectedCategory) return shuffled.slice(0, 40);
+    return shuffle(
+      listings.filter(
+        (p) => p.category === selectedCategory.category_uuid || p.category === selectedCategory._id
+      )
     );
-  }, [listings, selectedCategory]);
+  }, [shuffled, listings, selectedCategory]);
 
   const handleCategorySelect = (cat) => {
     if (!cat) { setSelectedCategory(null); return; }
     setSelectedCategory((prev) => (prev?._id === cat._id ? null : cat));
   };
+
+  const handleProductView = useCallback((id) => {
+    setViewedIds((prev) => {
+      const next = new Set(prev);
+      next.add(id);
+      // Show popup after 10 unique product views (only once per session)
+      if (next.size >= 10 && !hasShownPopup.current) {
+        hasShownPopup.current = true;
+        setShowPopup(true);
+      }
+      return next;
+    });
+  }, []);
+
+  const handleUnlock = () => setShowPopup(false);
 
   return (
     <div className="min-h-screen bg-[#fafafa] pb-24">
@@ -53,13 +87,25 @@ export default function Home() {
             </div>
           ) : filtered.length > 0 ? (
             filtered.map((p) => (
-              <ProductFeedCard key={p._id} product={p} whatsappNumber={config.whatsappNumber || config.phone} />
+              <ProductFeedCard
+                key={p._id}
+                product={p}
+                whatsappNumber={config.whatsappNumber || config.phone}
+                onView={handleProductView}
+              />
             ))
           ) : (
             <p className="mt-16 text-center text-sm text-gray-400">No products found in this category</p>
           )}
         </section>
       </main>
+
+      <ScrollGatePopup
+        visible={showPopup}
+        waNumber={config.whatsappNumber || config.phone}
+        onUnlock={handleUnlock}
+      />
+
       <MobileBottomNav />
     </div>
   );
