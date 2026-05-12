@@ -1,15 +1,16 @@
 const toWebpUrl = (src = '') => {
   if (!src || src.includes('.webp')) return src;
-  return src.replace(/\.(jpg|jpeg|png)$/i, '.webp');
+  // Only replace extension at the very end of the URL path (before any query string)
+  return src.replace(/\.(jpg|jpeg|png)(\?.*)?$/i, '.webp$2');
 };
 
-// Injects a text watermark into Cloudinary URLs via URL transformation
+// Injects a safe Cloudinary text watermark (no special chars that break URL parsing)
 const addWatermark = (src = '') => {
   if (!src || !src.includes('res.cloudinary.com')) return src;
   if (src.includes('/upload/') && !src.includes('l_text:')) {
     return src.replace(
       '/upload/',
-      '/upload/l_text:Arial_22:SanjuSK.com,co_white,o_55,g_south_east,x_10,y_10/'
+      '/upload/l_text:Arial_20:SanjuSK,co_white,o_50,g_south_east,x_8,y_8/'
     );
   }
   return src;
@@ -21,15 +22,22 @@ const LazyImage = ({ src, fallbackSrc, alt, className = '', watermark = true, ..
 
   return (
     <picture>
-      {webpSrc && <source srcSet={webpSrc} type="image/webp" />}
+      {webpSrc && webpSrc !== wmSrc && <source srcSet={webpSrc} type="image/webp" />}
       <img
-        src={fallbackSrc || wmSrc}
+        src={fallbackSrc || wmSrc || src}
         alt={alt}
         className={className}
         loading="lazy"
         decoding="async"
         onContextMenu={(e) => e.preventDefault()}
         draggable="false"
+        onError={(e) => {
+          // If the watermarked URL fails, fall back to the original URL
+          if (src && e.target.src !== src) {
+            e.target.onerror = null;
+            e.target.src = src;
+          }
+        }}
         {...props}
       />
     </picture>
