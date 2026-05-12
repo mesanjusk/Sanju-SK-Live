@@ -6,6 +6,10 @@ import LoadingSkeleton from './components/common/LoadingSkeleton';
 import { routeMeta } from './config/routeMeta';
 import NotFound from './pages/NotFound';
 import { useAnalytics } from './hooks/useAnalytics';
+import { checkAndApplyAccessToken } from './components/ScrollGatePopup';
+
+// Apply ?access=TOKEN from URL before anything renders
+checkAndApplyAccessToken();
 
 const Home           = lazy(() => import('./components/Home'));
 const AllListing     = lazy(() => import('./components/allLisiting'));
