@@ -245,8 +245,9 @@ const CreateListing = () => {
     }
 
     if (currentStep === 1) {
-      if (!form.price) {
-        toast.error('Price is required');
+      const validTiers = quantityPricing.filter((t) => t.minQty && t.price);
+      if (validTiers.length === 0) {
+        toast.error('At least one quantity pricing tier is required');
         return false;
       }
     }
@@ -299,6 +300,8 @@ const CreateListing = () => {
         'quantityPricing',
         JSON.stringify(cleanedTiers)
       );
+      const minPrice = Math.min(...cleanedTiers.map((t) => Number(t.price)));
+      formData.set('price', minPrice);
     }
 
     try {
@@ -712,19 +715,10 @@ const CreateListing = () => {
 
               {currentStep === 1 && (
                 <div className="space-y-5">
-                  <div className="grid gap-4 md:grid-cols-2">
-                    <input
-                      value={form.price}
-                      onChange={handleInput('price')}
-                      className="input-field"
-                      placeholder="Base price ₹"
-                    />
-
+                  <div>
                     <select
                       value={form.badge}
-                      onChange={handleInput(
-                        'badge'
-                      )}
+                      onChange={handleInput('badge')}
                       className="input-field"
                     >
                       {BADGE_OPTIONS.map((b) => (
