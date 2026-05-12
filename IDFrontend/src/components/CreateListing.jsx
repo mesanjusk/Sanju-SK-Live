@@ -268,9 +268,10 @@ const CreateListing = () => {
 
     const formData = new FormData();
 
-    Object.entries(form).forEach(([k, v]) =>
-      formData.append(k, v)
-    );
+    // Append all form fields except price (price is derived from tiers)
+    Object.entries(form).forEach(([k, v]) => {
+      if (k !== 'price') formData.append(k, v);
+    });
 
     images.forEach((img) =>
       formData.append('images', img)
@@ -283,18 +284,23 @@ const CreateListing = () => {
       );
     }
 
-    const cleanedTiers = quantityPricing.filter(
-      (t) => t.minQty && t.price
-    );
+    // Convert tier values to numbers and filter out rows with no minQty or price
+    const cleanedTiers = quantityPricing
+      .map((t) => ({
+        minQty: Number(t.minQty),
+        ...(t.maxQty !== '' && t.maxQty !== undefined ? { maxQty: Number(t.maxQty) } : {}),
+        price: Number(t.price),
+      }))
+      .filter((t) => t.minQty > 0 && t.price > 0);
 
-    if (cleanedTiers.length) {
-      formData.append(
-        'quantityPricing',
-        JSON.stringify(cleanedTiers)
-      );
-      const minPrice = Math.min(...cleanedTiers.map((t) => Number(t.price)));
-      formData.set('price', minPrice);
-    }
+    // Always send quantityPricing (even as empty array)
+    formData.append('quantityPricing', JSON.stringify(cleanedTiers));
+
+    // Derive price from the minimum tier price, or 0 if no tiers
+    const minPrice = cleanedTiers.length > 0
+      ? Math.min(...cleanedTiers.map((t) => t.price))
+      : 0;
+    formData.append('price', minPrice);
 
     try {
       if (editingId) {
