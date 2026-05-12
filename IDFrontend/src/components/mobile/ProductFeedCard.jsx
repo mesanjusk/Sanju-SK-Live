@@ -92,7 +92,13 @@ function ProductFeedCard({ product, whatsappNumber, onView }) {
         <Link to={`/products/${product._id}`} className="flex min-w-0 items-center gap-2.5">
           <div className="h-9 w-9 flex-shrink-0 overflow-hidden rounded-full bg-gray-100 ring-2 ring-gray-100">
             {images[0] ? (
-              <img src={images[0]} alt={product.title} className="h-full w-full object-cover" loading="lazy" />
+              <img
+                src={images[0]}
+                alt={product.title}
+                className="h-full w-full object-cover"
+                loading="lazy"
+                onError={(e) => { e.target.onerror = null; e.target.style.display = 'none'; }}
+              />
             ) : (
               <div className="h-full w-full bg-gray-200" />
             )}
@@ -119,14 +125,21 @@ function ProductFeedCard({ product, whatsappNumber, onView }) {
         onTouchEnd={onTouchEnd}
       >
         <Link to={`/products/${product._id}`}>
-          <img
-            src={images[imgIdx] || images[0]}
-            alt={product.title}
-            className="aspect-square w-full object-cover select-none"
-            loading="lazy"
-            draggable="false"
-            onContextMenu={(e) => e.preventDefault()}
-          />
+          {images.length > 0 ? (
+            <img
+              src={images[imgIdx] ?? images[0]}
+              alt={product.title}
+              className="aspect-square w-full object-cover select-none"
+              loading="lazy"
+              draggable="false"
+              onContextMenu={(e) => e.preventDefault()}
+              onError={(e) => { e.target.onerror = null; e.target.style.display = 'none'; }}
+            />
+          ) : (
+            <div className="aspect-square w-full bg-gray-100 flex items-center justify-center text-gray-300 text-xs">
+              No image
+            </div>
+          )}
         </Link>
 
         {/* Dot indicator for multiple images */}
