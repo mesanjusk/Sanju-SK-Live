@@ -17,11 +17,11 @@ router.get('/', async (req, res) => {
 // POST /api/videos
 router.post('/', async (req, res) => {
   try {
-    const { title, youtubeUrl, description } = req.body;
-    if (!title || !youtubeUrl) {
-      return res.status(400).json({ message: 'Title and YouTube URL are required.' });
-    }
-    const video = new Video({ title, youtubeUrl, description });
+    const { title, youtubeUrl, instagramUrl, platform, description } = req.body;
+    if (!title) return res.status(400).json({ message: 'Title is required.' });
+    if (platform === 'youtube' && !youtubeUrl) return res.status(400).json({ message: 'YouTube URL is required.' });
+    if (platform === 'instagram' && !instagramUrl) return res.status(400).json({ message: 'Instagram URL is required.' });
+    const video = new Video({ title, youtubeUrl, instagramUrl, platform, description });
     await video.save();
     res.status(201).json(video);
   } catch (err) {
@@ -33,10 +33,10 @@ router.post('/', async (req, res) => {
 // PUT /api/videos/:id
 router.put('/:id', async (req, res) => {
   try {
-    const { title, youtubeUrl, description } = req.body;
+    const { title, youtubeUrl, instagramUrl, platform, description } = req.body;
     const video = await Video.findByIdAndUpdate(
       req.params.id,
-      { title, youtubeUrl, description },
+      { title, youtubeUrl, instagramUrl, platform, description },
       { new: true }
     );
     res.json(video);
