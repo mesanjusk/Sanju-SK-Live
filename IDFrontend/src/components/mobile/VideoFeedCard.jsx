@@ -1,5 +1,5 @@
-import { memo, useState } from 'react';
-import { FaYoutube, FaShare, FaEllipsisH, FaPlay } from 'react-icons/fa';
+import { memo, useEffect, useRef, useState } from 'react';
+import { FaYoutube, FaShare, FaEllipsisH } from 'react-icons/fa';
 
 const getYouTubeId = (url) => {
   if (!url) return null;
@@ -8,8 +8,20 @@ const getYouTubeId = (url) => {
 };
 
 function VideoFeedCard({ video }) {
-  const [playing, setPlaying] = useState(false);
+  const [visible, setVisible] = useState(false);
+  const cardRef = useRef(null);
   const ytId = getYouTubeId(video.youtubeUrl);
+
+  // Auto-load iframe when card scrolls into view
+  useEffect(() => {
+    if (!cardRef.current) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => { if (entry.isIntersecting) { setVisible(true); observer.disconnect(); } },
+      { threshold: 0.3 }
+    );
+    observer.observe(cardRef.current);
+    return () => observer.disconnect();
+  }, []);
 
   const handleShare = () => {
     if (navigator.share) navigator.share({ title: video.title, url: video.youtubeUrl });
@@ -18,10 +30,11 @@ function VideoFeedCard({ video }) {
 
   if (!ytId) return null;
 
-  const thumbUrl = `https://img.youtube.com/vi/${ytId}/hqdefault.jpg`;
+  // youtube-nocookie.com: privacy-enhanced, same embed, avoids extra tracking blocks
+  const embedSrc = `https://www.youtube-nocookie.com/embed/${ytId}?autoplay=1&mute=1&playsinline=1&rel=0&modestbranding=1&loop=1&playlist=${ytId}`;
 
   return (
-    <article className="mb-2 bg-white">
+    <article ref={cardRef} className="mb-2 bg-white">
       {/* Header */}
       <div className="flex items-center justify-between px-3 py-2.5">
         <div className="flex min-w-0 items-center gap-2.5">
@@ -40,59 +53,38 @@ function VideoFeedCard({ video }) {
         </button>
       </div>
 
-      {/* Video area */}
+      {/* Video */}
       <div className="relative aspect-video w-full bg-black">
-        {playing ? (
+        {visible ? (
           <iframe
-            src={`https://www.youtube.com/embed/${ytId}?autoplay=1&playsinline=1&rel=0`}
+            src={embedSrc}
             title={video.title}
             allow="autoplay; encrypted-media; picture-in-picture"
             allowFullScreen
-            className="h-full w-full"
+            className="h-full w-full border-0"
           />
         ) : (
-          <button
-            onClick={() => setPlaying(true)}
-            className="group relative h-full w-full"
-            aria-label="Play video"
-          >
-            <img
-              src={thumbUrl}
-              alt={video.title}
-              className="h-full w-full object-cover"
-              loading="lazy"
-            />
-            <div className="absolute inset-0 flex items-center justify-center bg-black/20 transition-colors group-hover:bg-black/30">
-              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-red-600 shadow-xl transition-transform group-active:scale-95">
-                <FaPlay className="ml-1 text-2xl text-white" />
-              </div>
-            </div>
-            <div className="absolute bottom-2 left-2 flex items-center gap-1 rounded-md bg-black/60 px-2 py-0.5">
-              <FaYoutube className="text-xs text-red-500" />
-              <span className="text-[10px] font-semibold text-white">YouTube</span>
-            </div>
-          </button>
+          <div className="flex h-full w-full items-center justify-center bg-gray-100">
+            <FaYoutube className="text-5xl text-red-500 opacity-40" />
+          </div>
         )}
       </div>
 
       {/* Actions */}
       <div className="flex items-center justify-between px-3 pt-2.5 pb-1">
-        <div className="flex items-center gap-4">
-          <button onClick={handleShare} aria-label="Share" className="transition-transform active:scale-90">
-            <FaShare className="text-xl text-gray-900" />
-          </button>
-        </div>
+        <button onClick={handleShare} aria-label="Share" className="transition-transform active:scale-90">
+          <FaShare className="text-xl text-gray-900" />
+        </button>
         <a
           href={video.youtubeUrl}
           target="_blank"
           rel="noreferrer"
           className="flex items-center gap-1.5 rounded-lg bg-red-600 px-4 py-2 text-[12px] font-semibold text-white transition-transform active:scale-95"
         >
-          Watch <FaYoutube />
+          Watch on YouTube <FaYoutube />
         </a>
       </div>
 
-      {/* Description */}
       {video.description && (
         <div className="px-3 pb-3 pt-1">
           <p className="line-clamp-2 text-xs leading-relaxed text-gray-500">{video.description}</p>
