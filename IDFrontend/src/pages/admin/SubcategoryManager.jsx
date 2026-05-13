@@ -23,7 +23,7 @@ export default function SubcategoryManager() {
   const [image, setImage] = useState(null);
   const [loading, setLoading] = useState(false);
   const [confirm, setConfirm] = useState({ open: false, id: null });
-  const [editDialog, setEditDialog] = useState({ open: false, id: null, name: '', categoryId: '' });
+  const [editDialog, setEditDialog] = useState({ open: false, id: null, name: '', categoryId: '', image: null });
   const [editLoading, setEditLoading] = useState(false);
   const [toast, setToast] = useState({ open: false, message: '', severity: 'success' });
 
@@ -74,8 +74,12 @@ export default function SubcategoryManager() {
     if (!editDialog.name.trim()) return;
     setEditLoading(true);
     try {
-      await api.put(`/api/subcategories/${editDialog.id}`, { name: editDialog.name, categoryId: editDialog.categoryId });
-      setEditDialog({ open: false, id: null, name: '', categoryId: '' });
+      const formData = new FormData();
+      formData.append('name', editDialog.name);
+      if (editDialog.categoryId) formData.append('categoryId', editDialog.categoryId);
+      if (editDialog.image) formData.append('image', editDialog.image);
+      await api.put(`/api/subcategories/${editDialog.id}`, formData);
+      setEditDialog({ open: false, id: null, name: '', categoryId: '', image: null });
       await fetchAll();
       showToast('Subcategory updated');
     } catch {
@@ -131,7 +135,7 @@ export default function SubcategoryManager() {
                 <TableCell>{sub.name}</TableCell>
                 <TableCell>{sub.categoryId?.name || '—'}</TableCell>
                 <TableCell align="right">
-                  <IconButton size="small" color="primary" onClick={() => setEditDialog({ open: true, id: sub._id, name: sub.name, categoryId: sub.categoryId?._id || '' })}>
+                  <IconButton size="small" color="primary" onClick={() => setEditDialog({ open: true, id: sub._id, name: sub.name, categoryId: sub.categoryId?._id || '', image: null })}>
                     <EditIcon fontSize="small" />
                   </IconButton>
                   <IconButton size="small" color="error" onClick={() => setConfirm({ open: true, id: sub._id })}>
@@ -155,7 +159,7 @@ export default function SubcategoryManager() {
         onCancel={() => setConfirm({ open: false, id: null })}
       />
 
-      <Dialog open={editDialog.open} onClose={() => setEditDialog({ open: false, id: null, name: '', categoryId: '' })} maxWidth="xs" fullWidth>
+      <Dialog open={editDialog.open} onClose={() => setEditDialog({ open: false, id: null, name: '', categoryId: '', image: null })} maxWidth="xs" fullWidth>
         <DialogTitle>Edit Subcategory</DialogTitle>
         <DialogContent sx={{ pt: 2, display: 'flex', flexDirection: 'column', gap: 2 }}>
           <TextField
@@ -172,9 +176,17 @@ export default function SubcategoryManager() {
               <MenuItem key={cat._id} value={cat._id}>{cat.name}</MenuItem>
             ))}
           </TextField>
+          <Button variant="outlined" component="label" sx={{ alignSelf: 'flex-start', textTransform: 'none' }}>
+            {editDialog.image ? editDialog.image.name : 'Change Image (optional)'}
+            <input type="file" hidden accept="image/*" onChange={(e) => {
+              const f = e.target.files[0];
+              if (f && !validateImage(f, showToast)) { e.target.value = ''; return; }
+              setEditDialog((prev) => ({ ...prev, image: f }));
+            }} />
+          </Button>
         </DialogContent>
         <DialogActions sx={{ px: 3, pb: 2 }}>
-          <Button onClick={() => setEditDialog({ open: false, id: null, name: '', categoryId: '' })} variant="outlined" color="inherit">Cancel</Button>
+          <Button onClick={() => setEditDialog({ open: false, id: null, name: '', categoryId: '', image: null })} variant="outlined" color="inherit">Cancel</Button>
           <Button onClick={handleUpdate} variant="contained" disabled={editLoading || !editDialog.name.trim()}>
             {editLoading ? <CircularProgress size={16} color="inherit" /> : 'Save'}
           </Button>
