@@ -2,8 +2,10 @@ import { useState, useEffect } from 'react';
 import {
   Box, Button, TextField, MenuItem, Typography, Table, TableBody, TableCell,
   TableContainer, TableHead, TableRow, Paper, IconButton, Avatar, CircularProgress,
+  Dialog, DialogTitle, DialogContent, DialogActions,
 } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
+import EditIcon from '@mui/icons-material/Edit';
 import api from '../../api';
 import { ConfirmDialog, Toast } from '../../components/admin/AdminUiKit';
 
@@ -21,6 +23,8 @@ export default function SubcategoryManager() {
   const [image, setImage] = useState(null);
   const [loading, setLoading] = useState(false);
   const [confirm, setConfirm] = useState({ open: false, id: null });
+  const [editDialog, setEditDialog] = useState({ open: false, id: null, name: '', categoryId: '' });
+  const [editLoading, setEditLoading] = useState(false);
   const [toast, setToast] = useState({ open: false, message: '', severity: 'success' });
 
   const showToast = (message, severity = 'success') => setToast({ open: true, message, severity });
@@ -63,6 +67,21 @@ export default function SubcategoryManager() {
       showToast('Subcategory deleted');
     } catch {
       showToast('Failed to delete', 'error');
+    }
+  };
+
+  const handleUpdate = async () => {
+    if (!editDialog.name.trim()) return;
+    setEditLoading(true);
+    try {
+      await api.put(`/api/subcategories/${editDialog.id}`, { name: editDialog.name, categoryId: editDialog.categoryId });
+      setEditDialog({ open: false, id: null, name: '', categoryId: '' });
+      await fetchAll();
+      showToast('Subcategory updated');
+    } catch {
+      showToast('Failed to update', 'error');
+    } finally {
+      setEditLoading(false);
     }
   };
 
@@ -112,6 +131,9 @@ export default function SubcategoryManager() {
                 <TableCell>{sub.name}</TableCell>
                 <TableCell>{sub.categoryId?.name || '—'}</TableCell>
                 <TableCell align="right">
+                  <IconButton size="small" color="primary" onClick={() => setEditDialog({ open: true, id: sub._id, name: sub.name, categoryId: sub.categoryId?._id || '' })}>
+                    <EditIcon fontSize="small" />
+                  </IconButton>
                   <IconButton size="small" color="error" onClick={() => setConfirm({ open: true, id: sub._id })}>
                     <DeleteIcon fontSize="small" />
                   </IconButton>
@@ -132,6 +154,33 @@ export default function SubcategoryManager() {
         onConfirm={handleDelete}
         onCancel={() => setConfirm({ open: false, id: null })}
       />
+
+      <Dialog open={editDialog.open} onClose={() => setEditDialog({ open: false, id: null, name: '', categoryId: '' })} maxWidth="xs" fullWidth>
+        <DialogTitle>Edit Subcategory</DialogTitle>
+        <DialogContent sx={{ pt: 2, display: 'flex', flexDirection: 'column', gap: 2 }}>
+          <TextField
+            label="Subcategory Name" size="small" fullWidth autoFocus
+            value={editDialog.name}
+            onChange={(e) => setEditDialog((prev) => ({ ...prev, name: e.target.value }))}
+          />
+          <TextField
+            select label="Category" size="small" fullWidth
+            value={editDialog.categoryId}
+            onChange={(e) => setEditDialog((prev) => ({ ...prev, categoryId: e.target.value }))}
+          >
+            {categories.map((cat) => (
+              <MenuItem key={cat._id} value={cat._id}>{cat.name}</MenuItem>
+            ))}
+          </TextField>
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 2 }}>
+          <Button onClick={() => setEditDialog({ open: false, id: null, name: '', categoryId: '' })} variant="outlined" color="inherit">Cancel</Button>
+          <Button onClick={handleUpdate} variant="contained" disabled={editLoading || !editDialog.name.trim()}>
+            {editLoading ? <CircularProgress size={16} color="inherit" /> : 'Save'}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
       <Toast open={toast.open} message={toast.message} severity={toast.severity} onClose={() => setToast((t) => ({ ...t, open: false }))} />
     </Box>
   );

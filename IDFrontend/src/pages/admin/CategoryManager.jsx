@@ -2,9 +2,10 @@ import { useState, useEffect } from 'react';
 import {
   Box, Button, TextField, Typography, Table, TableBody, TableCell,
   TableContainer, TableHead, TableRow, Paper, IconButton, Avatar,
-  CircularProgress,
+  CircularProgress, Dialog, DialogTitle, DialogContent, DialogActions,
 } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
+import EditIcon from '@mui/icons-material/Edit';
 import api from '../../api';
 import { ConfirmDialog, Toast } from '../../components/admin/AdminUiKit';
 
@@ -20,6 +21,8 @@ export default function CategoryManager() {
   const [image, setImage] = useState(null);
   const [loading, setLoading] = useState(false);
   const [confirm, setConfirm] = useState({ open: false, id: null });
+  const [editDialog, setEditDialog] = useState({ open: false, id: null, name: '' });
+  const [editLoading, setEditLoading] = useState(false);
   const [toast, setToast] = useState({ open: false, message: '', severity: 'success' });
 
   const showToast = (message, severity = 'success') => setToast({ open: true, message, severity });
@@ -58,6 +61,21 @@ export default function CategoryManager() {
       showToast('Category deleted');
     } catch {
       showToast('Failed to delete', 'error');
+    }
+  };
+
+  const handleUpdate = async () => {
+    if (!editDialog.name.trim()) return;
+    setEditLoading(true);
+    try {
+      await api.put(`/api/categories/${editDialog.id}`, { name: editDialog.name });
+      setEditDialog({ open: false, id: null, name: '' });
+      await fetchCategories();
+      showToast('Category updated');
+    } catch {
+      showToast('Failed to update', 'error');
+    } finally {
+      setEditLoading(false);
     }
   };
 
@@ -105,6 +123,9 @@ export default function CategoryManager() {
                 </TableCell>
                 <TableCell>{cat.name}</TableCell>
                 <TableCell align="right">
+                  <IconButton size="small" color="primary" onClick={() => setEditDialog({ open: true, id: cat._id, name: cat.name })}>
+                    <EditIcon fontSize="small" />
+                  </IconButton>
                   <IconButton size="small" color="error" onClick={() => setConfirm({ open: true, id: cat._id })}>
                     <DeleteIcon fontSize="small" />
                   </IconButton>
@@ -125,6 +146,24 @@ export default function CategoryManager() {
         onConfirm={handleDelete}
         onCancel={() => setConfirm({ open: false, id: null })}
       />
+
+      <Dialog open={editDialog.open} onClose={() => setEditDialog({ open: false, id: null, name: '' })} maxWidth="xs" fullWidth>
+        <DialogTitle>Edit Category</DialogTitle>
+        <DialogContent sx={{ pt: 2 }}>
+          <TextField
+            label="Category Name" size="small" fullWidth autoFocus
+            value={editDialog.name}
+            onChange={(e) => setEditDialog((prev) => ({ ...prev, name: e.target.value }))}
+          />
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 2 }}>
+          <Button onClick={() => setEditDialog({ open: false, id: null, name: '' })} variant="outlined" color="inherit">Cancel</Button>
+          <Button onClick={handleUpdate} variant="contained" disabled={editLoading || !editDialog.name.trim()}>
+            {editLoading ? <CircularProgress size={16} color="inherit" /> : 'Save'}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
       <Toast open={toast.open} message={toast.message} severity={toast.severity} onClose={() => setToast((t) => ({ ...t, open: false }))} />
     </Box>
   );
