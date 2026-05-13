@@ -21,7 +21,7 @@ export default function CategoryManager() {
   const [image, setImage] = useState(null);
   const [loading, setLoading] = useState(false);
   const [confirm, setConfirm] = useState({ open: false, id: null });
-  const [editDialog, setEditDialog] = useState({ open: false, id: null, name: '' });
+  const [editDialog, setEditDialog] = useState({ open: false, id: null, name: '', image: null });
   const [editLoading, setEditLoading] = useState(false);
   const [toast, setToast] = useState({ open: false, message: '', severity: 'success' });
 
@@ -68,8 +68,11 @@ export default function CategoryManager() {
     if (!editDialog.name.trim()) return;
     setEditLoading(true);
     try {
-      await api.put(`/api/categories/${editDialog.id}`, { name: editDialog.name });
-      setEditDialog({ open: false, id: null, name: '' });
+      const formData = new FormData();
+      formData.append('name', editDialog.name);
+      if (editDialog.image) formData.append('image', editDialog.image);
+      await api.put(`/api/categories/${editDialog.id}`, formData);
+      setEditDialog({ open: false, id: null, name: '', image: null });
       await fetchCategories();
       showToast('Category updated');
     } catch {
@@ -123,7 +126,7 @@ export default function CategoryManager() {
                 </TableCell>
                 <TableCell>{cat.name}</TableCell>
                 <TableCell align="right">
-                  <IconButton size="small" color="primary" onClick={() => setEditDialog({ open: true, id: cat._id, name: cat.name })}>
+                  <IconButton size="small" color="primary" onClick={() => setEditDialog({ open: true, id: cat._id, name: cat.name, image: null })}>
                     <EditIcon fontSize="small" />
                   </IconButton>
                   <IconButton size="small" color="error" onClick={() => setConfirm({ open: true, id: cat._id })}>
@@ -147,17 +150,25 @@ export default function CategoryManager() {
         onCancel={() => setConfirm({ open: false, id: null })}
       />
 
-      <Dialog open={editDialog.open} onClose={() => setEditDialog({ open: false, id: null, name: '' })} maxWidth="xs" fullWidth>
+      <Dialog open={editDialog.open} onClose={() => setEditDialog({ open: false, id: null, name: '', image: null })} maxWidth="xs" fullWidth>
         <DialogTitle>Edit Category</DialogTitle>
-        <DialogContent sx={{ pt: 2 }}>
+        <DialogContent sx={{ pt: 2, display: 'flex', flexDirection: 'column', gap: 2 }}>
           <TextField
             label="Category Name" size="small" fullWidth autoFocus
             value={editDialog.name}
             onChange={(e) => setEditDialog((prev) => ({ ...prev, name: e.target.value }))}
           />
+          <Button variant="outlined" component="label" sx={{ alignSelf: 'flex-start', textTransform: 'none' }}>
+            {editDialog.image ? editDialog.image.name : 'Change Image (optional)'}
+            <input type="file" hidden accept="image/*" onChange={(e) => {
+              const f = e.target.files[0];
+              if (f && !validateImage(f, showToast)) { e.target.value = ''; return; }
+              setEditDialog((prev) => ({ ...prev, image: f }));
+            }} />
+          </Button>
         </DialogContent>
         <DialogActions sx={{ px: 3, pb: 2 }}>
-          <Button onClick={() => setEditDialog({ open: false, id: null, name: '' })} variant="outlined" color="inherit">Cancel</Button>
+          <Button onClick={() => setEditDialog({ open: false, id: null, name: '', image: null })} variant="outlined" color="inherit">Cancel</Button>
           <Button onClick={handleUpdate} variant="contained" disabled={editLoading || !editDialog.name.trim()}>
             {editLoading ? <CircularProgress size={16} color="inherit" /> : 'Save'}
           </Button>

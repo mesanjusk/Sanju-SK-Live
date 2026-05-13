@@ -65,14 +65,15 @@ router.delete('/:id', async (req, res) => {
   }
 });
 
-// PUT /api/subcategories/:id - Update subcategory name or categoryId
-router.put('/:id', async (req, res) => {
+// PUT /api/subcategories/:id - Update subcategory name, categoryId, or image
+router.put('/:id', upload.single('image'), async (req, res) => {
   try {
     const { name, categoryId } = req.body;
 
     const updatedData = {};
     if (name) updatedData.name = name;
     if (categoryId) updatedData.categoryId = categoryId;
+    if (req.file) updatedData.imageUrl = req.file.path;
 
     const subcategory = await Subcategory.findByIdAndUpdate(
       req.params.id,

@@ -33,7 +33,7 @@ export default function ProductDetail() {
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [imgIdx, setImgIdx] = useState(0);
-  const [qty, setQty] = useState(1);
+  const [qty, setQty] = useState(25);
   const [showVideo, setShowVideo] = useState(false);
   const [categoryName, setCategoryName] = useState('');
   const whatsappNumber = useWhatsAppNumber();
@@ -283,12 +283,12 @@ export default function ProductDetail() {
                 <div className="flex items-center gap-3">
                   <div className="flex items-center overflow-hidden rounded-xl border border-gray-200">
                     <button
-                      onClick={() => setQty((q) => Math.max(hasTiers ? product.quantityPricing[0].minQty : 1, q - 1))}
+                      onClick={() => setQty((q) => Math.max(hasTiers ? product.quantityPricing[0].minQty : 25, q - 25))}
                       className="px-4 py-2.5 text-lg text-gray-500 hover:bg-gray-50"
                     >−</button>
                     <span className="min-w-[48px] px-2 text-center font-bold text-gray-900">{qty}</span>
                     <button
-                      onClick={() => setQty((q) => q + 1)}
+                      onClick={() => setQty((q) => q + 25)}
                       className="px-4 py-2.5 text-lg text-gray-500 hover:bg-gray-50"
                     >+</button>
                   </div>
