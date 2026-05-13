@@ -22,6 +22,7 @@ import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import WhatsAppIcon from '@mui/icons-material/WhatsApp';
 import LeaderboardIcon from '@mui/icons-material/Leaderboard';
 import InboxIcon from '@mui/icons-material/Inbox';
+import VideoLibraryIcon from '@mui/icons-material/VideoLibrary';
 
 import AnalyticsPage from '../pages/admin/AnalyticsPage';
 import CategoryManager from '../pages/admin/CategoryManager';
@@ -35,6 +36,7 @@ import ConfiManager from '../pages/admin/ConfiManager';
 import WhatsAppBotManager from '../pages/admin/WhatsAppBotManager';
 import LeadsManager from '../pages/admin/LeadsManager';
 import InboxManager from '../pages/admin/InboxManager';
+import VideoManager from '../pages/admin/VideoManager';
 import CreateListing from './CreateListing';
 import api from '../api';
 import { StatCard, SurfaceCard, PageContainer } from './admin/AdminUiKit';
@@ -67,6 +69,7 @@ const ALL_NAV = [
   { key: 'leads',         label: 'Leads',         Icon: LeaderboardIcon,     permission: 'canManageLeads' },
   { key: 'inbox',         label: 'WA Inbox',      Icon: InboxIcon,           permission: 'canManageWhatsApp' },
   { key: 'listings',      label: 'Products',      Icon: Inventory2Icon,      permission: 'canManageProducts' },
+  { key: 'videos',        label: 'Videos',        Icon: VideoLibraryIcon,    permission: 'canManageProducts' },
   { key: 'categories',    label: 'Categories',    Icon: CategoryIcon,        permission: 'canManageCategories' },
   { key: 'subcategories', label: 'Subcategories', Icon: AccountTreeIcon,     permission: 'canManageCategories' },
   { key: 'titles',        label: 'Titles',        Icon: LabelIcon,           permission: 'canManageCategories' },
@@ -136,6 +139,7 @@ function Overview({ onNavigate, userRole }) {
         <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: 1.5 }}>
           {[
             { label: '+ Add Product',  key: 'listings',      show: permissions.canManageProducts },
+            { label: '+ Add Video',    key: 'videos',        show: permissions.canManageProducts },
             { label: '+ Add Category', key: 'categories',    show: permissions.canManageCategories },
             { label: '+ Upload Banner',key: 'banners',       show: permissions.canManageBanners },
             { label: 'View Leads',     key: 'leads',         show: permissions.canManageLeads },
@@ -213,6 +217,7 @@ export default function AdminDashboard() {
       case 'analytics':     return <PageContainer title="Analytics" breadcrumb={['Admin', 'Analytics']}><AnalyticsPage /></PageContainer>;
       case 'leads':         return <PageContainer title="Leads" breadcrumb={['Admin', 'Leads']}><LeadsManager /></PageContainer>;
       case 'listings':      return <CreateListing />;
+      case 'videos':        return <VideoManager />;
       case 'categories':    return <CategoryManager />;
       case 'subcategories': return <SubcategoryManager />;
       case 'titles':        return <TitleManager />;
