@@ -21,6 +21,7 @@ import autoReplyRoutes from './routes/autoReplyRoutes.js';
 import webhookRoutes from './routes/webhookRoutes.js';
 import leadRoutes from './routes/leadRoutes.js';
 import inboxRoutes from './routes/inboxRoutes.js';
+import videoRoutes from './routes/videoRoutes.js';
 
 dotenv.config();
 
@@ -55,6 +56,7 @@ app.use('/api/auto-reply', autoReplyRoutes);
 app.use('/api/webhook', webhookRoutes);
 app.use('/api/leads', leadRoutes);
 app.use('/api/inbox', inboxRoutes);
+app.use('/api/videos', videoRoutes);
 
 app.get('/api/ping', (req, res) => res.status(200).send('✅ Backend is alive!'));
 

@@ -3,6 +3,7 @@ import api from '../api';
 import MobileHeader from './mobile/MobileHeader';
 import StoryCategories from './mobile/StoryCategories';
 import ProductFeedCard from './mobile/ProductFeedCard';
+import VideoFeedCard from './mobile/VideoFeedCard';
 import MobileBottomNav from './mobile/MobileBottomNav';
 import LoadingSkeleton from './common/LoadingSkeleton';
 import ScrollGatePopup from './ScrollGatePopup';
@@ -17,10 +18,26 @@ function shuffle(arr) {
   return a;
 }
 
+// Interleave videos into the product feed every N products
+function interleaveFeed(products, videos) {
+  if (!videos.length) return products.map((p) => ({ ...p, _feedType: 'product' }));
+  const result = [];
+  let vIdx = 0;
+  products.forEach((p, i) => {
+    result.push({ ...p, _feedType: 'product' });
+    // Insert a video after every 5th product
+    if ((i + 1) % 5 === 0 && vIdx < videos.length) {
+      result.push({ ...videos[vIdx++], _feedType: 'video' });
+    }
+  });
+  return result;
+}
+
 export default function Home() {
   const [listings, setListings] = useState([]);
   const [categories, setCategories] = useState([]);
   const [subcategories, setSubcategories] = useState([]);
+  const [videos, setVideos] = useState([]);
   const [config, setConfig] = useState({});
   const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState(null);
@@ -35,18 +52,18 @@ export default function Home() {
       api.get('/api/categories'),
       api.get('/api/subcategories'),
       api.get('/api/confi/GetConfiList'),
-    ]).then(([l, c, s, conf]) => {
+      api.get('/api/videos'),
+    ]).then(([l, c, s, conf, v]) => {
       setListings(Array.isArray(l.data) ? l.data : []);
       setCategories(Array.isArray(c.data) ? c.data : c.data?.result || []);
       setSubcategories(Array.isArray(s.data) ? s.data : []);
       setConfig(conf.data?.result?.[0] || {});
+      setVideos(Array.isArray(v.data) ? v.data : []);
     }).finally(() => setLoading(false));
   }, []);
 
-  // Shuffle once per page load; re-shuffle when category changes
   const shuffled = useMemo(() => shuffle(listings), [listings]);
 
-  // Subcategories that belong to the selected category
   const visibleSubcategories = useMemo(() => {
     if (!selectedCategory) return [];
     return subcategories.filter(
@@ -54,7 +71,7 @@ export default function Home() {
     );
   }, [subcategories, selectedCategory]);
 
-  const filtered = useMemo(() => {
+  const filteredProducts = useMemo(() => {
     if (!selectedCategory) return shuffled.slice(0, 40);
     const byCat = listings.filter(
       (p) => p.category === selectedCategory.category_uuid || p.category === selectedCategory._id
@@ -66,6 +83,12 @@ export default function Home() {
       )
     );
   }, [shuffled, listings, selectedCategory, selectedSubcategory]);
+
+  // Mix videos into feed only on the unfiltered home view
+  const feed = useMemo(() => {
+    if (selectedCategory) return filteredProducts.map((p) => ({ ...p, _feedType: 'product' }));
+    return interleaveFeed(filteredProducts, shuffle(videos));
+  }, [filteredProducts, videos, selectedCategory]);
 
   const handleCategorySelect = (cat) => {
     if (!cat) { setSelectedCategory(null); setSelectedSubcategory(null); return; }
@@ -84,7 +107,6 @@ export default function Home() {
     setViewedIds((prev) => {
       const next = new Set(prev);
       next.add(id);
-      // Show popup after 10 unique product views (only once per session)
       if (next.size >= 10 && !hasShownPopup.current) {
         hasShownPopup.current = true;
         setShowPopup(true);
@@ -92,8 +114,6 @@ export default function Home() {
       return next;
     });
   }, []);
-
-  const handleUnlock = () => setShowPopup(false);
 
   return (
     <div className="min-h-screen bg-[#fafafa] pb-24">
@@ -128,15 +148,19 @@ export default function Home() {
             <div className="grid gap-4 p-4">
               {[...Array(4)].map((_, i) => <LoadingSkeleton key={i} />)}
             </div>
-          ) : filtered.length > 0 ? (
-            filtered.map((p) => (
-              <ProductFeedCard
-                key={p._id}
-                product={p}
-                whatsappNumber={config.whatsappNumber || config.phone}
-                onView={handleProductView}
-              />
-            ))
+          ) : feed.length > 0 ? (
+            feed.map((item) =>
+              item._feedType === 'video' ? (
+                <VideoFeedCard key={`v-${item._id}`} video={item} />
+              ) : (
+                <ProductFeedCard
+                  key={item._id}
+                  product={item}
+                  whatsappNumber={config.whatsappNumber || config.phone}
+                  onView={handleProductView}
+                />
+              )
+            )
           ) : (
             <p className="mt-16 text-center text-sm text-gray-400">No products found in this category</p>
           )}
@@ -146,7 +170,7 @@ export default function Home() {
       <ScrollGatePopup
         visible={showPopup}
         waNumber={config.whatsappNumber || config.phone}
-        onUnlock={handleUnlock}
+        onUnlock={() => setShowPopup(false)}
       />
 
       <MobileBottomNav />
