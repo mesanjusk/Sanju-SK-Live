@@ -95,6 +95,16 @@ export default function Footer() {
         </div>
 
         <div className="lux-divider" />
+
+        {/* NAP – Name, Address, Phone for local SEO */}
+        <div className="lux-container py-4 text-xs text-[#697869]">
+          <p><strong>Business Name:</strong> SANJU SK Digital – Mahi Creation</p>
+          <p><strong>Address:</strong> Krishnapura Ward, In Front of Santoshi Mata Mandir, Gondia, Maharashtra 441614</p>
+          <p><strong>Phone:</strong> +91 93723 33633</p>
+          <p><strong>Hours:</strong> Mon–Sat 10:00 AM – 8:00 PM | Sun: Closed</p>
+        </div>
+
+        <div className="lux-divider" />
         <div className="lux-container flex flex-col gap-2 py-4 text-xs text-[#697869] sm:flex-row sm:justify-between">
           <span>© {year} {config.name || 'SK Luxury Studio'}.</span>
           <Link to="/login">Admin</Link>

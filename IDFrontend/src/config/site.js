@@ -1,22 +1,22 @@
-export const SITE_URL = import.meta.env.VITE_SITE_URL || 'https://idfrontend.vercel.app';
+export const SITE_URL = import.meta.env.VITE_SITE_URL || 'https://www.sanjusk.in';
 
 export const SITE_META = {
-  name: 'Sanju SK',
-  defaultTitle: 'Sanju SK | Premium Invitations & Gifts',
+  name: 'SANJU SK Digital – Mahi Creation',
+  defaultTitle: 'SANJU SK Digital – Mahi Creation | One Stop Printing & Gifting Solution',
   defaultDescription:
-    'Discover handcrafted invitations, customized gifts, and festive products from Sanju SK.',
+    'SANJU SK Digital – Mahi Creation. One stop solution for wedding cards, visiting cards, trophies, corporate gifts, flex banners & more in Gondia, Maharashtra. Order on WhatsApp.',
   twitterHandle: '@sanjusk',
-  ogImage: `${SITE_URL}/og-default.webp`,
-  whatsappNumber: '919999999999',
+  ogImage: 'https://www.sanjusk.in/og-default.webp',
+  whatsappNumber: '919372333633',
   business: {
-    name: 'Sanju SK',
-    phone: '+91-99999-99999',
-    email: 'hello@sanjusk.com',
+    name: 'SANJU SK Digital – Mahi Creation',
+    phone: '+919372333633',
+    email: 'hello@sanjusk.in',
     address: {
-      streetAddress: 'Main Market Road',
-      addressLocality: 'Jaipur',
-      addressRegion: 'Rajasthan',
-      postalCode: '302001',
+      streetAddress: 'Krishnapura Ward, In Front of Santoshi Mata Mandir',
+      addressLocality: 'Gondia',
+      addressRegion: 'Maharashtra',
+      postalCode: '441614',
       addressCountry: 'IN',
     },
   },

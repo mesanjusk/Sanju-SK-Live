@@ -1,4 +1,3 @@
 User-agent: *
 Allow: /
-Disallow: /admin
-Sitemap: https://idfrontend.vercel.app/sitemap.xml
+Sitemap: https://www.sanjusk.in/sitemap.xml
