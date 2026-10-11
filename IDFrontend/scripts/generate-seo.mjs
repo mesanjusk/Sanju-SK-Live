@@ -28,6 +28,13 @@ ${routes.map((route, i) => `  <url>
 `;
 const robots = `User-agent: OAI-SearchBot
 Allow: /
+Disallow: /admin
+Disallow: /login
+Disallow: /upload
+Disallow: /UploadCategory
+Disallow: /UploadSubcategory
+Disallow: /UploadBanner
+Disallow: /add
 
 User-agent: ChatGPT-User
 Allow: /
