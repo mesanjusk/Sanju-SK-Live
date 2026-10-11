@@ -165,6 +165,20 @@ export default function Home() {
             <p className="mt-16 text-center text-sm text-gray-400">No products found in this category</p>
           )}
         </section>
+        <section aria-label="SK Digital printing and invitation services" className="mx-auto my-10 max-w-2xl px-4">
+          <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
+            <h2 className="text-lg font-bold text-gray-900">Wedding cards, digital invitations &amp; corporate gifts</h2>
+            <p className="mt-2 text-sm leading-6 text-gray-600">
+              Explore services from SK Digital – Mahi Creation in Gondia. Get custom wedding card printing,
+              create a digital invitation or enquire about branded gifts and print packaging.
+            </p>
+            <nav aria-label="Explore SK Digital services" className="mt-4 flex flex-col gap-3 text-sm font-semibold text-gray-900">
+              <a className="underline underline-offset-4" href="/wedding-card-printing-gondia/">Wedding card printing in Gondia</a>
+              <a className="underline underline-offset-4" href="/digital-wedding-invitations/">Digital wedding invitations in India</a>
+              <a className="underline underline-offset-4" href="/corporate-gifting-gondia/">Corporate gifts &amp; custom branding in Gondia</a>
+            </nav>
+          </div>
+        </section>
       </main>
 
       <ScrollGatePopup
