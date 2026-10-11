@@ -1,7 +1,7 @@
 export const routeMeta = {
   '/': {
-    title: 'Home',
-    description: 'Browse top categories, featured products, and latest offers from Sanju SK.',
+    title: 'Wedding Cards, Custom Printing & Corporate Gifts in Gondia',
+    description: 'Discover custom wedding card printing, branded corporate gifts, banners, stationery, trophies and digital invitations from SANJU SK Digital – Mahi Creation, Gondia.',
   },
   '/allListing': {
     title: 'All Listings',
@@ -53,6 +53,7 @@ export const routeMeta = {
   '/favorites': {
     title: 'Favorites',
     description: 'Your shortlisted invitation and gift products.',
+    noIndex: true,
   },
   '/products': {
     title: 'Products',
@@ -61,10 +62,12 @@ export const routeMeta = {
   '/cart': {
     title: 'Cart',
     description: 'Review selected products before placing your order.',
+    noIndex: true,
   },
   '/checkout': {
     title: 'Checkout',
     description: 'Complete your order safely with secure checkout options.',
+    noIndex: true,
   },
   '/login': {
     title: 'Login',

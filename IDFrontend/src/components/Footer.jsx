@@ -9,7 +9,7 @@ export default function Footer() {
   const [showCats, setShowCats] = useState(false);
   const navigate = useNavigate();
   const year = useMemo(() => new Date().getFullYear(), []);
-  const wa = String(config.whatsappNumber || config.phone || '919999999999').replace(/\D/g, '');
+  const wa = String(config.whatsappNumber || config.phone || '919372333633').replace(/\D/g, '');
 
   useEffect(() => {
     api.get('/api/confi/GetConfiList')
@@ -99,9 +99,9 @@ export default function Footer() {
         {/* NAP – Name, Address, Phone for local SEO */}
         <div className="lux-container py-4 text-xs text-[#697869]">
           <p><strong>Business Name:</strong> SANJU SK Digital – Mahi Creation</p>
-          <p><strong>Address:</strong> Krishnapura Ward, In Front of Santoshi Mata Mandir, Gondia, Maharashtra 441614</p>
+          <p><strong>Address:</strong> Krishnapura Ward, In Front of Santoshi Mata Mandir, Gondia, Maharashtra 441601</p>
           <p><strong>Phone:</strong> +91 93723 33633</p>
-          <p><strong>Hours:</strong> Mon–Sat 10:00 AM – 8:00 PM | Sun: Closed</p>
+          <p><strong>Hours:</strong> Mon–Sat 10:00 AM – 8:00 PM | Sunday: call to confirm</p>
         </div>
 
         <div className="lux-divider" />
