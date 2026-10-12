@@ -7,7 +7,6 @@ import VideoFeedCard from './mobile/VideoFeedCard';
 import MobileBottomNav from './mobile/MobileBottomNav';
 import LoadingSkeleton from './common/LoadingSkeleton';
 import ScrollGatePopup from './ScrollGatePopup';
-import LocalSeoIntro from './LocalSeoIntro';
 import FAQSection from './FAQSection';
 import LocalContactFooter from './LocalContactFooter';
 
@@ -43,6 +42,8 @@ export default function Home() {
   const [videos, setVideos] = useState([]);
   const [config, setConfig] = useState({});
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
+  const [reloadKey, setReloadKey] = useState(0);
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [selectedSubcategory, setSelectedSubcategory] = useState(null);
   const [viewedIds, setViewedIds] = useState(new Set());
@@ -50,20 +51,45 @@ export default function Home() {
   const hasShownPopup = useRef(false);
 
   useEffect(() => {
-    Promise.all([
-      api.get('/api/listings'),
-      api.get('/api/categories'),
-      api.get('/api/subcategories'),
-      api.get('/api/confi/GetConfiList'),
-      api.get('/api/videos'),
-    ]).then(([l, c, s, conf, v]) => {
-      setListings(Array.isArray(l.data) ? l.data : []);
-      setCategories(Array.isArray(c.data) ? c.data : c.data?.result || []);
-      setSubcategories(Array.isArray(s.data) ? s.data : []);
-      setConfig(conf.data?.result?.[0] || {});
-      setVideos(Array.isArray(v.data) ? v.data : []);
-    }).finally(() => setLoading(false));
-  }, []);
+    // Product data is the primary content. One cold-start/API failure must
+    // not hide the entire feed, nor should a failed secondary request do so.
+    let active = true;
+    let retryTimer;
+    const load = async (attempt = 0) => {
+      const [l, c, s, conf, v] = await Promise.allSettled([
+        api.get('/api/listings', { timeout: 30000 }),
+        api.get('/api/categories', { timeout: 30000 }),
+        api.get('/api/subcategories', { timeout: 30000 }),
+        api.get('/api/confi/GetConfiList', { timeout: 30000 }),
+        api.get('/api/videos', { timeout: 30000 }),
+      ]);
+      if (!active) return;
+
+      if (c.status === 'fulfilled') setCategories(Array.isArray(c.value.data) ? c.value.data : c.value.data?.result || []);
+      if (s.status === 'fulfilled') setSubcategories(Array.isArray(s.value.data) ? s.value.data : s.value.data?.result || []);
+      if (conf.status === 'fulfilled') setConfig(conf.value.data?.result?.[0] || {});
+      if (v.status === 'fulfilled') setVideos(Array.isArray(v.value.data) ? v.value.data : []);
+
+      if (l.status === 'fulfilled') {
+        const rows = Array.isArray(l.value.data) ? l.value.data : (l.value.data?.result || []);
+        if (rows.length || attempt >= 2) {
+          setListings(rows);
+          setLoadError(false);
+          setLoading(false);
+          return;
+        }
+      }
+      // Render free-tier cold starts can briefly time out or return empty data.
+      if (attempt < 6) {
+        retryTimer = setTimeout(() => load(attempt + 1), Math.min(2000 + 2000 * attempt, 12000));
+      } else {
+        setLoadError(true);
+        setLoading(false);
+      }
+    };
+    load();
+    return () => { active = false; clearTimeout(retryTimer); };
+  }, [reloadKey]);
 
   const shuffled = useMemo(() => shuffle(listings), [listings]);
 
@@ -121,7 +147,6 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-[#fafafa] pb-24">
       <MobileHeader />
-      <LocalSeoIntro />
       <main className="mx-auto w-full max-w-2xl py-1">
         <StoryCategories
           categories={categories.slice(0, 12)}
@@ -160,14 +185,20 @@ export default function Home() {
                 <ProductFeedCard
                   key={item._id}
                   product={item}
-                  whatsappNumber={config.whatsappNumber || config.phone}
+                  whatsappNumber={config.whatsappNumber || config.phone || '919372333633'}
                   onView={handleProductView}
                 />
               )
             )
-          ) : (
-            <p className="mt-16 text-center text-sm text-gray-400">No products found in this category</p>
-          )}
+          ) : loadError ? (
+              <div role="alert" className="mx-4 my-8 rounded-xl border border-amber-200 bg-amber-50 p-4 text-center text-sm text-gray-700">
+                Products are temporarily unavailable. Your collection has not been deleted.
+                <button type="button" onClick={() => { setLoading(true); setLoadError(false); setReloadKey((v) => v + 1); }}
+                  className="mt-3 block w-full rounded-lg bg-[#075E54] px-4 py-2 font-semibold text-white">Retry loading products</button>
+              </div>
+            ) : (
+              <p className="mt-16 text-center text-sm text-gray-400">No products found in this category</p>
+            )}
         </section>
         <section aria-label="SK Digital printing and invitation services" className="mx-auto my-10 max-w-2xl px-4">
           <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
@@ -185,11 +216,12 @@ export default function Home() {
         </section>
       </main>
 
+      {/* Keep SEO contact and FAQs after the original mobile storefront, never above products. */}
       <FAQSection />
       <LocalContactFooter />
       <ScrollGatePopup
         visible={showPopup}
-        waNumber={config.whatsappNumber || config.phone}
+        waNumber={config.whatsappNumber || config.phone || '919372333633'}
         onUnlock={() => setShowPopup(false)}
       />
 
