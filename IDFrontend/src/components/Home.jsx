@@ -7,6 +7,9 @@ import VideoFeedCard from './mobile/VideoFeedCard';
 import MobileBottomNav from './mobile/MobileBottomNav';
 import LoadingSkeleton from './common/LoadingSkeleton';
 import ScrollGatePopup from './ScrollGatePopup';
+import LocalSeoIntro from './LocalSeoIntro';
+import FAQSection from './FAQSection';
+import LocalContactFooter from './LocalContactFooter';
 
 // Fisher-Yates shuffle — new order on every page load
 function shuffle(arr) {
@@ -118,6 +121,7 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-[#fafafa] pb-24">
       <MobileHeader />
+      <LocalSeoIntro />
       <main className="mx-auto w-full max-w-2xl py-1">
         <StoryCategories
           categories={categories.slice(0, 12)}
@@ -181,6 +185,8 @@ export default function Home() {
         </section>
       </main>
 
+      <FAQSection />
+      <LocalContactFooter />
       <ScrollGatePopup
         visible={showPopup}
         waNumber={config.whatsappNumber || config.phone}

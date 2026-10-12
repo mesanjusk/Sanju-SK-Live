@@ -2,20 +2,16 @@ import { FaStar, FaMapMarkerAlt, FaClock, FaWhatsapp, FaExternalLinkAlt } from '
 import { SiGoogle } from 'react-icons/si';
 
 const HOURS = [
-  { day: 'Monday – Saturday', time: '9:00 AM – 9:00 PM', open: true },
-  { day: 'Sunday',            time: '10:00 AM – 6:00 PM', open: true },
+  { day: 'Monday – Saturday', time: '10:00 AM – 8:00 PM', open: true },
+  { day: 'Sunday',            time: 'Closed', open: false },
 ];
 
-const MOCK_GOOGLE_REVIEWS = [
-  { name: 'Amit K.',      rating: 5, text: 'Best printing shop! Quality is amazing and delivery is always on time.', time: '2 weeks ago' },
-  { name: 'Meera S.',     rating: 5, text: 'Got wedding cards made here. Absolutely loved the quality. Very professional team.', time: '1 month ago' },
-  { name: 'Rajan P.',     rating: 5, text: 'Trophy engraving was perfect. Will come again for all our corporate needs.', time: '3 weeks ago' },
-];
+
 
 export default function GMBSection({ config = {} }) {
-  const waNum = String(config.whatsappNumber || config.phone || '919999999999').replace(/\D/g, '');
+  const waNum = String('919372333633').replace(/\D/g, '');
   const waHref = `https://wa.me/${waNum}?text=${encodeURIComponent('Hi! I want to visit your shop. Can you share directions?')}`;
-  const gmb = config.googleMapsUrl || 'https://maps.google.com';
+  const gmb = 'https://maps.google.com/maps?cid=9198516368001650236';
   const placeId = config.googlePlaceId || '';
 
   return (
@@ -38,13 +34,7 @@ export default function GMBSection({ config = {} }) {
                 </div>
                 <div>
                   <p className="font-bold text-gray-900">SANJU SK Digital – Mahi Creation</p>
-                  <div className="mt-1 flex items-center gap-2">
-                    <div className="flex gap-0.5">
-                      {[...Array(5)].map((_,i) => <FaStar key={i} className="text-[#C9A227] text-sm" />)}
-                    </div>
-                    <span className="text-sm font-bold text-gray-900">5.0</span>
-                    <span className="text-xs text-gray-500">· Google Reviews</span>
-                  </div>
+                  <p className="mt-1 text-sm text-gray-600">Printing, signage and wedding invitations in Gondia</p>
                 </div>
               </div>
               <a href={gmb} target="_blank" rel="noreferrer"
@@ -61,7 +51,7 @@ export default function GMBSection({ config = {} }) {
                 <div>
                   <p className="font-semibold text-gray-800">Address</p>
                   <p className="mt-0.5 text-sm text-gray-600">
-                    {config.address || 'Shop Address, City, State – PIN Code'}<br />
+                    {'Krishnapura Ward, in front of Santoshi Mata Mandir, Gondia, Maharashtra 441601'}<br />
                     <a href={gmb} target="_blank" rel="noreferrer" className="text-[#128C7E] hover:underline text-xs font-medium">
                       Get directions →
                     </a>
@@ -109,32 +99,7 @@ export default function GMBSection({ config = {} }) {
               />
             </div>
 
-            {/* Mini Google reviews */}
-            <div className="card-premium p-5">
-              <div className="mb-4 flex items-center justify-between">
-                <h3 className="font-bold text-gray-800">Google Reviews</h3>
-                <a href={gmb} target="_blank" rel="noreferrer" className="text-xs font-semibold text-[#4285F4] hover:underline">View all</a>
-              </div>
-              <div className="space-y-3">
-                {MOCK_GOOGLE_REVIEWS.map((rv, i) => (
-                  <div key={i} className="rounded-2xl bg-gray-50 p-3">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#4285F4] text-xs font-bold text-white">{rv.name[0]}</div>
-                        <span className="text-sm font-semibold text-gray-800">{rv.name}</span>
-                      </div>
-                      <span className="text-xs text-gray-400">{rv.time}</span>
-                    </div>
-                    <div className="mt-1.5 flex gap-0.5">
-                      {[...Array(rv.rating)].map((_,j) => <FaStar key={j} className="text-[#C9A227] text-xs" />)}
-                    </div>
-                    <p className="mt-1 text-xs text-gray-600 line-clamp-2">{rv.text}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
           </div>
-        </div>
       </div>
     </section>
   );
