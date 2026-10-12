@@ -1,228 +1,98 @@
 import { memo, useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { FaHeart, FaRegHeart, FaShare, FaRegBookmark, FaWhatsapp, FaEllipsisH } from 'react-icons/fa';
+import { FaHeart, FaRegHeart, FaShare, FaWhatsapp, FaArrowRight } from 'react-icons/fa';
 import { useFavorites } from '../../context/FavoritesContext';
 import { trackWhatsAppClick } from '../../hooks/useAnalytics';
 import { saveEnquiryLead, resolveCategoryName } from '../../hooks/useWhatsApp';
+import ProductStage from '../experience/ProductStage';
 
 function ProductFeedCard({ product, whatsappNumber, onView }) {
   const { favorites, toggleFavorite, addLiked } = useFavorites();
-  const [likedFx, setLikedFx] = useState(false);
   const [imgIdx, setImgIdx] = useState(0);
   const [categoryName, setCategoryName] = useState('');
-  const touchStartX = useRef(null);
   const cardRef = useRef(null);
   const isFav = favorites.some((f) => f._id === product._id);
-  const images = Array.isArray(product.images)
-    ? product.images.filter(Boolean)
-    : [product.images].filter(Boolean);
+  const images = Array.isArray(product.images) ? product.images.filter(Boolean) : [product.images].filter(Boolean);
 
-  // Resolve category name once
   useEffect(() => {
     if (product?.category) {
-      resolveCategoryName(product.category).then(setCategoryName);
+      let mounted = true;
+      resolveCategoryName(product.category).then((name) => { if (mounted) setCategoryName(name || ''); }).catch(() => {});
+      return () => { mounted = false; };
     }
   }, [product?.category]);
 
-  // Notify parent when card enters viewport (for scroll gate)
   useEffect(() => {
-    if (!onView || !cardRef.current) return;
-    const observer = new IntersectionObserver(
-      ([entry]) => { if (entry.isIntersecting) { onView(product._id); observer.disconnect(); } },
-      { threshold: 0.4 }
-    );
+    if (!onView || !cardRef.current || !('IntersectionObserver' in window)) return;
+    const observer = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting) { onView(product._id); observer.disconnect(); }
+    }, { threshold: .35 });
     observer.observe(cardRef.current);
     return () => observer.disconnect();
   }, [onView, product._id]);
 
   const displayPrice = useMemo(() => {
-    const tiers = product.quantityPricing;
-    if (Array.isArray(tiers) && tiers.length > 0) {
-      const prices = tiers.map((t) => Number(t.price)).filter((p) => p > 0);
-      if (prices.length > 0) return { label: `From ₹${Math.min(...prices)}`, hasRange: true };
-    }
-    return { label: `₹${product.price || 0}`, hasRange: false };
+    const prices = product.quantityPricing?.map((t) => Number(t.price)).filter((p) => p > 0) || [];
+    return prices.length ? `From ₹${Math.min(...prices)}` : (Number(product.price) > 0 ? `₹${product.price}` : 'Ask for pricing');
   }, [product]);
 
-  const wa = String(whatsappNumber || '').replace(/\D/g, '');
+  const wa = String(whatsappNumber || '919372333633').replace(/\D/g, '');
   const productLink = `${window.location.origin}/products/${product._id}`;
-  const waMsgText =
-    `Hi! I'm interested in *${product.title}*\n` +
-    `🆔 Product ID: ${product._id || ''}\n` +
-    `💰 Price: ${displayPrice.label}\n` +
-    (categoryName ? `📂 Category: ${categoryName}\n` : '') +
-    (images[0] ? `🖼️ Image: ${images[0]}\n` : '') +
-    `🔗 Link: ${productLink}\n` +
-    `\nPlease share more details.`;
-  const waHref = wa ? `https://wa.me/${wa}?text=${encodeURIComponent(waMsgText)}` : '#';
+  const message = `Hi! I'm interested in *${product.title}*\n🆔 Product ID: ${product._id}\n💰 ${displayPrice}\n`
+    + (categoryName ? `📂 Category: ${categoryName}\n` : '')
+    + (images[imgIdx] ? `🖼️ Image: ${images[imgIdx]}\n` : '')
+    + `🔗 ${productLink}\nPlease share a quotation.`;
+  const waHref = `https://wa.me/${wa}?text=${encodeURIComponent(message)}`;
 
-  const handleWAClick = () => {
+  const onOrder = () => {
     trackWhatsAppClick(product._id);
-    saveEnquiryLead({ productId: product._id, productName: product.title, message: waMsgText });
+    saveEnquiryLead({ productId: product._id, productName: product.title, message });
   };
-
-  const onDoubleTap = () => {
-    toggleFavorite(product);
-    addLiked?.(product);
-    setLikedFx(true);
-    setTimeout(() => setLikedFx(false), 700);
-  };
-
   const handleShare = () => {
-    const url = productLink;
-    if (navigator.share) navigator.share({ title: product.title, url });
-    else navigator.clipboard?.writeText(url);
-  };
-
-  // Touch swipe for carousel
-  const onTouchStart = (e) => { touchStartX.current = e.touches[0].clientX; };
-  const onTouchEnd = (e) => {
-    if (touchStartX.current === null) return;
-    const diff = touchStartX.current - e.changedTouches[0].clientX;
-    if (diff > 50) setImgIdx((i) => Math.min(i + 1, images.length - 1));
-    else if (diff < -50) setImgIdx((i) => Math.max(i - 1, 0));
-    touchStartX.current = null;
+    if (navigator.share) navigator.share({ title: product.title, url: productLink }).catch(() => {});
+    else navigator.clipboard?.writeText(productLink);
   };
 
   return (
-    <article ref={cardRef} className="mb-2 bg-white">
-      {/* Post header */}
-      <div className="flex items-center justify-between px-3 py-2.5">
+    <article className="sk-feed-card" ref={cardRef}>
+      <div className="sk-feed-card__header">
         <Link to={`/products/${product._id}`} className="flex min-w-0 items-center gap-2.5">
-          <div className="h-9 w-9 flex-shrink-0 overflow-hidden rounded-full bg-gray-100 ring-2 ring-gray-100">
-            {images[0] ? (
-              <img
-                src={images[0]}
-                alt={product.title}
-                className="h-full w-full object-cover"
-                loading="lazy"
-                onError={(e) => { e.target.onerror = null; e.target.style.display = 'none'; }}
-              />
-            ) : (
-              <div className="h-full w-full bg-gray-200" />
-            )}
+          <div className="h-10 w-10 shrink-0 overflow-hidden rounded-xl border border-white bg-[#eef1ec] shadow-sm">
+            {images[0] && <img className="h-full w-full object-cover" src={images[0]} alt="" loading="lazy" />}
           </div>
           <div className="min-w-0">
-            <p className="line-clamp-1 text-[13px] font-semibold leading-tight text-gray-900">
-              {product.title}
-            </p>
-            {product.badge && (
-              <p className="text-[11px] leading-tight text-gray-400">{product.badge}</p>
-            )}
+            <h3 className="sk-feed-card__title line-clamp-1">{product.title}</h3>
+            <p className="sk-feed-card__muted">{categoryName || 'Made to order'}</p>
           </div>
         </Link>
-        <button className="flex-shrink-0 p-1 text-gray-500" aria-label="More options">
-          <FaEllipsisH className="text-sm" />
-        </button>
+        <span className="rounded-full bg-[#f6f0e5] px-2.5 py-1 text-[10px] font-bold text-[#a37f45]">PREVIEW</span>
       </div>
 
-      {/* Image — carousel if multiple */}
-      <div
-        className="relative"
-        onDoubleClick={onDoubleTap}
-        onTouchStart={onTouchStart}
-        onTouchEnd={onTouchEnd}
-      >
-        <Link to={`/products/${product._id}`}>
-          {images.length > 0 ? (
-            <img
-              src={images[imgIdx] ?? images[0]}
-              alt={product.title}
-              className="aspect-square w-full object-cover select-none"
-              loading="lazy"
-              draggable="false"
-              onContextMenu={(e) => e.preventDefault()}
-              onError={(e) => { e.target.onerror = null; e.target.style.display = 'none'; }}
-            />
-          ) : (
-            <div className="aspect-square w-full bg-gray-100 flex items-center justify-center text-gray-300 text-xs">
-              No image
-            </div>
-          )}
-        </Link>
-
-        {/* Dot indicator for multiple images */}
-        {images.length > 1 && (
-          <div className="absolute bottom-2.5 left-0 right-0 flex justify-center gap-1.5">
-            {images.map((_, i) => (
-              <button
-                key={i}
-                onClick={() => setImgIdx(i)}
-                className={`rounded-full transition-all ${
-                  i === imgIdx ? 'h-2 w-5 bg-white' : 'h-2 w-2 bg-white/60'
-                }`}
-              />
-            ))}
-          </div>
-        )}
-
-        {/* Multiple images badge top-right */}
-        {images.length > 1 && (
-          <span className="absolute right-2.5 top-2.5 rounded-full bg-black/50 px-2 py-0.5 text-[10px] font-semibold text-white">
-            {imgIdx + 1}/{images.length}
-          </span>
-        )}
-
-        {likedFx && (
-          <motion.div
-            initial={{ scale: 0.5, opacity: 1 }}
-            animate={{ scale: 1.3, opacity: 0 }}
-            transition={{ duration: 0.7 }}
-            className="pointer-events-none absolute inset-0 flex items-center justify-center"
-          >
-            <FaHeart className="text-7xl text-white drop-shadow-lg" />
-          </motion.div>
-        )}
+      <div onDoubleClick={() => { toggleFavorite(product); addLiked?.(product); }} >
+        <ProductStage images={images} title={product.title} activeIndex={imgIdx} onIndexChange={setImgIdx}
+          modelUrl={product.model3dUrl || product.modelUrl || product.glbUrl} compact />
       </div>
 
-      {/* Actions */}
-      <div className="flex items-center justify-between px-3 pt-2.5 pb-1">
-        <div className="flex items-center gap-4">
-          <button
-            onClick={() => toggleFavorite(product)}
-            aria-label="Save"
-            className="transition-transform active:scale-90"
-          >
-            {isFav
-              ? <FaHeart className="text-xl text-red-500" />
-              : <FaRegHeart className="text-xl text-gray-900" />
-            }
+      <div className="sk-feed-card__actionbar">
+        <div className="flex items-center gap-3">
+          <button type="button" onClick={() => toggleFavorite(product)} aria-label={isFav ? 'Remove from saved' : 'Save product'}
+            className="sk-glass-button !h-9 !w-9">
+            {isFav ? <FaHeart className="text-rose-500" /> : <FaRegHeart />}
           </button>
-          <button onClick={handleShare} aria-label="Share" className="transition-transform active:scale-90">
-            <FaShare className="text-xl text-gray-900" />
-          </button>
-          <button aria-label="Bookmark" className="transition-transform active:scale-90">
-            <FaRegBookmark className="text-xl text-gray-900" />
-          </button>
+          <button type="button" aria-label={`Share ${product.title}`} onClick={handleShare} className="sk-glass-button !h-9 !w-9"><FaShare /></button>
+          <Link to={`/products/${product._id}`} className="inline-flex items-center gap-1.5 text-xs font-bold text-[#365b4a]">
+            Details <FaArrowRight className="text-[10px]" />
+          </Link>
         </div>
-        <a
-          href={waHref}
-          target="_blank"
-          rel="noreferrer"
-          onClick={handleWAClick}
-          className="flex items-center gap-1.5 rounded-lg bg-gray-900 px-4 py-2 text-[12px] font-semibold text-white transition-transform active:scale-95"
-        >
-          Order <FaWhatsapp className="text-[#25D366]" />
+        <a className="sk-order-button" href={waHref} target="_blank" rel="noopener noreferrer" onClick={onOrder}>
+          Enquire <FaWhatsapp className="text-base text-[#91e6b1]" />
         </a>
       </div>
-
-      {/* Price + description */}
-      <div className="px-3 pb-3 pt-1">
-        <p className="text-[13px] font-bold text-gray-900">
-          {displayPrice.label}
-          {displayPrice.hasRange && (
-            <span className="ml-1 text-[11px] font-normal text-gray-400">· volume pricing</span>
-          )}
-        </p>
-        {product.description && (
-          <p className="mt-0.5 line-clamp-2 text-xs leading-relaxed text-gray-500">
-            {product.description}
-          </p>
-        )}
+      <div className="flex items-center justify-between gap-3 border-t border-[#f0f0e9] px-4 pb-4 pt-3">
+        <strong className="sk-price text-lg">{displayPrice}</strong>
+        {product.description && <p className="line-clamp-1 max-w-[56%] text-right text-[11px] text-[#77847a]">{product.description}</p>}
       </div>
     </article>
   );
 }
-
 export default memo(ProductFeedCard);

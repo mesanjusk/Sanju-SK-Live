@@ -402,27 +402,21 @@ export default function ProductListing() {
   );
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-24">
+    <div className="sk-storefront min-h-screen pb-24">
       <MobileHeader />
       <MobileSearchBar value={searchTerm} onChange={setSearchTerm} />
-      {/* Header */}
-      <div className="border-b border-gray-200 bg-white">
-        <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-          <h1 className="font-serif text-3xl font-bold text-gray-900">
-            All Products
-          </h1>
-
-          <p className="mt-2 text-sm text-gray-500">
-            {loading
-              ? 'Loading products...'
-              : `${products.length} products found`}
-          </p>
-        </div>
+      <div className="mx-auto max-w-7xl px-4 pt-5 sm:px-6 lg:px-8">
+        <section className="sk-catalog-hero">
+          <span>THE SANJU SK COLLECTION</span>
+          <h1>Made to be remembered.</h1>
+          <p>Discover print, signage, invitations and corporate gifts with immersive photo previews. Tap any product to see every available angle.</p>
+          <p aria-live="polite">{loading ? 'Exploring our collection…' : `${products.length} products ready to explore`}</p>
+        </section>
       </div>
 
       <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
         {/* Sticky Top Bar */}
-        <div className="sticky top-16 z-20 mb-6 rounded-2xl border border-gray-200 bg-white/90 p-4 shadow-sm backdrop-blur-md">
+        <div className="sticky top-16 z-20 mb-6 rounded-2xl border border-[#e9e9df] bg-white/90 p-4 shadow-[0_10px_27px_-20px_#294d39] backdrop-blur-xl">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
             {/* Search */}
             <div className="relative flex-1">
@@ -511,13 +505,13 @@ export default function ProductListing() {
           {/* Mobile Drawer */}
           {sidebarOpen && (
             <div
-              className="fixed inset-0 z-50 bg-black/40 lg:hidden"
+              className="fixed inset-0 z-50 bg-[#1a2f27]/60 lg:hidden"
               onClick={() =>
                 setSidebarOpen(false)
               }
             >
               <aside
-                className="absolute right-0 top-0 h-full w-80 overflow-y-auto bg-white p-5 shadow-2xl"
+                className="absolute right-0 top-0 h-full w-[min(90vw,360px)] overflow-y-auto bg-[#fafaf4] p-5 shadow-2xl"
                 onClick={(e) =>
                   e.stopPropagation()
                 }
@@ -545,7 +539,7 @@ export default function ProductListing() {
           {/* Products */}
           <main className="min-w-0 flex-1">
             {loading ? (
-              <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
+              <div className="sk-catalog-grid">
                 {[...Array(6)].map((_, i) => (
                   <LoadingSkeleton key={i} />
                 ))}
@@ -569,7 +563,7 @@ export default function ProductListing() {
 
                 <button
                   onClick={clearFilters}
-                  className="mt-5 rounded-xl bg-[#25D366] px-5 py-3 text-sm font-semibold text-white transition-all hover:bg-[#128C7E]"
+                  className="sk-order-button mt-5"
                 >
                   Clear Filters
                 </button>
@@ -582,7 +576,7 @@ export default function ProductListing() {
                     (product) => (
                       <div
                         key={product._id}
-                        className="transition-all duration-300 hover:-translate-y-1"
+                        className="min-w-0"
                       >
                         <ProductCard product={product} />
                       </div>

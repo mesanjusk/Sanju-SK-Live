@@ -15,7 +15,7 @@ function PostGrid({ items, emptyMsg }) {
         </div>
         <p className="text-base font-semibold text-gray-700">Nothing here yet</p>
         <p className="mt-1 text-sm text-gray-400">{emptyMsg}</p>
-        <Link to="/" className="mt-5 rounded-lg bg-gray-900 px-5 py-2.5 text-sm font-semibold text-white">
+        <Link to="/" className="sk-order-button mt-5">
           Browse Feed
         </Link>
       </div>
@@ -23,12 +23,12 @@ function PostGrid({ items, emptyMsg }) {
   }
 
   return (
-    <div className="grid grid-cols-3 gap-[2px]">
+    <div className="grid grid-cols-3 gap-2 p-3">
       {items.map((p) => {
         const img = Array.isArray(p.images) ? p.images[0] : p.images;
         return (
           <Link key={p._id} to={`/products/${p._id}`} className="block">
-            <div className="aspect-square overflow-hidden bg-gray-100">
+            <div className="aspect-square overflow-hidden rounded-xl border border-white bg-[#edf2e8] shadow-[0_9px_20px_-12px_#1536245a]">
               {img ? (
                 <img
                   src={img}
@@ -52,7 +52,7 @@ export default function Favorites() {
   const [tab, setTab] = useState('saved');
 
   return (
-    <div className="min-h-screen bg-white pb-24">
+    <div className="sk-storefront min-h-screen pb-24">
       <MobileHeader />
 
       {/* Header */}

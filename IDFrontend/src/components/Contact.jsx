@@ -1,167 +1,88 @@
-import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { FaWhatsapp, FaInstagram, FaEnvelope, FaArrowLeft, FaPhone, FaMapMarkerAlt, FaPaperPlane } from 'react-icons/fa';
-import api from '../api';
+import { useState } from 'react';
+import { Link } from 'react-router-dom';
+import { FaArrowLeft, FaWhatsapp, FaInstagram, FaPhone, FaMapMarkerAlt, FaPaperPlane, FaEnvelope } from 'react-icons/fa';
+import MobileBottomNav from './mobile/MobileBottomNav';
+import localSeo from '../config/local-seo.json';
 
+const WA = '919372333633';
 export default function Contact() {
-  const navigate = useNavigate();
-  const [config, setConfig] = useState({});
-  const [form, setForm] = useState({ name: '', email: '', message: '' });
-  const [sent, setSent] = useState(false);
+  const [form, setForm] = useState({ name: '', service: 'Wedding cards & invitations', message: '' });
+  const mapUrl = localSeo.mapUrl;
+  const onChange = (key, value) => setForm(prev => ({ ...prev, [key]: value }));
+  const request = `Hello SANJU SK Digital – Mahi Creation,\nMy name: ${form.name}\nService: ${form.service}\nRequirement: ${form.message}\nPlease share a quotation.`;
+  const enquiryUrl = `https://wa.me/${WA}?text=${encodeURIComponent(request)}`;
 
-  useEffect(() => {
-    api.get('/api/confi/GetConfiList')
-      .then((res) => setConfig(res.data?.result?.[0] || {}))
-      .catch(() => {});
-  }, []);
-
-  const wa = '919372333633';
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    setSent(true);
-    setForm({ name: '', email: '', message: '' });
-    setTimeout(() => setSent(false), 4000);
+  const handleSubmit = (event) => {
+    event.preventDefault();
+    // Open the user's WhatsApp composer. Never show a fake "message sent" state.
+    window.location.href = enquiryUrl;
   };
 
   return (
-    <div className="min-h-screen bg-black text-white pb-24">
-      {/* Instagram-style sticky header */}
-      <div className="sticky top-0 z-40 flex items-center gap-3 border-b border-white/10 bg-black/80 px-4 py-3 backdrop-blur">
-        <button
-          onClick={() => navigate(-1)}
-          className="flex h-9 w-9 items-center justify-center rounded-full bg-white/10 text-white active:scale-95"
-        >
-          <FaArrowLeft className="text-sm" />
-        </button>
-        <h1 className="flex-1 text-sm font-semibold">Contact Us</h1>
-      </div>
-
-      <div className="mx-auto max-w-lg px-4 pt-6">
-        {/* Profile-card style header */}
-        <div className="mb-6 flex flex-col items-center text-center">
-          {/* Avatar ring — gradient like Instagram */}
-          <div className="mb-4 rounded-full bg-gradient-to-br from-pink-500 via-orange-400 to-yellow-400 p-[3px]">
-            <div className="h-20 w-20 overflow-hidden rounded-full bg-black">
-              {config.logo ? (
-                <img src={config.logo} alt={config.name} className="h-full w-full object-cover" />
-              ) : (
-                <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-purple-700 via-pink-600 to-orange-400 text-2xl font-bold">
-                  {(config.name || 'SK').slice(0, 2).toUpperCase()}
-                </div>
-              )}
+    <div className="sk-storefront min-h-screen pb-32">
+      <header className="sk-detail-back">
+        <Link to="/" className="sk-glass-button !h-9 !w-9" aria-label="Back to home"><FaArrowLeft /></Link>
+        <div><h1 className="font-extrabold tracking-tight text-[#294238]">Let's create something remarkable</h1><p className="text-[10px] text-[#789080]">SANJU SK Digital · Mahi Creation</p></div>
+      </header>
+      <main className="mx-auto max-w-5xl px-4 py-6">
+        <section className="sk-catalog-hero">
+          <span>MADE PERSONAL, MADE TO LAST</span>
+          <h2 className="max-w-md !text-3xl">Your vision.<br />Our craft.</h2>
+          <p>Premium printing, dimensional signage, invitations and keepsakes, all from Gondia. Tell us what you imagine.</p>
+          <div className="mt-5 flex flex-wrap gap-2">
+            <a href={`https://wa.me/${WA}`} target="_blank" rel="noopener noreferrer" className="sk-order-button !bg-[#f0d1a0] !text-[#1a372b]">
+              <FaWhatsapp /> Chat on WhatsApp
+            </a>
+            <a href="tel:+919372333633" className="inline-flex items-center gap-2 rounded-xl border border-[#e9e3d155] px-4 py-3 text-xs font-bold text-white"><FaPhone /> Call the studio</a>
+          </div>
+        </section>
+        <div className="grid gap-5 lg:grid-cols-2">
+          <section className="sk-detail-panel" aria-labelledby="enquire-heading">
+            <span className="sk-brand-subline">PERSONAL QUOTATION</span>
+            <h2 id="enquire-heading" className="mt-2 text-2xl font-extrabold tracking-tight text-[#263e32]">Start your project</h2>
+            <p className="mt-2 text-sm leading-6 text-[#708174]">Share a few details. We'll open WhatsApp with your message ready for review and sending.</p>
+            <form className="mt-6 space-y-4" onSubmit={handleSubmit}>
+              <div><label htmlFor="sk-contact-name" className="mb-1 block text-xs font-bold text-[#314e3c]">Your name</label>
+                <input id="sk-contact-name" className="lux-input !bg-white" value={form.name} required
+                  onChange={e => onChange('name',e.target.value)} placeholder="Your name" /></div>
+              <div><label htmlFor="sk-contact-service" className="mb-1 block text-xs font-bold text-[#314e3c]">Service</label>
+                <select id="sk-contact-service" className="lux-input !bg-white" value={form.service} onChange={e => onChange('service',e.target.value)}>
+                  <option>Wedding cards & invitations</option>
+                  <option>3D LED & acrylic signage</option>
+                  <option>Flex banners & standees</option>
+                  <option>Trophies & corporate gifts</option>
+                  <option>Visiting cards, labels & branding</option>
+                  <option>Other custom printing</option>
+                </select></div>
+              <div><label htmlFor="sk-contact-details" className="mb-1 block text-xs font-bold text-[#314e3c]">Project details</label>
+                <textarea id="sk-contact-details" className="lux-input min-h-[112px] !bg-white" required
+                  value={form.message} onChange={e => onChange('message',e.target.value)}
+                  placeholder="What do you need, quantity, size and deadline?" /></div>
+              <button type="submit" className="sk-order-button !w-full !py-4 !text-sm"><FaPaperPlane /> Continue to WhatsApp</button>
+            </form>
+          </section>
+          <section className="sk-detail-panel" aria-labelledby="visit-heading">
+            <span className="sk-brand-subline">VISIT OUR STUDIO</span>
+            <h2 id="visit-heading" className="mt-2 text-2xl font-extrabold tracking-tight text-[#263e32]">Find us in Gondia</h2>
+            <address className="mt-4 not-italic text-sm leading-7 text-[#586e5e]">
+              <strong className="text-[#2e4c37]">{localSeo.businessName}</strong><br />
+              {localSeo.address.streetAddress}<br />
+              Gondia, Maharashtra 441601
+            </address>
+            <div className="mt-5 grid grid-cols-2 gap-3">
+              <div className="rounded-xl bg-[#f2f5ed] p-4"><p className="sk-brand-subline">OPEN HOURS</p><p className="mt-2 text-sm font-bold text-[#304e3d]">Mon–Sat</p><p className="text-xs text-[#65746a]">10 AM – 8 PM</p></div>
+              <div className="rounded-xl bg-[#f2f5ed] p-4"><p className="sk-brand-subline">SUNDAY</p><p className="mt-2 text-sm font-bold text-[#304e3d]">Closed</p><p className="text-xs text-[#65746a]">Send us a message</p></div>
             </div>
-          </div>
-          <h2 className="text-lg font-bold">{config.name || 'SANJU SK Digital – Mahi Creation'}</h2>
-          {config.address && (
-            <p className="mt-1 flex items-center gap-1 text-xs text-white/50">
-              <FaMapMarkerAlt className="text-pink-400" /> {config.address}
-            </p>
-          )}
-          <p className="mt-2 max-w-xs text-xs leading-relaxed text-white/60">
-            Premium invitations & print designs. DM us or use the form below — we reply fast!
-          </p>
-
-          {/* Stat pills */}
-          <div className="mt-4 flex gap-6 text-center">
-            {wa && (
-              <a
-                href={`https://wa.me/${wa}`}
-                target="_blank"
-                rel="noreferrer"
-                className="flex flex-col items-center gap-1 rounded-xl border border-white/10 bg-white/5 px-5 py-3 transition active:scale-95"
-              >
-                <FaWhatsapp className="text-xl text-[#25D366]" />
-                <span className="text-[11px] text-white/60">WhatsApp</span>
-              </a>
-            )}
-            {config.insta && (
-              <a
-                href={config.insta}
-                target="_blank"
-                rel="noreferrer"
-                className="flex flex-col items-center gap-1 rounded-xl border border-white/10 bg-white/5 px-5 py-3 transition active:scale-95"
-              >
-                <FaInstagram className="text-xl text-pink-400" />
-                <span className="text-[11px] text-white/60">Instagram</span>
-              </a>
-            )}
-            {config.email && (
-              <a
-                href={`mailto:${config.email}`}
-                className="flex flex-col items-center gap-1 rounded-xl border border-white/10 bg-white/5 px-5 py-3 transition active:scale-95"
-              >
-                <FaEnvelope className="text-xl text-orange-400" />
-                <span className="text-[11px] text-white/60">Email</span>
-              </a>
-            )}
-          </div>
-        </div>
-
-        {/* Quick contact info */}
-        {(config.phone || config.whatsappNumber) && (
-          <div className="mb-5 flex items-center gap-3 rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
-            <FaPhone className="shrink-0 text-[#25D366]" />
-            <span className="text-sm text-white/80">{config.whatsappNumber || config.phone}</span>
-          </div>
-        )}
-
-        {/* Message form */}
-        <div className="rounded-2xl border border-white/10 bg-white/5 p-5">
-          <h3 className="mb-4 text-sm font-semibold text-white/80">Send a Message</h3>
-
-          {sent && (
-            <div className="mb-4 flex items-center gap-2 rounded-xl bg-[#25D366]/20 px-4 py-3 text-sm text-[#25D366]">
-              <FaPaperPlane /> Message sent! We'll reply shortly.
+            <div className="mt-6 flex flex-col gap-3 text-sm font-bold text-[#365b45]">
+              <a href={mapUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3"><FaMapMarkerAlt className="text-[#c3975d]" /> Google Maps directions →</a>
+              <a href="tel:+919372333633" className="flex items-center gap-3"><FaPhone className="text-[#c3975d]" /> +91 93723 33633</a>
+              <a href="mailto:skgondia@gmail.com" className="flex items-center gap-3"><FaEnvelope className="text-[#c3975d]" /> skgondia@gmail.com</a>
+              <a href={localSeo.instagramUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3"><FaInstagram className="text-[#c3975d]" /> Visit our Instagram studio →</a>
             </div>
-          )}
-
-          <form onSubmit={handleSubmit} className="space-y-3">
-            <input
-              required
-              type="text"
-              value={form.name}
-              onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
-              placeholder="Your name"
-              className="w-full rounded-xl border border-white/10 bg-white/10 px-4 py-3 text-sm text-white placeholder-white/30 outline-none focus:border-pink-500 focus:ring-1 focus:ring-pink-500"
-            />
-            <input
-              required
-              type="email"
-              value={form.email}
-              onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))}
-              placeholder="Email address"
-              className="w-full rounded-xl border border-white/10 bg-white/10 px-4 py-3 text-sm text-white placeholder-white/30 outline-none focus:border-pink-500 focus:ring-1 focus:ring-pink-500"
-            />
-            <textarea
-              required
-              rows={4}
-              value={form.message}
-              onChange={(e) => setForm((f) => ({ ...f, message: e.target.value }))}
-              placeholder="Your message…"
-              className="w-full resize-none rounded-xl border border-white/10 bg-white/10 px-4 py-3 text-sm text-white placeholder-white/30 outline-none focus:border-pink-500 focus:ring-1 focus:ring-pink-500"
-            />
-            <button
-              type="submit"
-              className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-pink-500 via-orange-400 to-yellow-400 py-3 text-sm font-bold text-white shadow-lg active:scale-95"
-            >
-              <FaPaperPlane /> Send Message
-            </button>
-          </form>
+          </section>
         </div>
-
-        {/* WhatsApp CTA */}
-        {wa && (
-          <a
-            href={`https://wa.me/${wa}?text=${encodeURIComponent('Hi! I have a query about your designs.')}`}
-            target="_blank"
-            rel="noreferrer"
-            className="mt-4 flex items-center justify-center gap-2 rounded-2xl border border-[#25D366]/40 bg-[#25D366]/10 py-4 text-sm font-semibold text-[#25D366] active:scale-95"
-          >
-            <FaWhatsapp className="text-lg" /> Chat on WhatsApp
-          </a>
-        )}
-      </div>
+      </main>
+      <MobileBottomNav />
     </div>
   );
 }
