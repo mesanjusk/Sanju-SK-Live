@@ -36,9 +36,21 @@ export default function SEO({ title, description, pathname = '/', noIndex = fals
       content: noIndex ? 'noindex, nofollow' : 'index, follow, max-image-preview:large, max-snippet:-1',
     });
     upsertCanonical(canonicalUrl);
-    // FAQ schema only describes visible FAQ on the homepage.
-    const faq = document.getElementById('structured-data-jsonld');
-    if (faq && !isHome) faq.remove();
+    // Keep full FAQ schema on the homepage, and remove only the FAQ/WebPage
+    // graph nodes on SPA routes that do not display the homepage FAQ.
+    const script = document.getElementById('structured-data-jsonld');
+    if (script) {
+      if (!script.dataset.homeSchema) script.dataset.homeSchema = script.textContent;
+      try {
+        const graph = JSON.parse(script.dataset.homeSchema);
+        if (!isHome) graph['@graph'] = graph['@graph'].filter(
+          node => node['@type'] !== 'FAQPage' && node['@type'] !== 'WebPage'
+        );
+        script.textContent = JSON.stringify(graph);
+      } catch (error) {
+        console.warn('Could not update route-specific structured data', error);
+      }
+    }
   }, [canonicalUrl, isHome, noIndex, pageDescription, pageTitle]);
 
   return null;

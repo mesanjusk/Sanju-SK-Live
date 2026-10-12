@@ -165,20 +165,8 @@ function App() {
     return () => clearInterval(id);
   }, [backendReady]);
 
-  if (!backendReady) {
-    return (
-      <div className="flex min-h-screen flex-col items-center justify-center bg-white px-4">
-        <p className="font-serif text-2xl font-bold italic text-gray-900">SK Digital</p>
-        <div className="mt-4 h-1 w-20 animate-pulse rounded-full bg-gray-200" />
-        {warming && (
-          <p className="mt-4 animate-pulse text-sm text-gray-400">
-            Server is waking up, please wait a moment…
-          </p>
-        )}
-      </div>
-    );
-  }
-
+  // Render the storefront immediately so crawler-visible content is not blocked
+  // by a sleeping backend. Product feeds already fetch asynchronously.
   return (
     <Router>
       <AppRoutes />
