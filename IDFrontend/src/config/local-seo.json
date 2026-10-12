@@ -1,0 +1,83 @@
+{
+  "siteUrl": "https://www.sanjusk.in",
+  "businessName": "SANJU SK Digital – Mahi Creation",
+  "alternateName": [
+    "SANJU SK Digital",
+    "Mahi Creation"
+  ],
+  "headline": "SANJU SK Digital – Mahi Creation | Printing, 3D Signage & Wedding Cards in Gondia",
+  "description": "Gondia printing studio for 3D LED letters, neon signs, premium wedding cards, flex banners and custom trophies. Serving Gondia, Nagpur & Balaghat. Call +91 93723 33633.",
+  "phone": "+919372333633",
+  "displayPhone": "+91 93723 33633",
+  "logoPath": "/images/logo.png",
+  "ogImagePath": "/images/og-preview.png",
+  "mapUrl": "https://maps.google.com/maps?cid=9198516368001650236",
+  "instagramUrl": "https://www.instagram.com/sanju.sk.digital",
+  "address": {
+    "streetAddress": "Krishnapura Ward, in front of Santoshi Mata Mandir",
+    "addressLocality": "Gondia",
+    "addressRegion": "Maharashtra",
+    "postalCode": "441601",
+    "addressCountry": "IN"
+  },
+  "geo": {
+    "latitude": 21.4582258,
+    "longitude": 80.189857
+  },
+  "openingHours": {
+    "days": [
+      "Monday",
+      "Tuesday",
+      "Wednesday",
+      "Thursday",
+      "Friday",
+      "Saturday"
+    ],
+    "opens": "10:00",
+    "closes": "20:00"
+  },
+  "services": [
+    {
+      "name": "3D LED Acrylic Channel Letters & Neon Sign Boards",
+      "description": "Custom 3D LED acrylic channel letters, illuminated signs and neon-style sign boards for shops, showrooms and offices."
+    },
+    {
+      "name": "Laser-Cut & Luxury Handmade Wedding Cards",
+      "description": "Personalized laser-cut, premium and handmade wedding invitations, including traditional and modern printed card designs."
+    },
+    {
+      "name": "Large-Format Flex Banners, Hoardings & Standees",
+      "description": "Large-format flex banner printing, advertising hoardings, event backdrops and promotional standees."
+    },
+    {
+      "name": "Customized Corporate Trophies, Acrylic Mementos & Awards",
+      "description": "Personalized corporate trophies, acrylic mementos, recognition awards and engraved gift items."
+    },
+    {
+      "name": "Visiting Cards, Brochures, Product Labels & Digital Branding",
+      "description": "Business visiting cards, brochures, printed product labels and graphic design and branding material."
+    }
+  ],
+  "faqs": [
+    {
+      "question": "Where can I get custom 3D LED channel letters and neon sign boards in Gondia?",
+      "answer": "SANJU SK Digital – Mahi Creation in Krishnapura Ward, in front of Santoshi Mata Mandir, Gondia, takes enquiries for custom 3D LED acrylic channel letters and neon sign boards. Call +91 93723 33633 to discuss the size, design and quotation."
+    },
+    {
+      "question": "Who is the best wedding card and invitation printer in Gondia and Balaghat?",
+      "answer": "If you are comparing wedding invitation printers in Gondia or Balaghat, SANJU SK Digital – Mahi Creation in Gondia offers personalized luxury, handmade and laser-cut wedding cards. Share your design, quantity and event date to request a quotation; the best choice depends on your requirements."
+    },
+    {
+      "question": "Do you print large format flex banners, hoardings, and promo standees?",
+      "answer": "Yes. SANJU SK Digital – Mahi Creation offers large-format flex banners, hoardings, event backdrops and promotional standees. Contact the Gondia studio with the artwork, dimensions and quantity for availability and pricing."
+    },
+    {
+      "question": "Can I order customized corporate trophies and awards at SANJU SK Digital?",
+      "answer": "Yes. Contact SANJU SK Digital – Mahi Creation for personalized corporate trophies, acrylic mementos and awards. Share the event details, preferred material, quantity and any logo or name engraving requirements."
+    },
+    {
+      "question": "What are your operating hours and where are you located?",
+      "answer": "SANJU SK Digital – Mahi Creation is at Krishnapura Ward, in front of Santoshi Mata Mandir, Gondia, Maharashtra 441601. Open Monday to Saturday, 10:00 AM–8:00 PM; closed Sunday. Call +91 93723 33633 for assistance."
+    }
+  ]
+}

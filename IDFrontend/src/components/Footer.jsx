@@ -1,3 +1,4 @@
+import LocalContactFooter from './LocalContactFooter';
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { FaInstagram, FaWhatsapp, FaEnvelope, FaChevronDown, FaChevronUp, FaThLarge } from 'react-icons/fa';
@@ -9,7 +10,7 @@ export default function Footer() {
   const [showCats, setShowCats] = useState(false);
   const navigate = useNavigate();
   const year = useMemo(() => new Date().getFullYear(), []);
-  const wa = String(config.whatsappNumber || config.phone || '919372333633').replace(/\D/g, '');
+  const wa = '919372333633';
 
   useEffect(() => {
     api.get('/api/confi/GetConfiList')
@@ -30,9 +31,9 @@ export default function Footer() {
       <div className="lux-card overflow-hidden">
         <div className="lux-container grid gap-10 py-12 lg:grid-cols-[1.3fr_1fr_1fr]">
           <div>
-            <h3 className="text-4xl font-semibold">{config.name || 'SK Luxury Studio'}</h3>
+            <h3 className="text-4xl font-semibold">{'SANJU SK Digital – Mahi Creation'}</h3>
             <p className="mt-3 max-w-md text-sm text-[#516252]">
-              A modern design atelier for premium invitations, print identities, and visual storytelling with editorial elegance.
+              Local printing, signage, wedding invitations, corporate gifts and custom branding in Gondia.
             </p>
           </div>
 
@@ -80,8 +81,8 @@ export default function Footer() {
               <a className="lux-btn-soft" href={`https://wa.me/${wa}`} target="_blank" rel="noreferrer">
                 <FaWhatsapp /> WhatsApp
               </a>
-              {config.insta && (
-                <a className="lux-btn-soft" href={config.insta} target="_blank" rel="noreferrer">
+              {true && (
+                <a className="lux-btn-soft" href="https://www.instagram.com/sanju.sk.digital" target="_blank" rel="noreferrer">
                   <FaInstagram /> Instagram
                 </a>
               )}
@@ -96,14 +97,7 @@ export default function Footer() {
 
         <div className="lux-divider" />
 
-        {/* NAP – Name, Address, Phone for local SEO */}
-        <div className="lux-container py-4 text-xs text-[#697869]">
-          <p><strong>Business Name:</strong> SANJU SK Digital – Mahi Creation</p>
-          <p><strong>Address:</strong> Krishnapura Ward, In Front of Santoshi Mata Mandir, Gondia, Maharashtra 441601</p>
-          <p><strong>Phone:</strong> +91 93723 33633</p>
-          <p><strong>Hours:</strong> Mon–Sat 10:00 AM – 8:00 PM | Sunday: call to confirm</p>
-        </div>
-
+        <LocalContactFooter />
         <div className="lux-divider" />
         <div className="lux-container flex flex-col gap-2 py-4 text-xs text-[#697869] sm:flex-row sm:justify-between">
           <span>© {year} {config.name || 'SK Luxury Studio'}.</span>

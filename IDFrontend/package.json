@@ -6,7 +6,8 @@
     "build": "vite build",
     "preview": "vite preview",
     "test": "echo \"No tests specified\"",
-    "prebuild": "node scripts/generate-seo.mjs"
+    "prebuild": "node scripts/generate-seo.mjs",
+    "predev": "node scripts/generate-seo.mjs"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",

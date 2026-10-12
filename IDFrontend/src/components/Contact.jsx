@@ -15,7 +15,7 @@ export default function Contact() {
       .catch(() => {});
   }, []);
 
-  const wa = String(config.whatsappNumber || config.phone || '').replace(/\D/g, '');
+  const wa = '919372333633';
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -52,7 +52,7 @@ export default function Contact() {
               )}
             </div>
           </div>
-          <h2 className="text-lg font-bold">{config.name || 'SK Luxury Studio'}</h2>
+          <h2 className="text-lg font-bold">{config.name || 'SANJU SK Digital – Mahi Creation'}</h2>
           {config.address && (
             <p className="mt-1 flex items-center gap-1 text-xs text-white/50">
               <FaMapMarkerAlt className="text-pink-400" /> {config.address}
