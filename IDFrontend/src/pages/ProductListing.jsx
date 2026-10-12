@@ -3,6 +3,7 @@ import {
   useState,
   useCallback,
   useMemo,
+  useRef,
 } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import {
@@ -41,11 +42,12 @@ export default function ProductListing() {
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const activeProductRequest = useRef(0);
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const [whatsappNumber, setWhatsappNumber] =
-    useState('919999999999');
+    useState('919372333633');
 
   const [filters, setFilters] = useState({
     search: searchParams.get('search') || '',
@@ -114,7 +116,7 @@ export default function ProductListing() {
         setWhatsappNumber(
           c.whatsappNumber ||
             c.phone ||
-            '919999999999'
+            '919372333633'
         );
       }
     } catch (err) {
@@ -127,34 +129,39 @@ export default function ProductListing() {
   /* ---------------------------------- */
 
   const loadProducts = useCallback(async (f) => {
+    const requestId = ++activeProductRequest.current;
     setLoading(true);
     setError('');
+    const params = {};
+    if (f.search) params.search = f.search;
+    if (f.category) params.category = f.category;
+    if (f.subcategory) params.subcategory = f.subcategory;
+    if (f.religion) params.religion = f.religion;
+    if (f.sort) params.sort = f.sort;
 
-    try {
-      const params = {};
-
-      if (f.search) params.search = f.search;
-      if (f.category) params.category = f.category;
-      if (f.subcategory)
-        params.subcategory = f.subcategory;
-      if (f.religion) params.religion = f.religion;
-      if (f.sort) params.sort = f.sort;
-
-      const res = await api.get('/api/listings', {
-        params,
-      });
-
-      const data = Array.isArray(res.data)
-        ? res.data
-        : res.data?.result || [];
-
-      setProducts(data);
-    } catch (err) {
-      console.error(err);
-      setProducts([]);
-      setError('Failed to load products');
-    } finally {
-      setLoading(false);
+    // Retry on Render cold start; ignore stale responses when filters change.
+    for (let attempt = 0; attempt <= 5; attempt++) {
+      try {
+        const res = await api.get('/api/listings', { params, timeout: 30000 });
+        if (requestId !== activeProductRequest.current) return;
+        const data = Array.isArray(res.data) ? res.data : res.data?.result || [];
+        if (!data.length && attempt < 2 && !Object.values(params).some(Boolean)) {
+          await new Promise(resolve => setTimeout(resolve, 1500));
+          continue;
+        }
+        setProducts(data);
+        setLoading(false);
+        return;
+      } catch (err) {
+        if (requestId !== activeProductRequest.current) return;
+        if (attempt === 5) {
+          console.error('Product listings request failed after retries', err);
+          setError('Products are temporarily unavailable. Please retry.');
+          setLoading(false);
+          return;
+        }
+        await new Promise(resolve => setTimeout(resolve, Math.min(2000 * (attempt + 1), 10000)));
+      }
     }
   }, []);
 
