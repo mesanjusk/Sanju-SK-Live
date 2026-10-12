@@ -415,19 +415,6 @@ export default function ProductListing() {
       </div>
 
       <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-          <h1 className="font-serif text-3xl font-bold text-gray-900">
-            All Products
-          </h1>
-
-          <p className="mt-2 text-sm text-gray-500">
-            {loading
-              ? 'Loading products...'
-              : `${products.length} products found`}
-          </p>
-        </div>
-      </div>
-
-      <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
         {/* Sticky Top Bar */}
         <div className="sticky top-16 z-20 mb-6 rounded-2xl border border-[#e9e9df] bg-white/90 p-4 shadow-[0_10px_27px_-20px_#294d39] backdrop-blur-xl">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
