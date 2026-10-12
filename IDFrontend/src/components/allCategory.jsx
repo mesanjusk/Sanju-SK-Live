@@ -41,11 +41,11 @@ export default function AllCategory() {
   };
 
   return (
-    <div className="min-h-screen bg-[#fafafa] pb-24">
+    <div className="sk-storefront min-h-screen pb-24">
       <MobileHeader />
 
-      <main className="mx-auto w-full max-w-2xl px-4 py-4">
-        <h1 className="mb-4 text-lg font-bold text-gray-900">All Categories</h1>
+      <main className="sk-shell px-4 py-5">
+        <div className="sk-catalog-hero"><span>YOUR CREATIVE STUDIO</span><h1>Explore the possibilities.</h1><p>Discover invitations, 3D signage, corporate gifting and premium printing by collection.</p></div>
 
         {loading ? (
           <div className="grid gap-4">
@@ -60,7 +60,7 @@ export default function AllCategory() {
               );
 
               return (
-                <div key={cat._id} className="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm">
+                <div key={cat._id} className="overflow-hidden rounded-[24px] border border-[#e7e8db] bg-white shadow-[0_12px_30px_-24px_#173c2a]">
                   {/* Category row */}
                   <button
                     onClick={() => handleCategoryClick(cat)}

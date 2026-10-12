@@ -3,7 +3,7 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import MobileBottomNav from '../components/mobile/MobileBottomNav';
 import { FaWhatsapp, FaHeart, FaShare, FaYoutube, FaChevronLeft, FaChevronRight, FaArrowLeft } from 'react-icons/fa';
 import api from '../api';
-import LazyImage from '../components/common/LazyImage';
+import ProductStage from '../components/experience/ProductStage';
 import LoadingSkeleton from '../components/common/LoadingSkeleton';
 import { useFavorites } from '../context/FavoritesContext';
 import SEO from '../components/SEO';
@@ -55,7 +55,7 @@ export default function ProductDetail() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-white pb-24">
+      <div className="sk-detail-shell pb-36">
         <div className="flex items-center gap-3 border-b border-gray-100 bg-white px-4 py-3">
           <button onClick={() => navigate(-1)} className="flex h-9 w-9 items-center justify-center rounded-full bg-gray-100 text-gray-700">
             <FaArrowLeft className="text-sm" />
@@ -80,14 +80,14 @@ export default function ProductDetail() {
     );
   }
 
-  const images = Array.isArray(product.images) ? product.images : [];
+  const images = Array.isArray(product.images) ? product.images.filter(Boolean) : [product.images].filter(Boolean);
   const price = getPriceForQty(product, qty);
   const total = price * qty;
   const isFav = favorites.some((f) => f._id === product._id);
   const ytId = getYouTubeId(product.youtubeUrl);
   const hasTiers = Array.isArray(product.quantityPricing) && product.quantityPricing.length > 0;
 
-  const waNumber = String(whatsappNumber || '').replace(/\D/g, '');
+  const waNumber = String(whatsappNumber || '919372333633').replace(/\D/g, '');
   const waMsgText =
     `Hi! I want to order:\n*${product.title}*\n` +
     `🆔 Product ID: ${product._id}\n` +
@@ -123,7 +123,7 @@ export default function ProductDetail() {
 
       <div className="min-h-screen bg-white pb-24">
         {/* Instagram-style back header */}
-        <div className="sticky top-0 z-40 flex items-center gap-3 bg-white px-4 py-3">
+        <div className="sk-detail-back">
           <button
             onClick={() => navigate(-1)}
             className="flex h-9 w-9 items-center justify-center rounded-full bg-gray-100 text-gray-700 active:scale-95"
@@ -150,79 +150,36 @@ export default function ProductDetail() {
           </div>
         </div>
 
-        <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
-          <div className="grid gap-8 lg:grid-cols-2">
-            {/* Image Gallery */}
+        <div className="mx-auto max-w-6xl px-3 py-5 sm:px-6 lg:px-8">
+          <div className="grid items-start gap-6 lg:grid-cols-2">
+            {/* Interactive stage: perspective photos; true 3D only when a model URL exists. */}
             <div className="space-y-3">
-              <div className="relative overflow-hidden rounded-2xl bg-gray-100">
-                {images[imgIdx] ? (
-                  <LazyImage
-                    src={images[imgIdx]}
-                    alt={`${product.title} - photo ${imgIdx + 1}`}
-                    className="h-[340px] w-full object-cover sm:h-[420px]"
-                  />
-                ) : (
-                  <div className="flex h-[340px] items-center justify-center text-gray-400">No image</div>
-                )}
-
-                {images.length > 1 && (
-                  <>
-                    <button
-                      onClick={() => setImgIdx((p) => (p - 1 + images.length) % images.length)}
-                      className="absolute left-3 top-1/2 -translate-y-1/2 flex h-9 w-9 items-center justify-center rounded-full bg-white/80 text-gray-700 shadow hover:bg-white"
-                    >
-                      <FaChevronLeft className="text-xs" />
-                    </button>
-                    <button
-                      onClick={() => setImgIdx((p) => (p + 1) % images.length)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 flex h-9 w-9 items-center justify-center rounded-full bg-white/80 text-gray-700 shadow hover:bg-white"
-                    >
-                      <FaChevronRight className="text-xs" />
-                    </button>
-                  </>
-                )}
-
-                {ytId && (
-                  <button
-                    onClick={() => setShowVideo(true)}
-                    className="absolute bottom-4 right-4 flex items-center gap-2 rounded-xl bg-red-600 px-3 py-2 text-xs font-semibold text-white shadow-lg hover:bg-red-700"
-                  >
-                    <FaYoutube className="text-base" /> Watch Video
-                  </button>
-                )}
-              </div>
-
-              {images.length > 1 && (
-                <div className="flex gap-2 overflow-x-auto pb-1">
-                  {images.map((img, i) => (
-                    <button
-                      key={i}
-                      onClick={() => setImgIdx(i)}
-                      className={`relative h-20 w-20 shrink-0 overflow-hidden rounded-xl border-2 transition-all ${
-                        i === imgIdx ? 'border-gray-900 ring-2 ring-gray-900/20' : 'border-transparent hover:border-gray-300'
-                      }`}
-                    >
-                      <img src={img} alt={`Thumb ${i + 1}`} className="h-full w-full object-cover" />
-                    </button>
-                  ))}
-                </div>
+              <ProductStage images={images} title={product.title}
+                activeIndex={imgIdx} onIndexChange={setImgIdx}
+                modelUrl={product.model3dUrl || product.modelUrl || product.glbUrl} />
+              <p className="px-1 text-xs leading-5 text-[#6b7b6c]">
+                Explore each actual product photo with depth and zoom.
+                {product.model3dUrl || product.modelUrl || product.glbUrl
+                  ? ' An interactive 3D model is also available.'
+                  : ' Photo perspective is illustrative; sizing and colours may vary by screen.'}
+              </p>
+              {ytId && (
+                <button type="button" onClick={() => setShowVideo(true)}
+                  className="sk-order-button !w-full !bg-[#733f3d]">
+                  <FaYoutube className="text-base" /> Watch actual product video
+                </button>
               )}
-
               {showVideo && ytId && (
-                <div
-                  className="fixed inset-0 z-50 flex items-center justify-center bg-black/80"
-                  onClick={() => setShowVideo(false)}
-                >
-                  <div className="relative w-full max-w-3xl px-4" onClick={(e) => e.stopPropagation()}>
-                    <button onClick={() => setShowVideo(false)} className="absolute -top-10 right-4 text-2xl text-white">&times;</button>
-                    <div className="aspect-video overflow-hidden rounded-2xl">
-                      <iframe
-                        src={`https://www.youtube.com/embed/${ytId}?autoplay=1`}
-                        title="Product Video"
-                        allow="autoplay; encrypted-media"
-                        allowFullScreen
-                        className="h-full w-full"
-                      />
+                <div role="dialog" aria-modal="true" aria-label="Product video"
+                  className="fixed inset-0 z-[90] flex items-center justify-center bg-black/85 p-4"
+                  onClick={() => setShowVideo(false)}>
+                  <div className="relative w-full max-w-3xl" onClick={(event) => event.stopPropagation()}>
+                    <button type="button" onClick={() => setShowVideo(false)}
+                      aria-label="Close video" className="absolute -top-11 right-0 rounded-full bg-white px-4 py-2 text-black">Close</button>
+                    <div className="aspect-video overflow-hidden rounded-xl">
+                      <iframe src={`https://www.youtube-nocookie.com/embed/${ytId}?autoplay=1`}
+                        title="Product Video" allow="autoplay; encrypted-media"
+                        allowFullScreen className="h-full w-full" />
                     </div>
                   </div>
                 </div>
@@ -230,9 +187,9 @@ export default function ProductDetail() {
             </div>
 
             {/* Product Info */}
-            <div className="flex flex-col gap-5">
+            <div className="sk-detail-panel flex flex-col gap-5">
               <div>
-                <h2 className="font-serif text-2xl font-bold text-gray-900 sm:text-3xl">{product.title}</h2>
+                <h2 className="text-2xl font-extrabold tracking-tight text-[#263e32] sm:text-3xl">{product.title}</h2>
                 {product.description && (
                   <p className="mt-3 text-sm leading-relaxed text-gray-600">{product.description}</p>
                 )}
@@ -269,7 +226,7 @@ export default function ProductDetail() {
               )}
 
               {/* Price */}
-              <div className="rounded-2xl border border-gray-100 bg-gray-50 p-4">
+              <div className="rounded-2xl border border-[#dce7dc] bg-[#f2f6f0] p-4">
                 <div className="flex items-baseline gap-2">
                   <span className="text-3xl font-bold text-gray-900">₹{price}</span>
                   <span className="text-sm text-gray-500">per piece</span>
@@ -315,7 +272,7 @@ export default function ProductDetail() {
                 target="_blank"
                 rel="noreferrer"
                 onClick={handleWAClick}
-                className="flex items-center justify-center gap-3 rounded-2xl bg-[#25D366] py-4 text-base font-bold text-white shadow-lg hover:bg-[#128C7E] active:scale-95"
+                className="sk-order-button !py-4 !text-base"
               >
                 <FaWhatsapp className="text-xl" />
                 Order on WhatsApp — ₹{total}
@@ -345,13 +302,13 @@ export default function ProductDetail() {
         </div>
 
         {/* Sticky bottom CTA on mobile */}
-        <div className="fixed inset-x-0 bottom-0 z-40 bg-white px-4 py-3 lg:hidden">
+        <div className="fixed inset-x-0 bottom-[calc(65px+env(safe-area-inset-bottom))] z-30 border-t border-[#e3e8db] bg-white/95 px-4 py-2 shadow-[0_-10px_25px_#183f3213] backdrop-blur-lg lg:hidden">
           <a
             href={waHref}
             target="_blank"
             rel="noreferrer"
             onClick={handleWAClick}
-            className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#25D366] py-3.5 font-bold text-white hover:bg-[#128C7E] active:scale-95"
+            className="sk-order-button !flex !w-full !py-3.5 !text-sm"
           >
             <FaWhatsapp className="text-lg" />
             Order on WhatsApp — ₹{total}

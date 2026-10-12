@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import api from '../api';
 import MobileHeader from './mobile/MobileHeader';
+import { Link } from 'react-router-dom';
+import { FaArrowRight } from 'react-icons/fa';
 import StoryCategories from './mobile/StoryCategories';
 import ProductFeedCard from './mobile/ProductFeedCard';
 import VideoFeedCard from './mobile/VideoFeedCard';
@@ -145,9 +147,28 @@ export default function Home() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-[#fafafa] pb-24">
+    <div className="sk-storefront min-h-screen pb-24">
       <MobileHeader />
+      <div className="sk-shell">
+        <section className="sk-welcome" aria-label="Your creative printing studio">
+          {listings.find((item) => Array.isArray(item.images) ? item.images[0] : item.images) && (
+            <img className="sk-welcome__preview"
+              src={(() => { const item = listings.find((entry) => Array.isArray(entry.images) ? entry.images[0] : entry.images); return Array.isArray(item.images) ? item.images[0] : item.images; })()}
+              alt="Featured printed product from our collection" loading="lazy" />
+          )}
+          <div className="sk-welcome__content">
+            <span className="sk-welcome__eyebrow">Gondia's creative print studio</span>
+            <h1>Make every detail <em style={{ color: '#efd4a2', fontStyle: 'normal' }}>extraordinary.</em></h1>
+            <p>Luxury invitations · Immersive product previews · Printing &amp; 3D signage</p>
+            <Link to="/products" className="sk-welcome__cta">Explore the collection <FaArrowRight /></Link>
+          </div>
+        </section>
+      </div>
       <main className="mx-auto w-full max-w-2xl py-1">
+        <div className="sk-section-label">
+          <div><h2>Explore collections</h2><p>Choose what inspires you</p></div>
+          <Link to="/allCategories">View all →</Link>
+        </div>
         <StoryCategories
           categories={categories.slice(0, 12)}
           onSelect={handleCategorySelect}
@@ -172,6 +193,10 @@ export default function Home() {
           </div>
         )}
 
+        <div className="sk-section-label" style={{ paddingTop: 17 }}>
+          <div><h2>{selectedCategory ? selectedCategory.name : 'The latest creations'}</h2><p>Discover your next favourite design</p></div>
+          <Link to="/products">All products →</Link>
+        </div>
         <section className="mt-1">
           {loading ? (
             <div className="grid gap-4 p-4">

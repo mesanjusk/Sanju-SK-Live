@@ -20,14 +20,14 @@ export default function Profile() {
       }).finally(() => setLoading(false));
   }, []);
 
-  const wa = String(config.whatsappNumber || config.phone || '919999999999').replace(/\D/g, '');
+  const wa = String(config.whatsappNumber || config.phone || '919372333633').replace(/\D/g, '');
   const postCount = listings.length;
   const initials = (config.name || 'S').charAt(0).toUpperCase();
 
   return (
-    <div className="min-h-screen bg-white pb-24">
+    <div className="sk-storefront min-h-screen pb-24">
       {/* Header */}
-      <header className="sticky top-0 z-40 flex items-center justify-between bg-white px-4 py-3">
+      <header className="sk-storefront-header sticky top-0 z-40 flex items-center justify-between px-4 py-3">
         <span className="text-base font-semibold text-gray-900">
           {config.name || 'SK Digital'}
         </span>

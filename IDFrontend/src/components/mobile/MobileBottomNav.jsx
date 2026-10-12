@@ -11,7 +11,7 @@ const items = [
 
 export default function MobileBottomNav() {
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-40 bg-white/95 px-3 pb-[max(env(safe-area-inset-bottom),0.5rem)] pt-2 backdrop-blur md:left-1/2 md:max-w-md md:-translate-x-1/2 md:rounded-t-2xl md:shadow-lg">
+    <nav className="sk-bottom-nav fixed bottom-0 left-0 right-0 z-40 bg-white/95 px-3 pb-[max(env(safe-area-inset-bottom),0.5rem)] pt-2 backdrop-blur md:left-1/2 md:max-w-md md:-translate-x-1/2 md:rounded-t-2xl md:shadow-lg">
       <div className="mx-auto flex max-w-md items-center justify-around">
         {items.map(({ to, icon: Icon, label }) => (
           <NavLink
