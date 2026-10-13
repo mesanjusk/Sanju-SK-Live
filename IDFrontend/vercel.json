@@ -1,6 +1,11 @@
 {
   "redirects": [
     {
+      "source": "/sitemap-products.xml",
+      "destination": "/api/sitemap-products",
+      "permanent": false
+    },
+    {
       "source": "/home",
       "destination": "/",
       "permanent": true
@@ -39,6 +44,14 @@
     }
   ],
   "rewrites": [
+    {
+      "source": "/products/:id",
+      "destination": "/api/product-seo?id=:id"
+    },
+    {
+      "source": "/product-view/:id",
+      "destination": "/"
+    },
     {
       "source": "/wedding-card-printing-gondia",
       "destination": "/wedding-card-printing-gondia/index.html"

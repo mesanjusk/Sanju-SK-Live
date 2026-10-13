@@ -152,7 +152,7 @@ const sitemapPages = '<?xml version="1.0" encoding="UTF-8"?>\n' +
 const sitemapIndex = '<?xml version="1.0" encoding="UTF-8"?>\n' +
   '<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' +
   '  <sitemap><loc>' + seo.siteUrl + '/sitemap-pages.xml</loc></sitemap>\n' +
-  '  <sitemap><loc>' + seo.siteUrl + '/sitemap-products.xml</loc></sitemap>\n' +
+  '  <sitemap><loc>' + seo.siteUrl + '/api/sitemap-products</loc></sitemap>\n' +
   '</sitemapindex>\n';
 const robots = `User-agent: OAI-SearchBot
 Allow: /

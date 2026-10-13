@@ -14,7 +14,7 @@ const index=readFileSync(new URL('../index.html',import.meta.url),'utf8');
 const siteMap=readFileSync(new URL('../public/sitemap.xml',import.meta.url),'utf8');
 assert(index.includes('id="sk-seo-initial"'),'Homepage initial HTML content missing');
 assert(index.includes('structured-data-jsonld'),'Homepage business JSON-LD missing');
-assert(siteMap.includes('sitemap-pages.xml')&&siteMap.includes('sitemap-products.xml'),'Sitemap index incomplete');
+assert(siteMap.includes('sitemap-pages.xml')&&siteMap.includes('/api/sitemap-products'),'Sitemap index incomplete');
 const prevFetch=globalThis.fetch;
 function mockResponse(){
   return {
