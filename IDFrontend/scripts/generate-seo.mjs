@@ -110,15 +110,50 @@ if (!source.includes(start) || !source.includes(end)) throw new Error('SEO head 
 fs.writeFileSync(indexFile, source.replace(new RegExp(start + '[\\s\\S]*?' + end),
   start + '\n' + tags + '\n    ' + end));
 
+// Initial HTML includes factual, crawlable business content while React boots.
+// The React storefront replaces this fallback without any change to the UI.
+const bodyStart = '<!-- SEO STATIC BODY START -->';
+const bodyEnd = '<!-- SEO STATIC BODY END -->';
+const rootMarkup = [
+  '<main id="sk-seo-initial" aria-label="SANJU SK Digital services">',
+  '<header><h1>' + esc(seo.businessName) + ' — Printing, 3D Signage and Wedding Cards in Gondia</h1>',
+  '<p>' + esc(seo.description) + '</p>',
+  '<nav aria-label="Our services"><a href="/wedding-card-printing-gondia/">Wedding invitation printing</a> · ',
+  '<a href="/digital-wedding-invitations/">Digital invitations</a> · ',
+  '<a href="/corporate-gifting-gondia/">Corporate gifting</a> · <a href="/products">Product collection</a></nav></header>',
+  '<section aria-label="Printing and design services"><h2>What we do</h2><ul>',
+  ...seo.services.map(s => '<li><strong>' + esc(s.name) + '</strong> — ' + esc(s.description) + '</li>'),
+  '</ul></section><section aria-label="Frequently asked questions"><h2>Common questions</h2>',
+  ...seo.faqs.map(f => '<h3>' + esc(f.question) + '</h3><p>' + esc(f.answer) + '</p>'),
+  '</section><footer><strong>' + esc(seo.businessName) + '</strong><address>',
+  esc(seo.address.streetAddress) + ', ' + esc(seo.address.addressLocality) + ', ' +
+  esc(seo.address.addressRegion) + ' ' + esc(seo.address.postalCode) + ', India',
+  '</address><a href="tel:' + seo.phone + '">' + esc(seo.displayPhone) + '</a> · ',
+  'Monday–Saturday 10 AM–8 PM · Sunday closed</footer></main>',
+].join('');
+const currentIndex = fs.readFileSync(indexFile, 'utf8');
+if (!currentIndex.includes(bodyStart) || !currentIndex.includes(bodyEnd)) {
+  throw new Error('SSR fallback body markers missing from index.html');
+}
+fs.writeFileSync(indexFile, currentIndex.replace(
+  new RegExp(bodyStart + '[\\s\\S]*?' + bodyEnd),
+  () => bodyStart + '\n' + rootMarkup + '\n' + bodyEnd
+));
+
 const routes = [
   '/', '/wedding-card-printing-gondia/', '/digital-wedding-invitations/',
   '/corporate-gifting-gondia/', '/products', '/allListing', '/home1', '/contact',
 ];
 fs.mkdirSync(publicDir, { recursive: true });
-const sitemap = '<?xml version="1.0" encoding="UTF-8"?>\n' +
+const sitemapPages = '<?xml version="1.0" encoding="UTF-8"?>\n' +
   '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' +
   routes.map(route => '  <url><loc>' + seo.siteUrl + route + '</loc></url>').join('\n') +
   '\n</urlset>\n';
+const sitemapIndex = '<?xml version="1.0" encoding="UTF-8"?>\n' +
+  '<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' +
+  '  <sitemap><loc>' + seo.siteUrl + '/sitemap-pages.xml</loc></sitemap>\n' +
+  '  <sitemap><loc>' + seo.siteUrl + '/sitemap-products.xml</loc></sitemap>\n' +
+  '</sitemapindex>\n';
 const robots = `User-agent: OAI-SearchBot
 Allow: /
 
@@ -139,6 +174,7 @@ Disallow: /UploadBanner
 Disallow: /add
 Sitemap: ${seo.siteUrl}/sitemap.xml
 `;
-fs.writeFileSync(path.join(publicDir, 'sitemap.xml'), sitemap);
+fs.writeFileSync(path.join(publicDir, 'sitemap-pages.xml'), sitemapPages);
+fs.writeFileSync(path.join(publicDir, 'sitemap.xml'), sitemapIndex);
 fs.writeFileSync(path.join(publicDir, 'robots.txt'), robots);
-console.log('Generated homepage SEO schema and crawl assets for', home);
+console.log('Generated SEO initial HTML, business graph and dynamic sitemap index for', home);

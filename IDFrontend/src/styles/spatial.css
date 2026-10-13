@@ -165,3 +165,10 @@
   transform:perspective(700px) rotateY(-20deg) rotateX(7deg) rotateZ(8deg);background:#fffefaee;box-shadow:20px 22px 22px #0006,inset 0 0 0 7px #ffffff30;border:4px solid #fffc;opacity:.85;}
 @media(max-width:480px){.sk-welcome:has(.sk-welcome__preview) .sk-welcome__content{max-width:74%;}}
 @media(prefers-reduced-motion:reduce){.sk-welcome__preview{transform:none;}}
+
+/* Performance: preserve estimated height while offscreen catalog cards paint on demand. */
+@supports (content-visibility:auto) {
+  .sk-feed-card {content-visibility:auto;contain-intrinsic-size:auto 680px;}
+  .sk-catalog-card {content-visibility:auto;contain-intrinsic-size:auto 570px;}
+}
+.sk-product-stage__artwork img {aspect-ratio:1/1;}

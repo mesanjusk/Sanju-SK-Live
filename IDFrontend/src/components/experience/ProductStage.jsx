@@ -95,7 +95,7 @@ export default function ProductStage({
             <div className="sk-product-stage__artwork">
               {selected ? (
                 <img src={selected} alt={`${title} — view ${activeIndex + 1} of ${photos.length}`}
-                  draggable="false" loading={compact ? 'lazy' : 'eager'} decoding="async" />
+                  draggable="false" loading={compact ? 'lazy' : 'eager'} decoding="async" width="800" height="800" />
               ) : (
                 <div className="sk-product-stage__missing">Product photo coming soon</div>
               )}
