@@ -66,7 +66,7 @@ function ProductFeedCard({ product, whatsappNumber, onView, priority = false }) 
             <p className="sk-feed-card__muted">{categoryName || 'Made to order'}</p>
           </div>
         </Link>
-        <span className="rounded-full bg-[#f6f0e5] px-2.5 py-1 text-[10px] font-bold text-[#a37f45]">PREVIEW</span>
+        <span className="rounded-full bg-[#f6f0e5] px-2.5 py-1 text-[10px] font-bold text-[#6f532c]">PREVIEW</span>
       </div>
 
       <div onDoubleClick={() => { toggleFavorite(product); addLiked?.(product); }} >
