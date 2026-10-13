@@ -163,7 +163,12 @@
 
 .sk-welcome__preview {position:absolute;z-index:0;right:12px;top:32px;width:31%;max-width:175px;height:116px;object-fit:contain;border-radius:12px;
   transform:perspective(700px) rotateY(-20deg) rotateX(7deg) rotateZ(8deg);background:#fffefaee;box-shadow:20px 22px 22px #0006,inset 0 0 0 7px #ffffff30;border:4px solid #fffc;opacity:.85;}
-@media(max-width:480px){.sk-welcome:has(.sk-welcome__preview) .sk-welcome__content{max-width:74%;}}
+/* Reserve the same headline width before/after asynchronously loaded product art.
+   Never make this width conditional on :has(img), which caused mobile CLS ~0.15. */
+@media(max-width:480px){
+  .sk-welcome {min-height:190px;}
+  .sk-welcome .sk-welcome__content {max-width:74%;}
+}
 @media(prefers-reduced-motion:reduce){.sk-welcome__preview{transform:none;}}
 
 /* Performance: preserve estimated height while offscreen catalog cards paint on demand. */

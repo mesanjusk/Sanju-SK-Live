@@ -50,36 +50,44 @@ export default function Home() {
   const [selectedSubcategory, setSelectedSubcategory] = useState(null);
   const [viewedIds, setViewedIds] = useState(new Set());
   const [showPopup, setShowPopup] = useState(false);
+  const [visibleCount, setVisibleCount] = useState(8);
+  const loadMoreRef = useRef(null);
   const hasShownPopup = useRef(false);
 
   useEffect(() => {
-    let active = true, retryTimer;
-    // Only a successful API response can mean the catalog is empty.
-    // A 503/network failure must show an actionable outage state.
-    const load = async () => {
-      const [l, c, s, conf, v] = await Promise.allSettled([
-        api.get('/api/listings', { timeout: 12000 }),
-        api.get('/api/categories', { timeout: 12000 }),
-        api.get('/api/subcategories', { timeout: 12000 }),
-        api.get('/api/confi/GetConfiList', { timeout: 12000 }),
-        api.get('/api/videos', { timeout: 12000 }),
-      ]);
-      if (!active) return;
-      if (c.status === 'fulfilled') setCategories(Array.isArray(c.value.data) ? c.value.data : c.value.data?.result || []);
-      if (s.status === 'fulfilled') setSubcategories(Array.isArray(s.value.data) ? s.value.data : s.value.data?.result || []);
-      if (conf.status === 'fulfilled') setConfig(conf.value.data?.result?.[0] || {});
-      if (v.status === 'fulfilled') setVideos(Array.isArray(v.value.data) ? v.value.data : []);
-      const rows = l.status === 'fulfilled' ? (Array.isArray(l.value.data) ? l.value.data : l.value.data?.result) : null;
-      if (Array.isArray(rows)) {
+    let active = true;
+    let retryTimer;
+    // The product feed must not wait for secondary APIs (videos, configs, etc).
+    // A slower optional service must never hold back products on a cold start.
+    const loadProducts = async () => {
+      try {
+        const response = await api.get('/api/listings', { timeout: 12000 });
+        if (!active) return;
+        const rows = Array.isArray(response.data) ? response.data : response.data?.result;
+        if (!Array.isArray(rows)) throw new Error('Unexpected product API format');
         setListings(rows);
         setLoadError(false);
-      } else {
+      } catch {
+        if (!active) return;
         setLoadError(true);
-        retryTimer = setTimeout(load, 20000);
+        retryTimer = setTimeout(loadProducts, 20000);
+      } finally {
+        if (active) setLoading(false);
       }
-      setLoading(false);
     };
-    load();
+    loadProducts();
+    api.get('/api/categories', { timeout: 12000 })
+      .then(res => { if (active) setCategories(Array.isArray(res.data) ? res.data : res.data?.result || []); })
+      .catch(() => {});
+    api.get('/api/subcategories', { timeout: 12000 })
+      .then(res => { if (active) setSubcategories(Array.isArray(res.data) ? res.data : res.data?.result || []); })
+      .catch(() => {});
+    api.get('/api/confi/GetConfiList', { timeout: 12000 })
+      .then(res => { if (active) setConfig(res.data?.result?.[0] || {}); })
+      .catch(() => {});
+    api.get('/api/videos', { timeout: 12000 })
+      .then(res => { if (active) setVideos(Array.isArray(res.data) ? res.data : res.data?.result || []); })
+      .catch(() => {});
     return () => { active = false; clearTimeout(retryTimer); };
   }, [reloadKey]);
 
@@ -110,6 +118,19 @@ export default function Home() {
     if (selectedCategory) return filteredProducts.map((p) => ({ ...p, _feedType: 'product' }));
     return interleaveFeed(filteredProducts, shuffle(videos));
   }, [filteredProducts, videos, selectedCategory]);
+
+  // Progressive feed: render only the first 8 cards and extend near the viewport.
+  // This avoids initializing dozens of 3D viewers and image nodes on first paint.
+  useEffect(() => { setVisibleCount(8); }, [selectedCategory, selectedSubcategory]);
+  useEffect(() => {
+    if (visibleCount >= feed.length || !loadMoreRef.current) return;
+    if (!('IntersectionObserver' in window)) return;
+    const observer = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting) setVisibleCount(count => Math.min(count + 8, feed.length));
+    }, { rootMargin: '480px 0px', threshold: 0 });
+    observer.observe(loadMoreRef.current);
+    return () => observer.disconnect();
+  }, [visibleCount, feed.length]);
 
   const handleCategorySelect = (cat) => {
     if (!cat) { setSelectedCategory(null); setSelectedSubcategory(null); return; }
@@ -193,7 +214,7 @@ export default function Home() {
               {[...Array(4)].map((_, i) => <LoadingSkeleton key={i} />)}
             </div>
           ) : feed.length > 0 ? (
-            feed.map((item) =>
+            feed.slice(0, visibleCount).map((item) =>
               item._feedType === 'video' ? (
                 <VideoFeedCard key={`v-${item._id}`} video={item} />
               ) : (
@@ -215,6 +236,13 @@ export default function Home() {
             ) : (
               <p className="mt-16 text-center text-sm text-gray-400">No products found in this category</p>
             )}
+          {feed.length > visibleCount && !loading && (
+            <div ref={loadMoreRef} className="px-4 pb-4 pt-2 text-center">
+              <button type="button" className="sk-order-button !w-full" onClick={() => setVisibleCount(n => Math.min(n + 8, feed.length))}>
+                Show more designs
+              </button>
+            </div>
+          )}
         </section>
         <section aria-label="SK Digital printing and invitation services" className="mx-auto my-10 max-w-2xl px-4">
           <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
