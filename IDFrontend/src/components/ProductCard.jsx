@@ -6,7 +6,7 @@ import { trackWhatsAppClick } from '../hooks/useAnalytics';
 import { useWhatsAppNumber, saveEnquiryLead, resolveCategoryName } from '../hooks/useWhatsApp';
 import ProductStage from './experience/ProductStage';
 
-export default function ProductCard({ product }) {
+export default function ProductCard({ product, priority = false }) {
   const [img, setImg] = useState(0);
   const [categoryName, setCategoryName] = useState('');
   const { favorites, toggleFavorite } = useFavorites();
@@ -40,7 +40,7 @@ export default function ProductCard({ product }) {
       <div className="relative">
         <ProductStage images={images} title={product?.title} compact
           activeIndex={img} onIndexChange={setImg}
-          modelUrl={product?.model3dUrl || product?.modelUrl || product?.glbUrl} />
+          modelUrl={product?.model3dUrl || product?.modelUrl || product?.glbUrl} priority={priority} />
         <button type="button" aria-label={isFav ? 'Remove saved product' : 'Save product'}
           className="sk-glass-button !absolute !right-3 !top-14 !z-[5] !h-9 !w-9"
           onClick={() => toggleFavorite(product)}>
