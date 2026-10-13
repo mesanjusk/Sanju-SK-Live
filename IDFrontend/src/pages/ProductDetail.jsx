@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useParams, Link, useNavigate, useLocation } from 'react-router-dom';
 import MobileBottomNav from '../components/mobile/MobileBottomNav';
 import { FaWhatsapp, FaHeart, FaShare, FaYoutube, FaChevronLeft, FaChevronRight, FaArrowLeft } from 'react-icons/fa';
 import api from '../api';
@@ -30,6 +30,9 @@ const getYouTubeId = (url) => {
 export default function ProductDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
+  const [loadError, setLoadError] = useState(false);
+  const [reloadKey, setReloadKey] = useState(0);
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [imgIdx, setImgIdx] = useState(0);
@@ -40,18 +43,40 @@ export default function ProductDetail() {
   const { favorites, toggleFavorite } = useFavorites();
 
   useEffect(() => {
-    api.get(`/api/listings/${id}`)
-      .then((prodRes) => {
-        setProduct(prodRes.data);
-        const tiers = prodRes.data?.quantityPricing;
-        if (Array.isArray(tiers) && tiers.length > 0) setQty(tiers[0].minQty);
-        if (prodRes.data?.category) {
-          resolveCategoryName(prodRes.data.category).then(setCategoryName);
+    let active = true;
+    const load = async () => {
+      setLoading(true);
+      setLoadError(false);
+      for (let attempt = 0; attempt < 5; attempt++) {
+        try {
+          const response = await api.get(`/api/listings/${id}`, { timeout: 30000 });
+          if (!active) return;
+          setProduct(response.data);
+          const tiers = response.data?.quantityPricing;
+          if (Array.isArray(tiers) && tiers.length > 0) setQty(tiers[0].minQty);
+          if (response.data?.category) {
+            resolveCategoryName(response.data.category).then(name => {
+              if (active) setCategoryName(name);
+            }).catch(() => {});
+          }
+          setLoading(false);
+          return;
+        } catch (error) {
+          if (!active) return;
+          if (error?.response?.status === 404) {
+            setProduct(null);
+            setLoadError(false);
+            setLoading(false);
+            return;
+          }
+          if (attempt < 4) await new Promise(resolve => setTimeout(resolve, Math.min(2500*(attempt+1), 9000)));
         }
-      })
-      .catch(() => {})
-      .finally(() => setLoading(false));
-  }, [id]);
+      }
+      if (active) { setLoading(false); setLoadError(true); }
+    };
+    load();
+    return () => { active = false; };
+  }, [id, reloadKey]);
 
   if (loading) {
     return (
@@ -64,6 +89,18 @@ export default function ProductDetail() {
         <div className="mx-auto max-w-7xl px-4 py-10">
           <LoadingSkeleton count={4} />
         </div>
+      </div>
+    );
+  }
+
+  if (loadError) {
+    return (
+      <div className="sk-detail-shell flex min-h-[65vh] flex-col items-center justify-center px-5 text-center">
+        <h2 className="text-xl font-extrabold text-[#2e4738]">The product is temporarily unavailable</h2>
+        <p className="mt-3 max-w-sm text-sm text-[#647469]">Our product server is waking up. Your product listing has not been removed.</p>
+        <button type="button" onClick={() => setReloadKey(n => n + 1)}
+          className="sk-order-button mt-5">Try again</button>
+        <Link to="/products" className="mt-4 text-sm font-semibold text-[#3d604c] underline">Browse other products</Link>
       </div>
     );
   }
@@ -118,7 +155,8 @@ export default function ProductDetail() {
       <SEO
         title={product.seoTitle || product.title}
         description={product.seoDescription || product.description}
-        keywords={product.seoKeywords}
+        pathname={`/products/${id}`}
+        noIndex={location.pathname.startsWith('/product-view/')}
       />
 
       <div className="min-h-screen bg-white pb-24">

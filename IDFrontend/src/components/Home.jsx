@@ -154,7 +154,7 @@ export default function Home() {
           {listings.find((item) => Array.isArray(item.images) ? item.images[0] : item.images) && (
             <img className="sk-welcome__preview"
               src={(() => { const item = listings.find((entry) => Array.isArray(entry.images) ? entry.images[0] : entry.images); return Array.isArray(item.images) ? item.images[0] : item.images; })()}
-              alt="Featured printed product from our collection" loading="lazy" />
+              alt="Featured printed product from our collection" loading="eager" fetchPriority="high" decoding="async" width="175" height="116" />
           )}
           <div className="sk-welcome__content">
             <span className="sk-welcome__eyebrow">Gondia's creative print studio</span>
@@ -242,6 +242,17 @@ export default function Home() {
       </main>
 
       {/* Keep SEO contact and FAQs after the original mobile storefront, never above products. */}
+      <section className="mx-auto mb-6 max-w-2xl px-4" aria-label="How to order custom printing in Gondia">
+        <div className="rounded-2xl border border-[#e8e6d7] bg-white p-5 shadow-sm">
+          <h2 className="text-lg font-bold text-[#294334]">Custom printing, made easy</h2>
+          <p className="mt-2 text-sm leading-6 text-[#687b6a]">
+            Browse real product photos, share your preferred design on WhatsApp and tell us your quantity,
+            size and deadline. We prepare a quotation and confirm your artwork before production.
+            Visit us in Krishnapura Ward, Gondia, or enquire from Nagpur and Balaghat.
+          </p>
+          <a href="https://www.sanjusk.in/contact" className="mt-3 inline-block text-sm font-bold text-[#2a634b] underline">Contact our Gondia studio</a>
+        </div>
+      </section>
       <FAQSection />
       <LocalContactFooter />
       <ScrollGatePopup

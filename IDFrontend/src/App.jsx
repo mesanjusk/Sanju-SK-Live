@@ -48,6 +48,11 @@ const ProductDetail  = lazy(() => import('./pages/ProductDetail'));
 const PageWithSeo = ({ children }) => {
   const { pathname } = useLocation();
   const dynamicMeta =
+    (pathname.startsWith('/product-view/') && {
+      title: 'Product Preview',
+      description: 'View a product from SANJU SK Digital – Mahi Creation.',
+      noIndex: true,
+    }) ||
     (pathname.startsWith('/products/') && {
       title: 'Product Details',
       description: 'View product details, pricing and order on WhatsApp.',
@@ -88,6 +93,8 @@ function AppRoutes() {
           <Route path="/"              element={<Home />} />
           <Route path="/products"      element={<ProductListing />} />
           <Route path="/products/:id"  element={<ProductDetail />} />
+          {/* Uncached SPA fallback if the Render API cannot serve initial SEO HTML. */}
+          <Route path="/product-view/:id" element={<ProductDetail />} />
           <Route path="/allCategories" element={<AllCategory />} />
           <Route path="/allListing"    element={<AllListing />} />
           <Route path="/subcategory/:id" element={<FilterSubcategory />} />
