@@ -7,6 +7,7 @@ import ProductStage from '../components/experience/ProductStage';
 import LoadingSkeleton from '../components/common/LoadingSkeleton';
 import { useFavorites } from '../context/FavoritesContext';
 import SEO from '../components/SEO';
+import ProductStructuredData from '../components/ProductStructuredData';
 import { trackWhatsAppClick } from '../hooks/useAnalytics';
 import { useWhatsAppNumber, saveEnquiryLead, resolveCategoryName } from '../hooks/useWhatsApp';
 
@@ -46,6 +47,7 @@ export default function ProductDetail() {
     let active = true;
     const load = async () => {
       setLoading(true);
+      setProduct(null);
       setLoadError(false);
       for (let attempt = 0; attempt < 5; attempt++) {
         try {
@@ -155,9 +157,11 @@ export default function ProductDetail() {
       <SEO
         title={product.seoTitle || product.title}
         description={product.seoDescription || product.description}
+        image={images[0]}
         pathname={`/products/${id}`}
         noIndex={location.pathname.startsWith('/product-view/')}
       />
+      <ProductStructuredData product={product} />
 
       <div className="min-h-screen bg-white pb-24">
         {/* Instagram-style back header */}

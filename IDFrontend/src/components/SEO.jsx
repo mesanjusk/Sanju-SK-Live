@@ -12,7 +12,7 @@ function upsertCanonical(url) {
   link.href = url;
 }
 
-export default function SEO({ title, description, pathname = '/', noIndex = false }) {
+export default function SEO({ title, description, pathname = '/', noIndex = false, image }) {
   // The homepage's full local-business and FAQ schema is generated in index.html
   // at build time. Do not inject duplicate or inconsistent LocalBusiness nodes.
   const isHome = pathname === '/';
@@ -25,11 +25,11 @@ export default function SEO({ title, description, pathname = '/', noIndex = fals
     upsertMeta('meta[name="description"]', { name: 'description', content: pageDescription });
     for (const [key, value] of Object.entries({
       'og:type': 'website', 'og:title': pageTitle, 'og:description': pageDescription,
-      'og:url': canonicalUrl, 'og:image': SITE_META.ogImage,
+      'og:url': canonicalUrl, 'og:image': image || SITE_META.ogImage,
     })) upsertMeta(`meta[property="${key}"]`, { property: key, content: value });
     for (const [key, value] of Object.entries({
       'twitter:card': 'summary_large_image', 'twitter:title': pageTitle,
-      'twitter:description': pageDescription, 'twitter:image': SITE_META.ogImage,
+      'twitter:description': pageDescription, 'twitter:image': image || SITE_META.ogImage,
     })) upsertMeta(`meta[name="${key}"]`, { name: key, content: value });
     upsertMeta('meta[name="robots"]', {
       name: 'robots',
@@ -51,7 +51,7 @@ export default function SEO({ title, description, pathname = '/', noIndex = fals
         console.warn('Could not update route-specific structured data', error);
       }
     }
-  }, [canonicalUrl, isHome, noIndex, pageDescription, pageTitle]);
+  }, [canonicalUrl, isHome, noIndex, pageDescription, pageTitle, image]);
 
   return null;
 }
