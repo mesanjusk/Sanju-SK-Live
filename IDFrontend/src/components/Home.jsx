@@ -11,6 +11,7 @@ import LoadingSkeleton from './common/LoadingSkeleton';
 import ScrollGatePopup from './ScrollGatePopup';
 import FAQSection from './FAQSection';
 import LocalContactFooter from './LocalContactFooter';
+import { optimizedImage } from '../utils/media';
 
 // Fisher-Yates shuffle — new order on every page load
 function shuffle(arr) {
@@ -164,7 +165,7 @@ export default function Home() {
         <section className="sk-welcome" aria-label="Your creative printing studio">
           {listings.find((item) => Array.isArray(item.images) ? item.images[0] : item.images) && (
             <img className="sk-welcome__preview"
-              src={(() => { const item = listings.find((entry) => Array.isArray(entry.images) ? entry.images[0] : entry.images); return Array.isArray(item.images) ? item.images[0] : item.images; })()}
+              src={optimizedImage((() => { const item = listings.find((entry) => Array.isArray(entry.images) ? entry.images[0] : entry.images); return Array.isArray(item.images) ? item.images[0] : item.images; })(), 340)}
               alt="Featured printed product from our collection" loading="eager" fetchPriority="high" decoding="async" width="175" height="116" />
           )}
           <div className="sk-welcome__content">
@@ -214,7 +215,7 @@ export default function Home() {
               {[...Array(4)].map((_, i) => <LoadingSkeleton key={i} />)}
             </div>
           ) : feed.length > 0 ? (
-            feed.slice(0, visibleCount).map((item) =>
+            feed.slice(0, visibleCount).map((item, index) =>
               item._feedType === 'video' ? (
                 <VideoFeedCard key={`v-${item._id}`} video={item} />
               ) : (
@@ -223,6 +224,7 @@ export default function Home() {
                   product={item}
                   whatsappNumber={config.whatsappNumber || config.phone || '919372333633'}
                   onView={handleProductView}
+                  priority={index === 0}
                 />
               )
             )

@@ -5,8 +5,9 @@ import { useFavorites } from '../../context/FavoritesContext';
 import { trackWhatsAppClick } from '../../hooks/useAnalytics';
 import { saveEnquiryLead, resolveCategoryName } from '../../hooks/useWhatsApp';
 import ProductStage from '../experience/ProductStage';
+import { optimizedImage } from '../../utils/media';
 
-function ProductFeedCard({ product, whatsappNumber, onView }) {
+function ProductFeedCard({ product, whatsappNumber, onView, priority = false }) {
   const { favorites, toggleFavorite, addLiked } = useFavorites();
   const [imgIdx, setImgIdx] = useState(0);
   const [categoryName, setCategoryName] = useState('');
@@ -58,7 +59,7 @@ function ProductFeedCard({ product, whatsappNumber, onView }) {
       <div className="sk-feed-card__header">
         <Link to={`/products/${product._id}`} className="flex min-w-0 items-center gap-2.5">
           <div className="h-10 w-10 shrink-0 overflow-hidden rounded-xl border border-white bg-[#eef1ec] shadow-sm">
-            {images[0] && <img className="h-full w-full object-cover" src={images[0]} alt="" loading="lazy" />}
+            {images[0] && <img className="h-full w-full object-cover" src={optimizedImage(images[0], 100)} alt="" loading="lazy" decoding="async" width="40" height="40" />}
           </div>
           <div className="min-w-0">
             <h3 className="sk-feed-card__title line-clamp-1">{product.title}</h3>
@@ -70,7 +71,7 @@ function ProductFeedCard({ product, whatsappNumber, onView }) {
 
       <div onDoubleClick={() => { toggleFavorite(product); addLiked?.(product); }} >
         <ProductStage images={images} title={product.title} activeIndex={imgIdx} onIndexChange={setImgIdx}
-          modelUrl={product.model3dUrl || product.modelUrl || product.glbUrl} compact />
+          modelUrl={product.model3dUrl || product.modelUrl || product.glbUrl} priority={priority} compact />
       </div>
 
       <div className="sk-feed-card__actionbar">

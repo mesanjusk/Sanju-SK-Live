@@ -198,7 +198,7 @@ export default function ProductDetail() {
             <div className="space-y-3">
               <ProductStage images={images} title={product.title}
                 activeIndex={imgIdx} onIndexChange={setImgIdx}
-                modelUrl={product.model3dUrl || product.modelUrl || product.glbUrl} />
+                modelUrl={product.model3dUrl || product.modelUrl || product.glbUrl} priority />
               <p className="px-1 text-xs leading-5 text-[#6b7b6c]">
                 Explore each actual product photo with depth and zoom.
                 {product.model3dUrl || product.modelUrl || product.glbUrl

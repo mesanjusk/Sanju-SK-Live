@@ -1,11 +1,12 @@
 import { useEffect, useRef, useState } from 'react';
 import { FaArrowLeft, FaArrowRight, FaExpand, FaSearchMinus, FaSearchPlus, FaTimes } from 'react-icons/fa';
+import { optimizedImage } from '../../utils/media';
 
 // The photo viewer uses CSS perspective. It is not represented as a true 3D model.
 // If a listing provides a GLB/GLTF URL, a real interactive model viewer is enabled.
 export default function ProductStage({
   images = [], title = 'Product', activeIndex = 0, onIndexChange,
-  modelUrl, compact = false,
+  modelUrl, compact = false, priority = false,
 }) {
   const frameRef = useRef(null);
   const touchRef = useRef(null);
@@ -94,8 +95,11 @@ export default function ProductStage({
           ) : (
             <div className="sk-product-stage__artwork">
               {selected ? (
-                <img src={selected} alt={`${title} — view ${activeIndex + 1} of ${photos.length}`}
-                  draggable="false" loading={compact ? 'lazy' : 'eager'} decoding="async" width="800" height="800" />
+                <img src={optimizedImage(selected, compact ? 720 : 1120)}
+                  alt={`${title} — view ${activeIndex + 1} of ${photos.length}`}
+                  draggable="false" loading={priority || !compact ? 'eager' : 'lazy'}
+                  fetchPriority={priority ? 'high' : 'auto'}
+                  decoding="async" width="800" height="800" />
               ) : (
                 <div className="sk-product-stage__missing">Product photo coming soon</div>
               )}
@@ -136,7 +140,7 @@ export default function ProductStage({
               <button key={`${photo}-${i}`} type="button" onClick={() => onIndexChange?.(i)}
                 aria-label={`Show photo ${i + 1}`} aria-pressed={i === activeIndex}
                 className={i === activeIndex ? 'is-active' : ''}>
-                <img src={photo} loading="lazy" alt="" />
+                <img src={optimizedImage(photo, 160)} loading="lazy" decoding="async" width="65" height="65" alt="" />
               </button>
             ))}
           </div>

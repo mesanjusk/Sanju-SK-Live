@@ -1,4 +1,5 @@
 import { memo } from 'react';
+import { optimizedImage } from '../../utils/media';
 
 function StoryCategories({ categories = [], onSelect, selectedId }) {
   return (
@@ -19,7 +20,7 @@ function StoryCategories({ categories = [], onSelect, selectedId }) {
             <div className={`sk-story-item__outer ${selectedId === cat._id ? 'is-selected' : ''}`}>
               <div className="sk-story-item__inner">
                 {cat.imageUrl
-                  ? <img src={cat.imageUrl} alt="" className="h-full w-full object-cover" loading="lazy" />
+                  ? <img src={optimizedImage(cat.imageUrl, 160)} alt="" className="h-full w-full object-cover" loading="lazy" decoding="async" width="65" height="65" />
                   : <div className="flex h-full w-full items-center justify-center bg-[#f4f3ea] text-xl text-[#bf9d69]">◈</div>}
               </div>
             </div>

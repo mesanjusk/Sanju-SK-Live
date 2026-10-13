@@ -586,12 +586,12 @@ export default function ProductListing() {
                 {/* Product Grid */}
                 <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
                   {paginatedProducts.map(
-                    (product) => (
+                    (product, index) => (
                       <div
                         key={product._id}
                         className="min-w-0"
                       >
-                        <ProductCard product={product} />
+                        <ProductCard product={product} priority={index === 0} />
                       </div>
                     )
                   )}
