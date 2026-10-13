@@ -42,6 +42,7 @@ export default function ProductListing() {
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [retryTick, setRetryTick] = useState(0);
   const activeProductRequest = useRef(0);
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -140,7 +141,7 @@ export default function ProductListing() {
     if (f.sort) params.sort = f.sort;
 
     // Retry on Render cold start; ignore stale responses when filters change.
-    for (let attempt = 0; attempt <= 5; attempt++) {
+    for (let attempt = 0; attempt < 2; attempt++) {
       try {
         const res = await api.get('/api/listings', { params, timeout: 30000 });
         if (requestId !== activeProductRequest.current) return;
@@ -154,9 +155,9 @@ export default function ProductListing() {
         return;
       } catch (err) {
         if (requestId !== activeProductRequest.current) return;
-        if (attempt === 5) {
+        if (attempt === 1) {
           console.error('Product listings request failed after retries', err);
-          setError('Products are temporarily unavailable. Please retry.');
+          setError('Our product server is currently offline. Try again, or request the catalog on WhatsApp.');
           setLoading(false);
           return;
         }
@@ -185,7 +186,13 @@ export default function ProductListing() {
     setSearchParams(newParams, {
       replace: true,
     });
-  }, [filters, loadProducts, setSearchParams]);
+  }, [filters, loadProducts, setSearchParams, retryTick]);
+
+  useEffect(() => {
+    if (!error) return;
+    const handle = setInterval(() => loadProducts(filters), 25000);
+    return () => clearInterval(handle);
+  }, [error, filters, loadProducts]);
 
   /* ---------------------------------- */
   /* Helpers */
@@ -478,7 +485,11 @@ export default function ProductListing() {
         {/* Error */}
         {error && (
           <div className="mb-6 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm font-medium text-red-600">
-            {error}
+            <p>{error}</p>
+            <div className="mt-3 flex flex-wrap gap-2">
+              <button type="button" className="sk-order-button" onClick={() => setRetryTick(n => n + 1)}>Retry</button>
+              <a className="sk-order-button" href="https://wa.me/919372333633?text=Hello%2C%20please%20share%20your%20product%20catalog" target="_blank" rel="noopener noreferrer">WhatsApp catalog</a>
+            </div>
           </div>
         )}
 
@@ -544,6 +555,8 @@ export default function ProductListing() {
                   <LoadingSkeleton key={i} />
                 ))}
               </div>
+            ) : error ? (
+              <p className="rounded-xl bg-white p-8 text-center text-sm text-[#536656]">Products will be displayed here when the catalog server is back online.</p>
             ) : products.length === 0 ? (
               <div className="flex flex-col items-center justify-center rounded-3xl border border-dashed border-gray-300 bg-white py-20 text-center">
                 <img

@@ -53,41 +53,31 @@ export default function Home() {
   const hasShownPopup = useRef(false);
 
   useEffect(() => {
-    // Product data is the primary content. One cold-start/API failure must
-    // not hide the entire feed, nor should a failed secondary request do so.
-    let active = true;
-    let retryTimer;
-    const load = async (attempt = 0) => {
+    let active = true, retryTimer;
+    // Only a successful API response can mean the catalog is empty.
+    // A 503/network failure must show an actionable outage state.
+    const load = async () => {
       const [l, c, s, conf, v] = await Promise.allSettled([
-        api.get('/api/listings', { timeout: 30000 }),
-        api.get('/api/categories', { timeout: 30000 }),
-        api.get('/api/subcategories', { timeout: 30000 }),
-        api.get('/api/confi/GetConfiList', { timeout: 30000 }),
-        api.get('/api/videos', { timeout: 30000 }),
+        api.get('/api/listings', { timeout: 12000 }),
+        api.get('/api/categories', { timeout: 12000 }),
+        api.get('/api/subcategories', { timeout: 12000 }),
+        api.get('/api/confi/GetConfiList', { timeout: 12000 }),
+        api.get('/api/videos', { timeout: 12000 }),
       ]);
       if (!active) return;
-
       if (c.status === 'fulfilled') setCategories(Array.isArray(c.value.data) ? c.value.data : c.value.data?.result || []);
       if (s.status === 'fulfilled') setSubcategories(Array.isArray(s.value.data) ? s.value.data : s.value.data?.result || []);
       if (conf.status === 'fulfilled') setConfig(conf.value.data?.result?.[0] || {});
       if (v.status === 'fulfilled') setVideos(Array.isArray(v.value.data) ? v.value.data : []);
-
-      if (l.status === 'fulfilled') {
-        const rows = Array.isArray(l.value.data) ? l.value.data : (l.value.data?.result || []);
-        if (rows.length || attempt >= 2) {
-          setListings(rows);
-          setLoadError(false);
-          setLoading(false);
-          return;
-        }
-      }
-      // Render free-tier cold starts can briefly time out or return empty data.
-      if (attempt < 6) {
-        retryTimer = setTimeout(() => load(attempt + 1), Math.min(2000 + 2000 * attempt, 12000));
+      const rows = l.status === 'fulfilled' ? (Array.isArray(l.value.data) ? l.value.data : l.value.data?.result) : null;
+      if (Array.isArray(rows)) {
+        setListings(rows);
+        setLoadError(false);
       } else {
         setLoadError(true);
-        setLoading(false);
+        retryTimer = setTimeout(load, 20000);
       }
+      setLoading(false);
     };
     load();
     return () => { active = false; clearTimeout(retryTimer); };
@@ -217,9 +207,10 @@ export default function Home() {
             )
           ) : loadError ? (
               <div role="alert" className="mx-4 my-8 rounded-xl border border-amber-200 bg-amber-50 p-4 text-center text-sm text-gray-700">
-                Products are temporarily unavailable. Your collection has not been deleted.
+                Our online catalog is temporarily offline. Please contact us for product photos and pricing; this page retries automatically.
                 <button type="button" onClick={() => { setLoading(true); setLoadError(false); setReloadKey((v) => v + 1); }}
                   className="mt-3 block w-full rounded-lg bg-[#075E54] px-4 py-2 font-semibold text-white">Retry loading products</button>
+                <a className="mt-3 block text-sm font-bold text-[#245f43] underline" href="https://wa.me/919372333633?text=Hello%2C%20please%20share%20your%20product%20catalog">Request catalog on WhatsApp</a>
               </div>
             ) : (
               <p className="mt-16 text-center text-sm text-gray-400">No products found in this category</p>
