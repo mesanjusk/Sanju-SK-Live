@@ -6,6 +6,7 @@ import api from '../api';
 import ProductStage from '../components/experience/ProductStage';
 import LoadingSkeleton from '../components/common/LoadingSkeleton';
 import { useFavorites } from '../context/FavoritesContext';
+import { useCart } from '../context/CartContext';
 import SEO from '../components/SEO';
 import ProductStructuredData from '../components/ProductStructuredData';
 import { trackWhatsAppClick } from '../hooks/useAnalytics';
@@ -42,6 +43,8 @@ export default function ProductDetail() {
   const [categoryName, setCategoryName] = useState('');
   const whatsappNumber = useWhatsAppNumber();
   const { favorites, toggleFavorite } = useFavorites();
+  const { addToCart } = useCart();
+  const [addedToCart, setAddedToCart] = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -307,6 +310,12 @@ export default function ProductDetail() {
                   <span className="rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-600">{product.badge}</span>
                 )}
               </div>
+
+              {/* Hybrid quote cart: items are not orders until SK Digital confirms. */}
+              <button type="button" className="w-full rounded-2xl border-2 border-[#128C7E] px-4 py-3 font-bold text-[#128C7E]" onClick={() => { addToCart(product, qty); setAddedToCart(true); }}>
+                Add to quotation cart
+              </button>
+              {addedToCart && <Link to="/cart" className="block text-center text-sm font-semibold text-[#128C7E] underline">View enquiry cart →</Link>}
 
               {/* WhatsApp order button */}
               <a
