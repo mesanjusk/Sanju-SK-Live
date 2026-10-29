@@ -1,0 +1,195 @@
+/* Homepage-only, mobile-first celebration storefront.
+   Scoped to the new hero and home page so admin and product routes are unchanged. */
+.sk-festive-dark {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  color: #fff;
+  background:
+    radial-gradient(circle at 91% 25%, rgba(201,230,217,.14), transparent 21%),
+    radial-gradient(ellipse at 8% -18%, rgba(222,197,151,.16), transparent 43%),
+    linear-gradient(155deg, #29586b 0%, #074b62 31%, #075169 72%, #064c60 100%);
+}
+.sk-festive-container { width: min(100%, 1120px); margin-inline: auto; }
+.sk-festive-header { padding: 17px 18px 0; }
+.sk-festive-header-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.sk-festive-brand { display: flex; align-items: center; gap: 10px; min-width: 0; color: #fff; text-decoration: none; }
+.sk-festive-brand-mark {
+  width: 39px; height: 39px; display: grid; flex: none; place-items: center;
+  border: 1px solid #f2dba6a6; border-radius: 12px;
+  background: linear-gradient(145deg, #d8bc80, #fff0c5 50%, #b99455);
+  box-shadow: inset 0 1px 0 #fff8, 0 4px 13px #05263855;
+  color: #143e4c; font-size: 17px; font-weight: 950; letter-spacing: -.08em;
+}
+.sk-festive-brand-name { display: block; font-size: 16px; font-weight: 580; line-height: 1.1; letter-spacing: .04em; white-space: nowrap; }
+.sk-festive-brand-name strong { font-weight: 950; }
+.sk-festive-brand-name small { display: block; margin-top: 4px; font-size: 8px; font-weight: 750; letter-spacing: .17em; color: #f6deb2; }
+.sk-festive-header-actions { display: flex; gap: 9px; }
+.sk-festive-action {
+  display: grid; place-items: center; width: 38px; height: 38px;
+  border: 1px solid #ffffff44; border-radius: 50%;
+  color: #fff; background: #ffffff16; font-size: 16px;
+  transition: background-color .15s ease;
+}
+.sk-festive-action:hover, .sk-festive-action:focus-visible { background: #ffffff35; }
+.sk-festive-location { display: flex; align-items: center; gap: 5px; margin: 14px 1px 13px; font-size: 11px; color: #e6f1ed; }
+.sk-festive-location svg { color: #f0dbaa; font-size: 12px; }
+.sk-festive-location strong { color: white; font-weight: 800; }
+.sk-festive-search {
+  display: flex; align-items: center; gap: 12px; width: 100%; height: 53px;
+  padding: 0 16px; border-radius: 17px; background: #f9fcfd;
+  box-shadow: 0 8px 19px #032b3b28, inset 0 1px 1px #fff;
+  border: 1px solid #e4eff1;
+}
+.sk-festive-search-icon { flex: none; color: #275263; font-size: 18px; }
+.sk-festive-search input {
+  width: 100%; min-width: 0; flex: 1; background: transparent; border: 0; outline: 0;
+  color: #193e4e; font-size: 14px; font-weight: 500;
+}
+.sk-festive-search input::placeholder { color: #687e88; opacity: 1; }
+.sk-festive-search input::-webkit-search-cancel-button { -webkit-appearance: none; }
+.sk-festive-search button { flex: none; display: grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; color: #536e7b; }
+.sk-festive-search:focus-within { outline: 3px solid #f3d59188; outline-offset: 2px; }
+.sk-festive-tabs {
+  display: flex; gap: 5px; overflow-x: auto; overscroll-behavior-x: contain;
+  padding: 19px 13px 2px; scrollbar-width: none; scroll-snap-type: x proximity;
+}
+.sk-festive-tabs::-webkit-scrollbar, .sk-festive-tiles::-webkit-scrollbar { display: none; }
+.sk-festive-tab {
+  position: relative; display: flex; flex: 0 0 auto; flex-direction: column;
+  align-items: center; gap: 8px; min-width: 71px; padding: 5px 8px 14px;
+  color: #d9edf0; font-size: 11px; font-weight: 650; scroll-snap-align: start;
+}
+.sk-festive-tab svg { font-size: 21px; height: 25px; }
+.sk-festive-tab span { white-space: nowrap; }
+.sk-festive-tab.is-active { color: #fff; font-weight: 900; }
+.sk-festive-tab.is-active::after { content: ''; position: absolute; bottom: 0; left: 24%; right: 24%; height: 3px; border-radius: 3px; background: #f6e0b2; }
+.sk-festive-tab:focus-visible, .sk-festive-tile:focus-visible, .sk-festive-primary-cta:focus-visible { outline: 2px solid #f5e3b5; outline-offset: -2px; }
+.sk-festive-showcase { min-height: 212px; position: relative; display: flex; align-items: center; padding: 20px 20px 8px; }
+.sk-festive-showcase-copy { position: relative; z-index: 2; width: 68%; padding: 6px 0 17px; }
+.sk-festive-kicker { color: #e5ca98; font-size: 9px; font-weight: 900; letter-spacing: .24em; }
+.sk-festive-sparkle { font-size: 14px; margin-right: 2px; }
+.sk-festive-showcase h1 {
+  max-width: 420px; margin: 7px 0 9px; color: #fffdf3;
+  font-family: Georgia, 'Times New Roman', serif; font-size: clamp(28px, 7.2vw, 43px);
+  font-weight: 700; line-height: 1.07; letter-spacing: -.035em;
+}
+.sk-festive-showcase h1 em { color: #f0d6a6; font-style: italic; }
+.sk-festive-showcase-copy > p:not(.sk-festive-kicker) { max-width: 375px; color: #dbe9e7; font-size: 10px; line-height: 1.65; }
+.sk-festive-primary-cta {
+  display: inline-flex; align-items: center; justify-content: center; gap: 11px;
+  margin-top: 14px; padding: 9px 13px; border: 1px solid #f5e4bb;
+  border-radius: 30px; background: #f7e7c2; color: #174b5b;
+  font-size: 11px; font-weight: 900; box-shadow: 0 7px 16px #042b3b44;
+}
+.sk-festive-primary-cta svg { font-size: 10px; }
+.sk-festive-showcase-art { position: absolute; inset: 0 0 0 auto; width: 44%; pointer-events: none; }
+.sk-festive-orb {
+  position: absolute; width: 160px; height: 160px; right: -28px; top: 11px;
+  border-radius: 50%; background:
+    radial-gradient(circle at 35% 37%, #fffff6 0 17%, #fff1c7 40%, #b0d7cc 66%, #1b6473 72%, transparent 74%);
+  filter: drop-shadow(0 0 17px #d2ddbd70); opacity: .84;
+}
+.sk-festive-art-card {
+  position: absolute; top: 66px; right: 25px; width: 103px; height: 121px;
+  display: grid; place-items: center; overflow: hidden; border-radius: 11px;
+  transform: rotate(10deg); border: 4px solid #fff6e2;
+  background: linear-gradient(140deg,#fffaf2,#f4dec2);
+  box-shadow: 6px 17px 26px #01253588;
+}
+.sk-festive-art-card img { width: 100%; height: 100%; object-fit: cover; }
+.sk-festive-art-card > svg { font-size: 43px; color: #be965b; }
+.sk-festive-art-sparkle { position: absolute; z-index: 1; color: #eed49d; }
+.sk-festive-art-sparkle-a { right: 5px; top: 30px; font-size: 33px; }
+.sk-festive-art-sparkle-b { right: 138px; bottom: 23px; font-size: 16px; }
+.sk-festive-picks { padding: 5px 16px 21px; }
+.sk-festive-picks-heading { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; margin-bottom: 13px; }
+.sk-festive-picks-heading h2 { color: #fff; font-size: 16px; font-weight: 850; letter-spacing: -.025em; }
+.sk-festive-picks-heading span { color: #e6ca91; font-size: 10px; }
+.sk-festive-tiles {
+  display: grid; grid-auto-flow: column; grid-auto-columns: 138px; gap: 12px;
+  overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; padding: 1px 1px 8px;
+}
+.sk-festive-tile {
+  position: relative; isolation: isolate; display: block; overflow: hidden;
+  height: 185px; padding: 13px 10px; text-align: center; scroll-snap-align: start;
+  border-radius: 17px; border: 1px solid #fff8de; background: linear-gradient(180deg,#fff9dc,#f7e8c6 53%,var(--sk-tile-tint, #e3d0b1));
+  box-shadow: 0 6px 13px #012f4044; color: #263b3e;
+}
+.sk-festive-tile::after { content: ''; position: absolute; z-index: -1; left: -25%; right: -25%; bottom: -45%; height: 100%; border-radius: 50%; background: #fff7e985; }
+.sk-festive-tile-title { position: relative; z-index: 2; display: block; min-height: 34px; color: #263a3b; font-size: 14px; line-height: 1.1; font-weight: 850; }
+.sk-festive-tile-subtitle { position: relative; z-index: 2; display: block; margin: 4px 0 0; color: #677272; font-size: 9px; }
+.sk-festive-tile img { position: absolute; z-index: 1; left: 6%; bottom: -4px; width: 88%; height: 112px; object-fit: contain; filter: drop-shadow(1px 8px 5px #46504a44); }
+.sk-festive-tile-fallback { position: absolute; left: calc(50% - 34px); bottom: 22px; width: 68px; height: 68px; color: #a67d56; opacity: .79; }
+.sk-festive-tile-arrow { position: absolute; z-index: 3; display: grid; place-items: center; width: 26px; height: 26px; right: 7px; bottom: 7px; border-radius: 50%; background: #ffffffdb; color: #1e596a; font-size: 10px; box-shadow: 0 3px 12px #263d3933; }
+.sk-festive-tile:hover img { transform: scale(1.035); }
+.sk-festive-quote { padding: 0 17px 10px; }
+.sk-festive-quote-bar {
+  display: flex; align-items: center; gap: 12px; min-height: 65px; padding: 9px 13px;
+  border: 1px solid #55a4b1; border-radius: 17px; color: #fff;
+  background: linear-gradient(100deg,#118ca0,#057189 75%,#02576b);
+  box-shadow: inset 0 1px #ffffff42, 0 6px 15px #052f3d33;
+}
+.sk-festive-quote-icon { width: 41px; height: 41px; display: grid; place-items: center; flex: none; border-radius: 13px; background: #ffffff2a; font-size: 20px; }
+.sk-festive-quote-bar strong { display: block; font-size: 13px; line-height: 1.25; }
+.sk-festive-quote-bar small { display: block; margin-top: 4px; color: #dcf5f5; font-size: 10px; }
+.sk-festive-quote-arrow { flex: none; margin-left: auto; font-size: 14px; }
+.sk-festive-scallop {
+  width: 100%; height: 24px; background:
+    radial-gradient(circle at 18px 0, #064c60 17px, transparent 18px) repeat-x,
+    #fffcf4;
+  background-size: 36px 24px, auto;
+}
+.sk-festive-benefits {
+  display: flex; justify-content: center; gap: clamp(10px,4vw,40px);
+  overflow-x: auto; padding: 11px 15px 10px; background: #fffcf4;
+  border-bottom: 1px solid #e8e3d6; white-space: nowrap;
+}
+.sk-festive-benefits span { display: flex; align-items: center; gap: 6px; color: #2b6572; font-size: 10px; font-weight: 750; }
+.sk-festive-benefits svg { color: #bc9655; font-size: 13px; }
+.sk-festive-home .sk-festive-collections-label { padding-top: 17px; background: #fffcf4; }
+.sk-festive-eyebrow { display: block; margin-bottom: 5px; font-size: 9px; font-weight: 850; letter-spacing: .2em; color: #bb9a62; }
+.sk-festive-home .sk-section-label h2 { color: #164c5b; }
+.sk-festive-home .sk-section-label a { color: #087c91; }
+.sk-festive-home .sk-story-row { background: #fffcf4; border-bottom: 1px solid #eee6d3; padding-bottom: 19px; }
+.sk-festive-home .sk-story-item__outer { width: 70px; height: 70px; border-radius: 50%; padding: 3px; background: #f1efe6; box-shadow: none; }
+.sk-festive-home .sk-story-item__outer.is-selected { background: linear-gradient(135deg,#a98e52,#ead59a,#947844); }
+.sk-festive-home .sk-story-item__inner { border-radius: 50%; }
+.sk-festive-home .sk-story-item__name { max-width: 76px; color: #305b66; }
+.sk-festive-home .sk-bottom-nav { border: 0; border-top: 1px solid #ebe9df; background: #fffefaf5 !important; box-shadow: 0 -4px 16px #062c381b; }
+.sk-festive-home .sk-bottom-nav a[aria-current="page"] { background: #fff4cf; color: #1b5261 !important; }
+.sk-festive-home .sk-bottom-nav a { color: #67737b; }
+@media (min-width: 640px) {
+  .sk-festive-header { padding: 22px 28px 0; }
+  .sk-festive-brand-name { font-size: 20px; }
+  .sk-festive-brand-mark { width: 45px; height: 45px; }
+  .sk-festive-tabs { gap: 17px; padding: 23px 25px 2px; }
+  .sk-festive-tab { min-width: 85px; font-size: 12px; }
+  .sk-festive-showcase { min-height: 292px; padding: 21px 40px; }
+  .sk-festive-showcase h1 { font-size: 46px; }
+  .sk-festive-showcase-copy > p:not(.sk-festive-kicker) { font-size: 13px; }
+  .sk-festive-showcase-art { right: 25px; width: 42%; }
+  .sk-festive-orb { width: 265px; height: 265px; right: 12px; top: 2px; }
+  .sk-festive-art-card { top: 80px; right: 84px; width: 138px; height: 166px; }
+  .sk-festive-picks { padding: 0 26px 28px; }
+  .sk-festive-tiles { grid-auto-columns: minmax(148px,1fr); gap: 15px; }
+  .sk-festive-tile { height: 202px; }
+  .sk-festive-tile img { height: 125px; }
+  .sk-festive-quote { padding: 0 26px 14px; }
+}
+@media (min-width: 850px) {
+  .sk-festive-showcase { min-height: 340px; }
+  .sk-festive-showcase h1 { max-width: 620px; font-size: 59px; }
+  .sk-festive-showcase-copy { width: 62%; }
+  .sk-festive-showcase-art { width: 38%; }
+  .sk-festive-orb { width: 330px; height: 330px; }
+  .sk-festive-art-card { right: 110px; top: 86px; width: 174px; height: 208px; }
+  .sk-festive-tiles { grid-template-columns: repeat(4,minmax(0,1fr)); grid-auto-columns: auto; }
+  .sk-festive-tile { height: 230px; }
+  .sk-festive-tile img { height: 153px; }
+  .sk-festive-tile-title { font-size: 16px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .sk-festive-action, .sk-festive-tile img { transition: none; transform: none; }
+  .sk-festive-home { scroll-behavior: auto; }
+}
