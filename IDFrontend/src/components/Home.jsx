@@ -11,21 +11,6 @@ import ScrollGatePopup from './ScrollGatePopup';
 import FAQSection from './FAQSection';
 import LocalContactFooter from './LocalContactFooter';
 
-const COLLECTION_TERMS = {
-  wedding: /wedding|invitation|shaadi|card|lagna/i,
-  gifting: /gift|hamper|mug|corporate|keychain/i,
-  signage: /sign|acrylic|led|neon|glow|board/i,
-  printing: /print|flex|banner|label|sticker|brochure|stationery/i,
-  awards: /troph|award|memento|medal/i,
-};
-const COLLECTION_LABELS = {
-  wedding: 'Wedding Cards',
-  gifting: 'Personalised Gifts',
-  signage: 'Glow Signage',
-  printing: 'Printing & Packaging',
-  awards: 'Trophies & Awards',
-};
-
 // Fisher-Yates shuffle — new order on every page load
 function shuffle(arr) {
   const a = [...arr];
@@ -62,7 +47,6 @@ export default function Home() {
   const [reloadKey, setReloadKey] = useState(0);
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [selectedSubcategory, setSelectedSubcategory] = useState(null);
-  const [activeCollection, setActiveCollection] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const deferredSearch = useDeferredValue(searchTerm);
   const [viewedIds, setViewedIds] = useState(new Set());
@@ -117,50 +101,47 @@ export default function Home() {
     );
   }, [subcategories, selectedCategory]);
 
+  const categoryById = useMemo(() => {
+    const index = new Map();
+    for (const category of categories) {
+      if (category._id) index.set(String(category._id), category);
+      if (category.category_uuid) index.set(String(category.category_uuid), category);
+    }
+    return index;
+  }, [categories]);
+
   const filteredProducts = useMemo(() => {
     const query = deferredSearch.trim().toLowerCase();
-    const categoryMatch = (p) => {
-      if (!selectedCategory) return true;
-      const id = p.category?._id || p.category;
-      return id === selectedCategory.category_uuid || id === selectedCategory._id;
-    };
-    const matchesCollection = (p) => {
-      if (!activeCollection) return true;
-      const categoryId = p.category?._id || p.category;
-      const category = categories.find((c) =>
-        c._id === categoryId || c.category_uuid === categoryId
-      );
-      const text = [p.title, p.description, category?.name].filter(Boolean).join(' ');
-      return COLLECTION_TERMS[activeCollection]?.test(text) || false;
-    };
-    const matchesSearch = (p) => {
+    const categoryIds = selectedCategory
+      ? [selectedCategory._id, selectedCategory.category_uuid].filter(Boolean).map(String)
+      : null;
+    const selectedSubId = selectedSubcategory?._id;
+    const matched = shuffled.filter((product) => {
+      const productCategoryId = String(product.category?._id || product.category || '');
+      if (categoryIds && !categoryIds.includes(productCategoryId)) return false;
+      if (selectedSubcategory &&
+          product.subcategory !== selectedSubId &&
+          product.subcategory !== selectedSubcategory.name) return false;
       if (!query) return true;
-      const categoryId = p.category?._id || p.category;
-      const category = categories.find((c) =>
-        c._id === categoryId || c.category_uuid === categoryId
-      );
-      return [p.title, p.description, category?.name]
-        .filter(Boolean).join(' ').toLowerCase().includes(query);
-    };
-    const matched = shuffled.filter((p) =>
-      categoryMatch(p) &&
-      (!selectedSubcategory || p.subcategory === selectedSubcategory._id || p.subcategory === selectedSubcategory.name) &&
-      matchesCollection(p) && matchesSearch(p)
-    );
-    return selectedCategory || activeCollection || query ? matched : matched.slice(0, 40);
-  }, [shuffled, categories, selectedCategory, selectedSubcategory, activeCollection, deferredSearch]);
+      const assignedCategory = categoryById.get(productCategoryId);
+      const searchable = [product.title, product.description, assignedCategory?.name]
+        .filter(Boolean).join(' ').toLowerCase();
+      return searchable.includes(query);
+    });
+    return selectedCategory || query ? matched : matched.slice(0, 40);
+  }, [shuffled, categoryById, selectedCategory, selectedSubcategory, deferredSearch]);
 
   // Videos belong to the discovery feed, not filtered product results.
   const feed = useMemo(() => {
-    if (selectedCategory || activeCollection || deferredSearch.trim()) {
-      return filteredProducts.map((p) => ({ ...p, _feedType: 'product' }));
+    if (selectedCategory || deferredSearch.trim()) {
+      return filteredProducts.map((product) => ({ ...product, _feedType: 'product' }));
     }
     return interleaveFeed(filteredProducts, shuffle(videos));
-  }, [filteredProducts, videos, selectedCategory, activeCollection, deferredSearch]);
+  }, [filteredProducts, videos, selectedCategory, deferredSearch]);
 
   // Progressive feed: render only the first 8 cards and extend near the viewport.
   // This avoids initializing dozens of 3D viewers and image nodes on first paint.
-  useEffect(() => { setVisibleCount(8); }, [selectedCategory, selectedSubcategory, activeCollection, deferredSearch]);
+  useEffect(() => { setVisibleCount(8); }, [selectedCategory, selectedSubcategory, deferredSearch]);
   useEffect(() => {
     if (visibleCount >= feed.length || !loadMoreRef.current) return;
     if (!('IntersectionObserver' in window)) return;
@@ -173,7 +154,6 @@ export default function Home() {
 
   const handleCategorySelect = (cat) => {
     setSearchTerm('');
-    setActiveCollection(null);
     if (!cat) { setSelectedCategory(null); setSelectedSubcategory(null); return; }
     setSelectedCategory((prev) => {
       if (prev?._id === cat._id) { setSelectedSubcategory(null); return null; }
@@ -186,19 +166,15 @@ export default function Home() {
     setSelectedSubcategory((prev) => (prev?._id === sub._id ? null : sub));
   };
 
-  const handleCollectionSelect = (id) => {
-    setActiveCollection(id);
-    setSearchTerm('');
-    setSelectedCategory(null);
-    setSelectedSubcategory(null);
-    if (id) requestAnimationFrame(() =>
+  const handleHeroCategorySelect = (category) => {
+    handleCategorySelect(category);
+    if (category) requestAnimationFrame(() =>
       document.getElementById('sk-products')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
     );
   };
 
   const handleSearchChange = (value) => {
     setSearchTerm(value);
-    setActiveCollection(null);
     setSelectedCategory(null);
     setSelectedSubcategory(null);
   };
@@ -222,8 +198,8 @@ export default function Home() {
         categories={categories}
         searchTerm={searchTerm}
         onSearchChange={handleSearchChange}
-        activeCollection={activeCollection}
-        onCollectionSelect={handleCollectionSelect}
+        selectedCategory={selectedCategory}
+        onCategorySelect={handleHeroCategorySelect}
         whatsappNumber={config.whatsappNumber || config.phone || '919372333633'}
       />
       <main className="mx-auto w-full max-w-2xl py-1">
@@ -256,7 +232,7 @@ export default function Home() {
         )}
 
         <div className="sk-section-label" id="sk-products" style={{ paddingTop: 20, scrollMarginTop: 16 }}>
-          <div><h2>{deferredSearch.trim() ? 'Search results' : activeCollection ? COLLECTION_LABELS[activeCollection] : selectedCategory ? selectedCategory.name : 'The latest creations'}</h2><p>{deferredSearch.trim() ? 'Showing matches for “' + deferredSearch.trim() + '”' : 'Discover your next favourite design'}</p></div>
+          <div><h2>{deferredSearch.trim() ? 'Search results' : selectedCategory ? selectedCategory.name : 'The latest creations'}</h2><p>{deferredSearch.trim() ? 'Showing matches for “' + deferredSearch.trim() + '”' : 'Discover your next favourite design'}</p></div>
           <Link to="/products">All products →</Link>
         </div>
         <section className="mt-1">
