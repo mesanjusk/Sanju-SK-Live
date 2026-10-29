@@ -193,3 +193,7 @@
   .sk-festive-action, .sk-festive-tile img { transition: none; transform: none; }
   .sk-festive-home { scroll-behavior: auto; }
 }
+
+/* Category names are authored in the admin and can be longer than the sample labels. */
+.sk-festive-tab span { max-width: 112px; overflow: hidden; text-overflow: ellipsis; }
+.sk-festive-tile-title { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; }
