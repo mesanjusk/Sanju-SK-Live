@@ -6,6 +6,12 @@ const seo = JSON.parse(fs.readFileSync(new URL('../src/config/local-seo.json', i
 const root = path.resolve(new URL('..', import.meta.url).pathname);
 const publicDir = path.join(root, 'public');
 const home = seo.siteUrl + '/';
+const coreServiceLinks = [
+  ['/wedding-card-printing-gondia/', 'Designer Wedding Cards & Laser-Cut Invitations'],
+  ['/3d-led-sign-boards-gondia/', '3D LED Channel Letters & Acrylic Sign Boards'],
+  ['/custom-trophies-awards-gondia/', 'Customized Trophies, Mementos & Corporate Awards'],
+  ['/flex-banner-printing-gondia/', 'Large Format Flex Banners, Standees & Vinyl Graphics'],
+];
 const img = (p) => seo.siteUrl + p;
 const areaServed = [
   ['Gondia', 'Maharashtra'],
@@ -123,6 +129,8 @@ const rootMarkup = [
   '<a href="/corporate-gifting-gondia/">Corporate gifting</a> · <a href="/products">Product collection</a></nav></header>',
   '<section aria-label="Printing and design services"><h2>What we do</h2><ul>',
   ...seo.services.map(s => '<li><strong>' + esc(s.name) + '</strong> — ' + esc(s.description) + '</li>'),
+  '</ul></section><section aria-label="Our core product and printing categories"><h2>Explore our core services</h2><ul>',
+  ...coreServiceLinks.map(([url, label]) => '<li><a href="' + url + '">' + esc(label) + ' in Gondia</a></li>'),
   '</ul></section><section aria-label="Frequently asked questions"><h2>Common questions</h2>',
   ...seo.faqs.map(f => '<h3>' + esc(f.question) + '</h3><p>' + esc(f.answer) + '</p>'),
   '</section><footer><strong>' + esc(seo.businessName) + '</strong><address>',
@@ -142,7 +150,9 @@ fs.writeFileSync(indexFile, currentIndex.replace(
 
 const routes = [
   '/', '/wedding-card-printing-gondia/', '/digital-wedding-invitations/',
-  '/corporate-gifting-gondia/', '/products', '/allListing', '/home1', '/contact',
+  '/corporate-gifting-gondia/', '/3d-led-sign-boards-gondia/',
+  '/custom-trophies-awards-gondia/', '/flex-banner-printing-gondia/',
+  '/products', '/allListing', '/home1', '/contact',
 ];
 fs.mkdirSync(publicDir, { recursive: true });
 const sitemapPages = '<?xml version="1.0" encoding="UTF-8"?>\n' +
