@@ -10,6 +10,7 @@ import LoadingSkeleton from './common/LoadingSkeleton';
 import ScrollGatePopup from './ScrollGatePopup';
 import FAQSection from './FAQSection';
 import LocalContactFooter from './LocalContactFooter';
+import ServiceGallery from './ServiceGallery';
 
 // Fisher-Yates shuffle — new order on every page load
 function shuffle(arr) {
@@ -43,8 +44,6 @@ export default function Home() {
   const [videos, setVideos] = useState([]);
   const [config, setConfig] = useState({});
   const [loading, setLoading] = useState(true);
-  const [loadError, setLoadError] = useState(false);
-  const [reloadKey, setReloadKey] = useState(0);
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [selectedSubcategory, setSelectedSubcategory] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
@@ -67,10 +66,8 @@ export default function Home() {
         const rows = Array.isArray(response.data) ? response.data : response.data?.result;
         if (!Array.isArray(rows)) throw new Error('Unexpected product API format');
         setListings(rows);
-        setLoadError(false);
       } catch {
         if (!active) return;
-        setLoadError(true);
         retryTimer = setTimeout(loadProducts, 20000);
       } finally {
         if (active) setLoading(false);
@@ -90,7 +87,7 @@ export default function Home() {
       .then(res => { if (active) setVideos(Array.isArray(res.data) ? res.data : res.data?.result || []); })
       .catch(() => {});
     return () => { active = false; clearTimeout(retryTimer); };
-  }, [reloadKey]);
+  }, []);
 
   const shuffled = useMemo(() => shuffle(listings), [listings]);
 
@@ -202,6 +199,7 @@ export default function Home() {
         onCategorySelect={handleHeroCategorySelect}
         whatsappNumber={config.whatsappNumber || config.phone || '919372333633'}
       />
+      <ServiceGallery />
       <main className="mx-auto w-full max-w-2xl py-1">
         <div className="sk-section-label sk-festive-collections-label">
           <div><span className="sk-festive-eyebrow">CURATED FOR YOU</span><h2>Explore collections</h2><p>Find your next favourite design</p></div>
@@ -231,6 +229,7 @@ export default function Home() {
           </div>
         )}
 
+        {(loading || feed.length > 0 || !!selectedCategory || !!deferredSearch.trim()) && (<>
         <div className="sk-section-label" id="sk-products" style={{ paddingTop: 20, scrollMarginTop: 16 }}>
           <div><h2>{deferredSearch.trim() ? 'Search results' : selectedCategory ? selectedCategory.name : 'The latest creations'}</h2><p>{deferredSearch.trim() ? 'Showing matches for “' + deferredSearch.trim() + '”' : 'Discover your next favourite design'}</p></div>
           <Link to="/products">All products →</Link>
@@ -254,14 +253,7 @@ export default function Home() {
                 />
               )
             )
-          ) : loadError ? (
-              <div role="alert" className="mx-4 my-8 rounded-xl border border-amber-200 bg-amber-50 p-4 text-center text-sm text-gray-700">
-                Our online catalog is temporarily offline. Please contact us for product photos and pricing; this page retries automatically.
-                <button type="button" onClick={() => { setLoading(true); setLoadError(false); setReloadKey((v) => v + 1); }}
-                  className="mt-3 block w-full rounded-lg bg-[#075E54] px-4 py-2 font-semibold text-white">Retry loading products</button>
-                <a className="mt-3 block text-sm font-bold text-[#245f43] underline" href="https://wa.me/919372333633?text=Hello%2C%20please%20share%20your%20product%20catalog">Request catalog on WhatsApp</a>
-              </div>
-            ) : (
+          ) : (
               <div className="mx-4 my-10 rounded-2xl bg-white p-8 text-center text-sm text-gray-600">
                 No matching designs found. Try another collection or search.
                 <button type="button" onClick={() => { handleSearchChange(''); setSelectedCategory(null); }}
@@ -276,6 +268,7 @@ export default function Home() {
             </div>
           )}
         </section>
+        </>)}
         <section aria-label="SK Digital printing and invitation services" className="mx-auto my-10 max-w-2xl px-4">
           <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
             <h2 className="text-lg font-bold text-gray-900">Wedding cards, digital invitations &amp; corporate gifts</h2>
@@ -287,6 +280,9 @@ export default function Home() {
               <a className="underline underline-offset-4" href="/wedding-card-printing-gondia/">Wedding card printing in Gondia</a>
               <a className="underline underline-offset-4" href="/digital-wedding-invitations/">Digital wedding invitations in India</a>
               <a className="underline underline-offset-4" href="/corporate-gifting-gondia/">Corporate gifts &amp; custom branding in Gondia</a>
+              <a className="underline underline-offset-4" href="/3d-led-sign-boards-gondia/">3D LED sign boards in Gondia</a>
+              <a className="underline underline-offset-4" href="/custom-trophies-awards-gondia/">Custom trophies and awards in Gondia</a>
+              <a className="underline underline-offset-4" href="/flex-banner-printing-gondia/">Flex banner printing in Gondia</a>
             </nav>
           </div>
         </section>
