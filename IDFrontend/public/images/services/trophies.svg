@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 520" role="img" aria-label="Illustration of engraved corporate trophies and awards">
+<defs><linearGradient id="bg" x2="1" y2="1"><stop stop-color="#e5ebdf"/><stop offset="1" stop-color="#d4e1da"/></linearGradient><linearGradient id="gold" x2="1" y2=".8"><stop stop-color="#a6793e"/><stop offset=".35" stop-color="#fff1b8"/><stop offset=".67" stop-color="#c69b4d"/><stop offset="1" stop-color="#906431"/></linearGradient><filter id="shadow"><feDropShadow dx="7" dy="15" stdDeviation="11" flood-color="#36504a" flood-opacity=".25"/></filter></defs>
+<rect width="800" height="520" fill="url(#bg)"/><circle cx="620" cy="95" r="166" fill="#fff6dd" opacity=".55"/><path d="M0 430Q400 390 800 430V520H0Z" fill="#c4d3c9"/>
+<g filter="url(#shadow)" transform="translate(245 32)"><path d="M83 78h239l-16 130q-22 88-100 101v55h75v34H125v-34h73v-55Q121 295 99 208Z" fill="url(#gold)" stroke="#a37a45" stroke-width="7"/>
+<path d="M94 125C-26 61 10 266 128 254M313 125C433 61 400 266 284 254" fill="none" stroke="url(#gold)" stroke-width="24"/>
+<path d="M136 105h146l-12 96q-17 54-65 60q-49-9-62-60Z" fill="#fff1c0" opacity=".3"/><circle cx="204" cy="182" r="39" fill="#fff3cc" stroke="#bd914d" stroke-width="5"/><path d="m204 151 10 21 23 4-17 17 4 23-20-11-20 11 4-23-17-17 23-4Z" fill="#c09b52"/>
+<rect x="88" y="395" width="232" height="46" rx="7" fill="#214d55"/><rect x="110" y="418" width="188" height="7" rx="3" fill="#d4b176"/></g>
+<g transform="translate(590 245) rotate(8)" filter="url(#shadow)"><rect x="-75" y="-113" width="150" height="220" rx="14" fill="#f8f9f1" stroke="#c79e53" stroke-width="10"/><path d="M-49-63h98M-38 34h76" stroke="#c1a06a" stroke-width="4"/><circle cy="-15" r="35" fill="url(#gold)"/><path d="M-17 10V50L0 38L17 50V10" fill="#c7a064"/></g>
+<g fill="#bd9d5b"><path d="M120 116l13 31 33 3-25 21 9 32-30-16-29 16 8-32-24-21 32-3Z" opacity=".6"/><circle cx="139" cy="354" r="7"/></g></svg>
