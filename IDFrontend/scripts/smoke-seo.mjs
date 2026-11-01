@@ -127,6 +127,11 @@ assert(homeSource.includes('filteredProducts.slice(0, visibleCount)'),'Focused p
 assert(heroSource.includes('phoneNumber')&&heroSource.includes('dialHref'),'Top navigation call link missing');
 assert(cardSource.includes('loading="lazy"')&&cardSource.includes('Enquire'),'Lightweight product gallery card missing');
 assert(heroSource.includes('FaEllipsisV')&&heroSource.includes('sk-top-navigation'),'Three-dot website menu missing');
+const festiveCss=readFileSync(new URL('../src/components/mobile/festive-home.css',import.meta.url),'utf8');
+assert(heroSource.includes('sk-festive-tile-top')&&heroSource.includes('sk-festive-tile-media'),'Collection photo and label must have separate layout regions');
+assert(festiveCss.includes('grid-auto-columns: calc((100% - 16px) / 3)'),'Show three collection tiles in the mobile viewport');
+assert(festiveCss.includes('.sk-festive-tile-media img')&&festiveCss.includes('position: static'),'Collection photo must stay within its own media region');
+assert(bottomNavSource.includes('fixed right-2')&&bottomNavSource.includes('h-10 w-10'),'Contact dock must stay compact and right-aligned');
 assert(heroSource.includes('Made with <FaHeart')&&heroSource.includes('sk-festive-top-phone'),'One-line heart and phone information missing');
 assert(bottomNavSource.includes('FaWhatsapp')&&bottomNavSource.includes('FaPhoneAlt')&&bottomNavSource.includes('FaHeart'),'Three floating contact icons missing');
 assert(reminderSource.includes('FIRST_REMINDER_DELAY_MS = 15000')&&reminderSource.includes('REPEAT_REMINDER_DELAY_MS = 8000'),'Call reminder timing must be 15 seconds then every 8 seconds');

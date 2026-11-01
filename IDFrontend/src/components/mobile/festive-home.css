@@ -107,21 +107,36 @@
 .sk-festive-picks-heading h2 { color: #fff; font-size: 16px; font-weight: 850; letter-spacing: -.025em; }
 .sk-festive-picks-heading span { color: #e6ca91; font-size: 10px; }
 .sk-festive-tiles {
-  display: grid; grid-auto-flow: column; grid-auto-columns: 138px; gap: 12px;
+  display: grid; grid-auto-flow: column; grid-auto-columns: calc((100% - 16px) / 3); gap: 8px;
   overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; padding: 1px 1px 8px;
 }
 .sk-festive-tile {
-  position: relative; isolation: isolate; display: block; overflow: hidden;
-  height: 185px; padding: 13px 10px; text-align: center; scroll-snap-align: start;
+  position: relative; isolation: isolate; display: flex; flex-direction: column;
+  align-items: stretch; overflow: hidden;
+  height: 160px; padding: 9px 7px; text-align: center; scroll-snap-align: start;
   border-radius: 17px; border: 1px solid #fff8de; background: linear-gradient(180deg,#fff9dc,#f7e8c6 53%,var(--sk-tile-tint, #e3d0b1));
   box-shadow: 0 6px 13px #012f4044; color: #263b3e;
 }
 .sk-festive-tile::after { content: ''; position: absolute; z-index: -1; left: -25%; right: -25%; bottom: -45%; height: 100%; border-radius: 50%; background: #fff7e985; }
-.sk-festive-tile-title { position: relative; z-index: 2; display: block; min-height: 34px; color: #263a3b; font-size: 14px; line-height: 1.1; font-weight: 850; }
-.sk-festive-tile-subtitle { position: relative; z-index: 2; display: block; margin: 4px 0 0; color: #677272; font-size: 9px; }
-.sk-festive-tile img { position: absolute; z-index: 1; left: 6%; bottom: -4px; width: 88%; height: 112px; object-fit: contain; filter: drop-shadow(1px 8px 5px #46504a44); }
-.sk-festive-tile-fallback { position: absolute; left: calc(50% - 34px); bottom: 22px; width: 68px; height: 68px; color: #a67d56; opacity: .79; }
-.sk-festive-tile-arrow { position: absolute; z-index: 3; display: grid; place-items: center; width: 26px; height: 26px; right: 7px; bottom: 7px; border-radius: 50%; background: #ffffffdb; color: #1e596a; font-size: 10px; box-shadow: 0 3px 12px #263d3933; }
+.sk-festive-tile-top {
+  position: relative; z-index: 2; display: flex; flex: 0 0 48px;
+  flex-direction: column; align-items: center; width: 100%; min-height: 0;
+}
+.sk-festive-tile-title {
+  display: block; width: 100%; color: #263a3b; font-size: 11px;
+  line-height: 1.15; font-weight: 850; overflow-wrap: anywhere;
+}
+.sk-festive-tile-subtitle { display: block; margin-top: 3px; color: #677272; font-size: 8px; }
+.sk-festive-tile-media {
+  position: relative; display: flex; flex: 1 1 auto; align-items: center;
+  justify-content: center; min-height: 0; width: 100%; overflow: hidden;
+}
+.sk-festive-tile-media img {
+  position: static; display: block; width: 100%; height: 100%;
+  object-fit: contain; filter: drop-shadow(0 4px 3px #46504a33);
+}
+.sk-festive-tile-fallback { width: 48px; height: 48px; color: #a67d56; opacity: .79; }
+.sk-festive-tile-arrow { position: absolute; z-index: 3; display: grid; place-items: center; width: 22px; height: 22px; right: 5px; bottom: 5px; border-radius: 50%; background: #ffffffdb; color: #1e596a; font-size: 10px; box-shadow: 0 3px 12px #263d3933; }
 .sk-festive-tile:hover img { transform: scale(1.035); }
 .sk-festive-quote { padding: 0 17px 10px; }
 .sk-festive-quote-bar {
@@ -171,7 +186,7 @@
   .sk-festive-picks { padding: 0 26px 28px; }
   .sk-festive-tiles { grid-auto-columns: minmax(148px,1fr); gap: 15px; }
   .sk-festive-tile { height: 202px; }
-  .sk-festive-tile img { height: 125px; }
+   .sk-festive-tile-media img { height: 100%; }
   .sk-festive-quote { padding: 0 26px 14px; }
 }
 @media (min-width: 850px) {
@@ -183,7 +198,7 @@
   .sk-festive-art-card { right: 110px; top: 86px; width: 174px; height: 208px; }
   .sk-festive-tiles { grid-template-columns: repeat(4,minmax(0,1fr)); grid-auto-columns: auto; }
   .sk-festive-tile { height: 230px; }
-  .sk-festive-tile img { height: 153px; }
+   .sk-festive-tile-media img { height: 100%; }
   .sk-festive-tile-title { font-size: 16px; }
 }
 @media (prefers-reduced-motion: reduce) {

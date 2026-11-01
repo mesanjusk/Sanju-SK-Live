@@ -11,19 +11,19 @@ export default function MobileBottomNav({ whatsappNumber = '919372333633', phone
 
   return (
     <nav aria-label="Quick contact and saved designs"
-      className="sk-floating-contact-nav fixed left-1/2 z-40 flex -translate-x-1/2 items-center gap-3 rounded-full border border-[#c8dcca] bg-white/95 px-3 py-2 shadow-[0_8px_30px_rgba(9,43,26,.22)] backdrop-blur"
-      style={{ bottom: 'calc(env(safe-area-inset-bottom, 0px) + 12px)' }}>
+      className="sk-floating-contact-nav fixed right-2 z-40 flex items-center gap-1.5 rounded-full border border-[#c8dcca] bg-white/90 p-1.5 shadow-[0_5px_18px_rgba(9,43,26,.18)] backdrop-blur sm:right-5"
+      style={{ bottom: 'calc(env(safe-area-inset-bottom, 0px) + 10px)' }}>
       <a href={chat} target="_blank" rel="noopener noreferrer"
         aria-label="WhatsApp SANJU SK Digital"
-        className="flex h-11 w-11 items-center justify-center rounded-full bg-[#176a43] text-xl text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-700">
+        className="flex h-10 w-10 items-center justify-center rounded-full bg-[#176a43] text-lg text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-700">
         <FaWhatsapp aria-hidden="true" />
       </a>
       <a href={dial} aria-label="Call SANJU SK Digital"
-        className="flex h-11 w-11 items-center justify-center rounded-full bg-[#e7f3e9] text-xl text-[#176a43] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-700">
+        className="flex h-10 w-10 items-center justify-center rounded-full bg-[#e7f3e9] text-lg text-[#176a43] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-700">
         <FaPhoneAlt aria-hidden="true" />
       </a>
       <NavLink to="/favorites" aria-label="Saved designs"
-        className={({ isActive }) => 'flex h-11 w-11 items-center justify-center rounded-full text-xl focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-700 ' +
+        className={({ isActive }) => 'flex h-10 w-10 items-center justify-center rounded-full text-lg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-700 ' +
           (isActive ? 'bg-[#176a43] text-white' : 'bg-[#f2f3ef] text-[#325c45]')}>
         <FaHeart aria-hidden="true" />
       </NavLink>
