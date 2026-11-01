@@ -15,7 +15,7 @@ const siteMap=readFileSync(new URL('../public/sitemap.xml',import.meta.url),'utf
 const appBootSource=readFileSync(new URL('../src/App.jsx',import.meta.url),'utf8');
 assert(appBootSource.includes("import Home from './components/Home'"), 'Homepage must render directly instead of flashing the suspense loader');
 assert(!appBootSource.includes("lazy(() => import('./components/Home'))"), 'Do not lazy load homepage behind a second skeleton');
-assert(index.includes('class="sk-boot-header"') && index.includes('class="sk-boot-hero'), 'Homepage initial HTML must match lavender storefront layout');
+assert(index.includes('class="sk-boot-header sk-boot-container"') && index.includes('class="sk-boot-hero'), 'Homepage initial HTML must match lavender storefront layout');
 assert(index.includes('class="sk-boot-quote"') && index.includes('class="sk-boot-collections"'), 'Initial HTML must include quote before collections');
 assert(index.indexOf('sk-boot-quote') < index.indexOf('sk-boot-collections'), 'Quote must appear before initial collections');
 assert(index.includes('<details class="sk-boot-more">') && index.includes('Common questions'), 'Initial SEO information must remain available without JS');
