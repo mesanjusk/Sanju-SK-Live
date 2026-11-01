@@ -386,3 +386,67 @@
   .sk-festive-tiles { grid-template-columns:repeat(4,minmax(0,1fr)); grid-auto-columns:auto; }
   .sk-festive-tile { height:238px; }
 }
+
+
+/* Light-lavender homepage palette: header, hero, collections, catalog and footer. */
+.sk-festive-home { background:linear-gradient(180deg,#fbf8ff 0%,#f5effc 50%,#faf7fe 100%);color:#4d3764; }
+.sk-festive-dark {
+  color:#44305e;
+  background:radial-gradient(circle at 90% 5%,#fffdfcaa,transparent 38%),
+             linear-gradient(155deg,#efe6fb 0%,#e7dcf6 50%,#f5eefe 100%);
+}
+.sk-festive-brand { color:#46315e; }
+.sk-festive-brand-name small { color:#8062a3; }
+.sk-festive-brand-mark { border-color:#dbcaec;background:linear-gradient(145deg,#ebdffd,#fffafd,#c7b0e4);box-shadow:inset 0 1px #fff,0 4px 12px #6b518344;color:#4c3567; }
+.sk-festive-action { color:#624587;background:#ffffff88;border-color:#d0bde4; }
+.sk-festive-action:hover,.sk-festive-action:focus-visible { background:#fff; }
+.sk-festive-location-line .sk-festive-location { color:#685379; }
+.sk-festive-location-line .sk-festive-location strong { color:#4c3564; }
+.sk-festive-location-line .sk-festive-location svg { color:#b683b7; }
+.sk-festive-location-line .sk-festive-top-phone { color:#644587; }
+.sk-festive-header-search { background:#fffaff;border-color:#dac9ed;box-shadow:0 3px 12px #7f5c9a21; }
+.sk-festive-header-search .sk-festive-search-icon { color:#8060a4; }
+.sk-festive-search input { color:#4d3764; }
+.sk-festive-search input::placeholder { color:#8c7a9e; }
+.sk-festive-search:focus-within { outline-color:#bd9de377; }
+.sk-festive-kicker,.sk-festive-sparkle { color:#8362a6; }
+.sk-festive-showcase h1 { color:#44305c; }
+.sk-festive-showcase h1 em { color:#8b68b0; }
+.sk-festive-showcase-copy > p:not(.sk-festive-kicker) { color:#6e5c80; }
+.sk-festive-orb {
+ background:radial-gradient(circle at 35% 37%,#fffefd 0 20%,#faf4ff 42%,#d7c6ed 68%,#ac8bd0 73%,transparent 76%);
+ filter:drop-shadow(0 0 12px #c8b4e666);
+}
+.sk-festive-art-card { background:linear-gradient(140deg,#fffafd,#e6d7f4);border-color:#fffaff;box-shadow:6px 12px 26px #76618a33; }
+.sk-festive-art-card > svg { color:#8b6daf; }
+.sk-festive-art-sparkle { color:#9b7fbb; }
+.sk-festive-picks-heading h2 { color:#48325e; }
+.sk-festive-picks-heading span { color:#816597; }
+.sk-festive-tile { border-color:#e0d2ee;background:linear-gradient(180deg,#fffaff 0%,#f8f1fe 54%,var(--sk-tile-tint,#e9ddf5) 130%);box-shadow:0 7px 20px #78619227; }
+.sk-festive-tile::after { background:#ffffff7d; }
+.sk-festive-tile-title { color:#4c3763; }
+.sk-festive-tile-subtitle { color:#8a739e; }
+.sk-festive-tile-arrow { background:#fffaff;color:#725095; }
+.sk-festive-quote-bar { border-color:#c6b0e0;background:linear-gradient(100deg,#b8a0d8,#8e70b8);color:#fff;box-shadow:0 5px 16px #775c9b2c; }
+.sk-festive-quote-bar small { color:#f9efff; }
+.sk-festive-scallop { background:radial-gradient(circle at 11px 0,#f5eefe 10px,transparent 11px) repeat-x,#faf7fe;background-size:22px 12px,auto; }
+.sk-festive-benefits { background:#faf7fe;border-color:#e5dced; }
+.sk-festive-benefits span { color:#765f91; }
+.sk-festive-benefits svg { color:#a789cb; }
+.sk-festive-home .sk-festive-collections-label { background:#faf7fe; }
+.sk-festive-home .sk-section-label h2 { color:#4d3766; }
+.sk-festive-home .sk-section-label a { color:#7b58a4; }
+.sk-festive-home .sk-story-row { background:#faf7fe;border-color:#e9dfef; }
+.sk-festive-home .sk-festive-eyebrow { color:#9577b1; }
+.sk-festive-home .sk-header-overflow-menu { background:#fffaff;border-color:#e2d4f1;box-shadow:0 14px 34px #5b3d7c35; }
+.sk-festive-home .sk-header-overflow-link { color:#51396a; }
+.sk-festive-home .sk-header-overflow-link:hover,.sk-festive-home .sk-header-overflow-link:focus-visible { background:#f3eafb; }
+.sk-festive-home #sk-products article { border-color:#e9dcf2;background:#fffbff;box-shadow:0 7px 23px #75569012; }
+.sk-festive-home #sk-products article [class*="bg-[#"] { border-color:#e4d8ef; }
+.sk-festive-home #sk-products section h2 { color:#4d3567; }
+.sk-festive-home #sk-products section > div:first-child p { color:#8b739d; }
+.sk-festive-home #sk-products button:focus-visible,.sk-festive-home a:focus-visible { outline-color:#8564ac; }
+.sk-festive-home #sk-business-information summary { border-color:#e1d2ed;background:#fffaff; }
+.sk-festive-home #sk-business-information summary:focus-visible { outline-color:#8660b1; }
+.sk-festive-home #sk-business-information .group-open\\:block { color:#8a7698; }
+.sk-festive-home .sk-floating-contact-nav { border-color:#e2d6f1;background:#fffaffed;box-shadow:0 6px 22px #63468222; }
