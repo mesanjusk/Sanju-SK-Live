@@ -1,9 +1,9 @@
-import { memo, useMemo } from 'react';
+import { memo, useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
-  FaArrowRight, FaBoxOpen, FaGift, FaHeart, FaLightbulb, FaMapMarkerAlt,
+  FaArrowRight, FaBoxOpen, FaEllipsisV, FaGift, FaHeart, FaHome, FaLightbulb,
   FaPalette, FaPhoneAlt, FaPrint, FaRegEnvelope, FaSearch, FaThLarge, FaTimes,
-  FaTrophy, FaWhatsapp
+  FaTrophy, FaUser, FaWhatsapp
 } from 'react-icons/fa';
 import { optimizedImage } from '../../utils/media';
 import './festive-home.css';
@@ -51,10 +51,25 @@ function FestiveStorefrontHero({
         category, count: products.length, index, Icon: iconFor(category.name),
         tint: TINTS[index % TINTS.length]
       };
-    }).sort((a, b) => b.count - a.count || a.index - b.index).slice(0, 12);
+    }).sort((a, b) => b.count - a.count || a.index - b.index);
   }, [listings, categories]);
 
   const featured = collections[0];
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef(null);
+  useEffect(() => {
+    if (!menuOpen) return undefined;
+    const onPointerDown = (event) => {
+      if (!menuRef.current?.contains(event.target)) setMenuOpen(false);
+    };
+    const onKeyDown = (event) => { if (event.key === 'Escape') setMenuOpen(false); };
+    document.addEventListener('pointerdown', onPointerDown);
+    document.addEventListener('keydown', onKeyDown);
+    return () => {
+      document.removeEventListener('pointerdown', onPointerDown);
+      document.removeEventListener('keydown', onKeyDown);
+    };
+  }, [menuOpen]);
   const wa = String(whatsappNumber || '919372333633').replace(/\D/g, '');
   const dialDigits = String(phoneNumber || '919372333633').replace(/\D/g, '');
   const dialHref = 'tel:' + (dialDigits.length === 10 ? '+91' + dialDigits : '+' + dialDigits);
@@ -109,17 +124,36 @@ function FestiveStorefrontHero({
                 <small>DIGITAL · MAHI CREATION</small>
               </span>
             </Link>
-            <div className="sk-festive-header-actions">
-              <a href={dialHref} aria-label={'Call SANJU SK Digital at ' + displayPhone} className="sk-festive-action"><FaPhoneAlt /></a>
-              <Link to="/favorites" aria-label="Saved designs" className="sk-festive-action"><FaHeart /></Link>
-              <a href={quoteUrl} target="_blank" rel="noopener noreferrer"
-                aria-label="Chat with SK Digital on WhatsApp" className="sk-festive-action"><FaWhatsapp /></a>
+            <div className="sk-festive-header-actions relative" ref={menuRef}>
+              <button type="button" className="sk-festive-action"
+                aria-label="Open website navigation" aria-haspopup="true"
+                aria-expanded={menuOpen} aria-controls="sk-top-navigation"
+                onClick={() => setMenuOpen(open => !open)}>
+                <FaEllipsisV aria-hidden="true" />
+              </button>
+              {menuOpen && (
+                <nav id="sk-top-navigation" aria-label="Website navigation"
+                  className="sk-header-overflow-menu">
+                  {[
+                    { to: '/', label: 'Home', Icon: FaHome },
+                    { to: '/allCategories', label: 'Explore categories', Icon: FaThLarge },
+                    { to: '/contact', label: 'Contact us', Icon: FaPhoneAlt },
+                    { to: '/favorites', label: 'Saved designs', Icon: FaHeart },
+                    { to: '/profile', label: 'My profile', Icon: FaUser },
+                  ].map(({ to, label, Icon }) => (
+                    <Link key={to} to={to} onClick={() => setMenuOpen(false)}
+                      className="sk-header-overflow-link">
+                      <Icon aria-hidden="true" /><span>{label}</span>
+                    </Link>
+                  ))}
+                </nav>
+              )}
             </div>
           </div>
-          <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
-            <p className="sk-festive-location"><FaMapMarkerAlt aria-hidden="true" /> Made with care in <strong>Gondia, Maharashtra</strong></p>
-            <a href={dialHref} className="text-[11px] font-extrabold text-[#f7e4b9] underline underline-offset-2" aria-label={'Call ' + displayPhone}>
-              <FaPhoneAlt aria-hidden="true" className="mr-1 inline" />{displayPhone}
+          <div className="sk-festive-location-line">
+            <p className="sk-festive-location">Made with <FaHeart aria-label="love" /> in <strong>Gondia, Maharashtra</strong></p>
+            <a href={dialHref} className="sk-festive-top-phone" aria-label={'Call ' + displayPhone}>
+              <FaPhoneAlt aria-hidden="true" />{displayPhone}
             </a>
           </div>
           <div className="sk-festive-search" role="search">
@@ -138,7 +172,7 @@ function FestiveStorefrontHero({
             aria-pressed={!selectedCategory}>
             <FaThLarge aria-hidden="true" /><span>All</span>
           </button>
-          {collections.slice(0, 8).map(renderTab)}
+          {collections.map(renderTab)}
         </nav>
 
         <section className="sk-festive-showcase sk-festive-container" aria-labelledby="sk-festive-title">

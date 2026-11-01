@@ -6,6 +6,7 @@ import seo from '../config/local-seo.json';
 import FestiveStorefrontHero from './mobile/FestiveStorefrontHero';
 import StoryCategories from './mobile/StoryCategories';
 import CompactProductCard from './mobile/CompactProductCard';
+import CategoryProductCarousel from './mobile/CategoryProductCarousel';
 import VideoFeedCard from './mobile/VideoFeedCard';
 import MobileBottomNav from './mobile/MobileBottomNav';
 import LoadingSkeleton from './common/LoadingSkeleton';
@@ -185,7 +186,7 @@ export default function Home() {
           <Link to="/allCategories">All categories →</Link>
         </div>
         <StoryCategories
-          categories={categories.slice(0, 12)}
+          categories={categories}
           onSelect={handleCategorySelect}
           selectedId={selectedCategory?._id || selectedCategory?.category_uuid}
         />
@@ -209,7 +210,7 @@ export default function Home() {
 
         <div id="sk-products" className="scroll-mt-4 px-4 pb-6 sm:px-6">
           {loading && listings.length === 0 ? (
-            <section aria-label="Loading collections" className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+            <section aria-label="Loading collections" className="mt-4 grid grid-cols-3 gap-2 sm:gap-3">
               {[0, 1, 2, 3, 4, 5].map(key => <LoadingSkeleton key={key} />)}
             </section>
           ) : focused ? (
@@ -229,7 +230,7 @@ export default function Home() {
               </div>
               {filteredProducts.length ? (
                 <>
-                  <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+                  <div className="grid grid-cols-3 gap-2 sm:gap-3">
                     {filteredProducts.slice(0, visibleCount).map((product) => (
                       <CompactProductCard key={product._id} product={product}
                         categoryName={categoryById.get(idOf(product.category))?.name || ''}
@@ -270,12 +271,7 @@ export default function Home() {
                       <Link to="/products" className="text-xs font-extrabold text-[#216943]">View all →</Link>
                     )}
                   </div>
-                  <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
-                    {section.products.slice(0, 4).map(product => (
-                      <CompactProductCard key={product._id} product={product}
-                        categoryName={section.name} whatsappNumber={whatsappNumber} />
-                    ))}
-                  </div>
+                  <CategoryProductCarousel section={section} whatsappNumber={whatsappNumber} />
                 </section>
               ))}
               {groupedProducts.length > 6 && (
@@ -305,14 +301,14 @@ export default function Home() {
         )}
       </main>
 
-      <details id="sk-business-information" className="group mx-auto mb-8 w-full max-w-3xl px-4">
-        <summary className="flex cursor-pointer list-none items-center justify-between gap-3 rounded-2xl border border-[#d9e4db] bg-white px-5 py-4 shadow-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-700">
+      <details id="sk-business-information" className="group mx-auto mb-8 w-full max-w-sm px-3 sm:max-w-md">
+        <summary className="flex cursor-pointer list-none items-center justify-between gap-2 rounded-2xl border border-[#d9e4db] bg-white px-3 py-3 shadow-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-700">
           <span>
             <span className="block text-[10px] font-extrabold uppercase tracking-[.15em] text-[#43875b]">MORE ABOUT US</span>
-            <span className="mt-1 block text-base font-extrabold text-[#284734]">Services, FAQs & store information</span>
-            <span className="mt-1 block text-xs text-[#708475]">Opening hours, directions and ordering guidance</span>
+            <span className="mt-1 block text-sm font-extrabold text-[#284734]">Services, FAQs & store information</span>
+            <span className="mt-1 block text-[11px] leading-4 text-[#708475]">Opening hours, directions and ordering guidance</span>
           </span>
-          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#e7f3e9] text-[#287143] transition-transform group-open:rotate-180">
+          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#e7f3e9] text-[#287143] transition-transform group-open:rotate-180">
             <FaChevronDown aria-hidden="true" />
           </span>
         </summary>
@@ -348,7 +344,7 @@ export default function Home() {
           <LocalContactFooter />
         </div>
       </details>
-      <MobileBottomNav />
+      <MobileBottomNav whatsappNumber={whatsappNumber} phoneNumber={phoneNumber} />
     </div>
   );
 }

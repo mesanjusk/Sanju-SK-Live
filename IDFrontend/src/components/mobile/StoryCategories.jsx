@@ -3,10 +3,10 @@ import { optimizedImage } from '../../utils/media';
 
 function StoryCategories({ categories = [], onSelect, selectedId }) {
   return (
-    <section aria-label="Browse collections" className="sk-story-row overflow-x-auto px-4 py-3 scrollbar-hide">
-      <div className="sk-shell flex snap-x gap-3.5">
+    <section aria-label="Browse collections" className="sk-story-row w-full overflow-x-auto overscroll-x-contain px-4 py-3 scrollbar-hide">
+      <div className="sk-shell flex w-max min-w-full flex-nowrap items-stretch snap-x gap-2.5">
         <button type="button" onClick={() => onSelect?.(null)}
-          className="sk-story-item flex-shrink-0 snap-start text-center" aria-pressed={!selectedId}>
+          className="sk-story-item flex w-[94px] shrink-0 snap-start flex-col items-center rounded-[20px] border border-[#e3e8dd] bg-white p-2 text-center shadow-sm" aria-pressed={!selectedId}>
           <div className={`sk-story-item__outer ${!selectedId ? 'is-selected' : ''}`}>
             <div className="sk-story-item__inner flex items-center justify-center">
               <span className="text-xl font-bold text-[#3a6450]">✦</span>
@@ -16,7 +16,7 @@ function StoryCategories({ categories = [], onSelect, selectedId }) {
         </button>
         {categories.map((cat,i) => (
           <button type="button" key={cat._id || cat.category_uuid || i} onClick={() => onSelect?.(cat)}
-            className="sk-story-item flex-shrink-0 snap-start text-center" aria-pressed={Boolean(selectedId) && selectedId === (cat._id || cat.category_uuid)}>
+            className="sk-story-item flex w-[94px] shrink-0 snap-start flex-col items-center rounded-[20px] border border-[#e3e8dd] bg-white p-2 text-center shadow-sm" aria-pressed={Boolean(selectedId) && selectedId === (cat._id || cat.category_uuid)}>
             <div className={`sk-story-item__outer ${Boolean(selectedId) && selectedId === (cat._id || cat.category_uuid) ? 'is-selected' : ''}`}>
               <div className="sk-story-item__inner">
                 {cat.imageUrl
