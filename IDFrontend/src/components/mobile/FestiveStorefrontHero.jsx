@@ -47,7 +47,7 @@ function FestiveStorefrontHero({
         label: category.name,
         short: category.name,
         subtitle: products.length ? products.length + ' designs' : 'Explore category',
-        image: image ? optimizedImage(image, 480) : null,
+        image: image ? optimizedImage(image, 300) : null,
         category, count: products.length, index, Icon: iconFor(category.name),
         tint: TINTS[index % TINTS.length]
       };
@@ -99,10 +99,14 @@ function FestiveStorefrontHero({
   const renderTile = (item) => {
     const { id, label, subtitle, Icon, image, tint, href } = item;
     const content = <>
-      <span className="sk-festive-tile-title">{label}</span>
-      <span className="sk-festive-tile-subtitle">{subtitle}</span>
-      {image ? <img src={image} alt="" loading="lazy" decoding="async"
-        width="180" height="160" /> : <Icon className="sk-festive-tile-fallback" aria-hidden="true" />}
+      <span className="sk-festive-tile-top">
+        <span className="sk-festive-tile-title">{label}</span>
+        <span className="sk-festive-tile-subtitle">{subtitle}</span>
+      </span>
+      <span className="sk-festive-tile-media">
+        {image ? <img src={image} alt={label + ' designs at SANJU SK Digital in Gondia'} loading="lazy" decoding="async"
+          width="240" height="160" /> : <Icon className="sk-festive-tile-fallback" aria-hidden="true" />}
+      </span>
       <span className="sk-festive-tile-arrow"><FaArrowRight aria-hidden="true" /></span>
     </>;
     const style = { '--sk-tile-tint': tint };
