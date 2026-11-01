@@ -4,7 +4,6 @@ import { FaArrowRight, FaChevronDown, FaPlay } from 'react-icons/fa';
 import api from '../api';
 import seo from '../config/local-seo.json';
 import FestiveStorefrontHero from './mobile/FestiveStorefrontHero';
-import StoryCategories from './mobile/StoryCategories';
 import CompactProductCard from './mobile/CompactProductCard';
 import CategoryProductCarousel from './mobile/CategoryProductCarousel';
 import VideoFeedCard from './mobile/VideoFeedCard';
@@ -176,31 +175,17 @@ export default function Home() {
         phoneNumber={phoneNumber}
       />
       <main className="mx-auto w-full max-w-6xl py-1">
-        <div className="sk-section-label sk-festive-collections-label">
-          <div>
-            <span className="sk-festive-eyebrow">SHOP BY COLLECTION</span>
-            <h2>Explore our categories</h2>
-            <p>Find designs by product type</p>
-          </div>
-          <Link to="/allCategories">All categories →</Link>
-        </div>
-        <StoryCategories
-          categories={categories}
-          onSelect={handleCategorySelect}
-          selectedId={selectedCategory?._id || selectedCategory?.category_uuid}
-        />
-
         {visibleSubcategories.length > 0 && (
           <div className="flex gap-2 overflow-x-auto px-4 py-3 scrollbar-hide">
             <button type="button" onClick={() => setSelectedSubcategory(null)}
               className={'shrink-0 rounded-full px-4 py-2 text-xs font-bold ' +
-                (!selectedSubcategory ? 'bg-[#176a43] text-white' : 'border border-[#d6e3da] bg-white text-[#38614a]')}>
+                (!selectedSubcategory ? 'bg-[#77609e] text-white' : 'border border-[#d6e3da] bg-white text-[#38614a]')}>
               All types
             </button>
             {visibleSubcategories.map(sub => (
               <button type="button" key={sub._id} onClick={() => setSelectedSubcategory(sub)}
                 className={'shrink-0 rounded-full px-4 py-2 text-xs font-bold ' +
-                  (selectedSubcategory?._id === sub._id ? 'bg-[#176a43] text-white' : 'border border-[#d6e3da] bg-white text-[#38614a]')}>
+                  (selectedSubcategory?._id === sub._id ? 'bg-[#77609e] text-white' : 'border border-[#d6e3da] bg-white text-[#38614a]')}>
                 {sub.name}
               </button>
             ))}
@@ -216,14 +201,14 @@ export default function Home() {
             <section aria-labelledby="focused-products-heading" className="mt-5">
               <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
                 <div>
-                  <p className="text-[10px] font-bold uppercase tracking-[.16em] text-[#5c8769]">YOUR SELECTION</p>
-                  <h2 id="focused-products-heading" className="mt-1 text-xl font-extrabold text-[#203f30]">
+                  <p className="text-[10px] font-bold uppercase tracking-[.16em] text-[#9877b6]">YOUR SELECTION</p>
+                  <h2 id="focused-products-heading" className="mt-1 text-xl font-extrabold text-[#49315f]">
                     {selectedCategory?.name || 'Search results'}
                   </h2>
-                  <p className="text-xs text-[#718678]">{filteredProducts.length} designs {deferredSearch.trim() ? 'matching your search' : 'available'}</p>
+                  <p className="text-xs text-[#8a7996]">{filteredProducts.length} designs {deferredSearch.trim() ? 'matching your search' : 'available'}</p>
                 </div>
                 <button type="button" onClick={() => { setSelectedCategory(null); setSelectedSubcategory(null); setSearchTerm(''); }}
-                  className="rounded-full border border-[#ccdfd0] bg-white px-4 py-2 text-xs font-bold text-[#2b6641]">
+                  className="rounded-full border border-[#ded2eb] bg-white px-4 py-2 text-xs font-bold text-[#715496]">
                   ← All categories
                 </button>
               </div>
@@ -239,14 +224,14 @@ export default function Home() {
                   {filteredProducts.length > visibleCount && (
                     <div ref={loadMoreRef} className="mt-5 text-center">
                       <button type="button" onClick={() => setVisibleCount(n => Math.min(n + 12, filteredProducts.length))}
-                        className="rounded-full border border-[#bedcc8] bg-[#e8f6ed] px-6 py-2.5 text-sm font-extrabold text-[#216943]">
+                        className="rounded-full border border-[#d8c8ec] bg-[#f0e8fc] px-6 py-2.5 text-sm font-extrabold text-[#74559f]">
                         Load more designs ({filteredProducts.length - visibleCount} remaining)
                       </button>
                     </div>
                   )}
                 </>
               ) : (
-                <div className="rounded-2xl border border-[#e0e9e1] bg-white p-7 text-center text-sm text-[#567462]">
+                <div className="rounded-2xl border border-[#e5dcef] bg-white p-7 text-center text-sm text-[#567462]">
                   No designs matched. Try a different category or search.
                 </div>
               )}
@@ -257,17 +242,17 @@ export default function Home() {
                 <section key={section.id} aria-labelledby={'category-' + section.id}>
                   <div className="mb-3 flex items-end justify-between gap-3">
                     <div>
-                      <p className="text-[10px] font-extrabold uppercase tracking-[.17em] text-[#719377]">HANDPICKED FOR YOU</p>
-                      <h2 id={'category-' + section.id} className="mt-1 text-lg font-extrabold text-[#243f33] sm:text-xl">{section.name}</h2>
-                      <p className="text-[11px] text-[#7b8f80]">{section.products.length} designs</p>
+                      <p className="text-[10px] font-extrabold uppercase tracking-[.17em] text-[#9779b3]">HANDPICKED FOR YOU</p>
+                      <h2 id={'category-' + section.id} className="mt-1 text-lg font-extrabold text-[#463359] sm:text-xl">{section.name}</h2>
+                      <p className="text-[11px] text-[#857491]">{section.products.length} designs</p>
                     </div>
                     {section.category ? (
                       <button type="button" onClick={() => showCategory(section.category)}
-                        className="inline-flex shrink-0 items-center gap-1 text-xs font-extrabold text-[#216943]">
+                        className="inline-flex shrink-0 items-center gap-1 text-xs font-extrabold text-[#74559f]">
                         View all <FaArrowRight aria-hidden="true" className="text-[10px]" />
                       </button>
                     ) : (
-                      <Link to="/products" className="text-xs font-extrabold text-[#216943]">View all →</Link>
+                      <Link to="/products" className="text-xs font-extrabold text-[#74559f]">View all →</Link>
                     )}
                   </div>
                   <CategoryProductCarousel section={section} whatsappNumber={whatsappNumber} />
@@ -276,7 +261,7 @@ export default function Home() {
               {groupedProducts.length > 6 && (
                 <div className="pb-1 text-center">
                   <button type="button" onClick={() => setShowAllCategories(v => !v)}
-                    className="inline-flex items-center gap-2 rounded-full border border-[#bad7c4] bg-[#fffdf8] px-4 py-2 text-xs font-extrabold text-[#236841] shadow-sm">
+                    className="inline-flex items-center gap-2 rounded-full border border-[#dfd0f0] bg-[#fffaff] px-4 py-2 text-xs font-extrabold text-[#785a9d] shadow-sm">
                     {showAllCategories ? 'Show fewer categories' : 'Explore all ' + groupedProducts.length + ' categories'}
                     <FaChevronDown aria-hidden="true" className={showAllCategories ? 'rotate-180' : ''} />
                   </button>
@@ -289,10 +274,10 @@ export default function Home() {
       </main>
       <ServiceGallery />
         {videos.length > 0 && (
-          <section className="mx-auto mb-3 w-[calc(100%-28px)] max-w-md rounded-xl border border-[#dbe5d8] bg-[#fffdf8] px-3 py-3 shadow-sm" aria-label="Design inspiration videos">
+          <section className="mx-auto mb-3 w-[calc(100%-28px)] max-w-md rounded-xl border border-[#dbe5d8] bg-[#fffaff] px-3 py-3 shadow-sm" aria-label="Design inspiration videos">
             <button type="button" onClick={() => setShowVideos(v => !v)}
               aria-expanded={showVideos}
-              className="flex w-full items-center justify-between gap-2 text-left text-xs font-extrabold text-[#27543a]">
+              className="flex w-full items-center justify-between gap-2 text-left text-xs font-extrabold text-[#594276]">
               <span className="inline-flex items-center gap-2"><FaPlay aria-hidden="true" /> Watch our latest design videos</span>
               <FaChevronDown aria-hidden="true" className={showVideos ? 'rotate-180' : ''} />
             </button>
@@ -302,24 +287,24 @@ export default function Home() {
         )}
 
       <details id="sk-business-information" className="group mx-auto mb-5 mt-2 w-full max-w-[280px] px-2 open:max-w-2xl">
-        <summary className="flex cursor-pointer list-none items-center justify-between gap-2 rounded-xl border border-[#d9e4db] bg-[#fffdf8] px-3 py-2.5 shadow-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-700">
+        <summary className="flex cursor-pointer list-none items-center justify-between gap-2 rounded-xl border border-[#e4dbef] bg-[#fffaff] px-3 py-2.5 shadow-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-700">
           <span>
-            <span className="block text-[10px] font-extrabold uppercase tracking-[.15em] text-[#43875b]">MORE ABOUT US</span>
-            <span className="mt-1 block text-sm font-extrabold text-[#284734]">Services, FAQs & store information</span>
-            <span className="mt-1 hidden text-[11px] leading-4 text-[#708475] group-open:block">Opening hours, directions and ordering guidance</span>
+            <span className="block text-[10px] font-extrabold uppercase tracking-[.15em] text-[#8765a9]">MORE ABOUT US</span>
+            <span className="mt-1 block text-sm font-extrabold text-[#4b355f]">Services, FAQs & store information</span>
+            <span className="mt-1 hidden text-[11px] leading-4 text-[#8b7d96] group-open:block">Opening hours, directions and ordering guidance</span>
           </span>
-          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#e7f3e9] text-[#287143] transition-transform group-open:rotate-180">
+          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#f3edfc] text-[#7a57a3] transition-transform group-open:rotate-180">
             <FaChevronDown aria-hidden="true" />
           </span>
         </summary>
         <div className="pt-2">
           <section aria-label="SK Digital printing and invitation services" className="mx-auto my-3 max-w-2xl">
-            <div className="rounded-2xl border border-[#e1e7e0] bg-white p-5 shadow-sm">
-              <h2 className="text-lg font-bold text-[#294334]">Wedding cards, digital invitations & corporate gifts</h2>
-              <p className="mt-2 text-sm leading-6 text-[#617467]">
+            <div className="rounded-2xl border border-[#e8def1] bg-white p-5 shadow-sm">
+              <h2 className="text-lg font-bold text-[#4a355f]">Wedding cards, digital invitations & corporate gifts</h2>
+              <p className="mt-2 text-sm leading-6 text-[#796b86]">
                 Explore local design and print services from SANJU SK Digital – Mahi Creation, Gondia.
               </p>
-              <nav aria-label="Explore SANJU SK Digital services" className="mt-4 grid gap-3 text-sm font-semibold text-[#315b45] sm:grid-cols-2">
+              <nav aria-label="Explore SANJU SK Digital services" className="mt-4 grid gap-3 text-sm font-semibold text-[#694f87] sm:grid-cols-2">
                 <a href="/wedding-card-printing-gondia/" className="underline underline-offset-4">Wedding cards in Gondia</a>
                 <a href="/digital-wedding-invitations/" className="underline underline-offset-4">Digital invitations</a>
                 <a href="/corporate-gifting-gondia/" className="underline underline-offset-4">Corporate gifts</a>
@@ -330,14 +315,14 @@ export default function Home() {
             </div>
           </section>
           <section className="mx-auto mb-3 max-w-2xl" aria-label="How to order custom printing in Gondia">
-            <div className="rounded-2xl border border-[#e8e6d7] bg-white p-5 shadow-sm">
-              <h2 className="text-lg font-bold text-[#294334]">Custom printing, made easy</h2>
-              <p className="mt-2 text-sm leading-6 text-[#687b6a]">
+            <div className="rounded-2xl border border-[#e8deef] bg-white p-5 shadow-sm">
+              <h2 className="text-lg font-bold text-[#4a355f]">Custom printing, made easy</h2>
+              <p className="mt-2 text-sm leading-6 text-[#82758c]">
                 Browse our product photos, share your preferred design on WhatsApp, and tell us the quantity,
                 size and deadline. We'll prepare a quotation and confirm artwork before production.
                 Visit Krishnapura Ward, Gondia, or enquire from Nagpur and Balaghat.
               </p>
-              <a href="/contact" className="mt-3 inline-block text-sm font-bold text-[#2a634b] underline">Contact our Gondia studio</a>
+              <a href="/contact" className="mt-3 inline-block text-sm font-bold text-[#715496] underline">Contact our Gondia studio</a>
             </div>
           </section>
           <FAQSection />

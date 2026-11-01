@@ -35,9 +35,9 @@ function CompactProductCard({ product, whatsappNumber, categoryName = '' }) {
   };
 
   return (
-    <article className="relative min-w-0 overflow-hidden rounded-[14px] border border-[#e5eae2] bg-white shadow-[0_8px_26px_-20px_rgba(29,70,47,.35)]">
+    <article className="relative min-w-0 overflow-hidden rounded-[14px] border border-[#e6dcef] bg-white shadow-[0_8px_26px_-20px_rgba(29,70,47,.35)]">
       <Link to={'/products/' + id} className="block">
-        <div className="relative aspect-square overflow-hidden bg-[#f5f6f1]">
+        <div className="relative aspect-square overflow-hidden bg-[#f8f2fd]">
           {image ? (
             <img
               src={optimizedImage(image, 300)}
@@ -46,27 +46,27 @@ function CompactProductCard({ product, whatsappNumber, categoryName = '' }) {
               className="h-full w-full object-contain transition-transform duration-300 hover:scale-[1.035]"
             />
           ) : (
-            <div className="flex h-full items-center justify-center text-3xl text-[#a5b7aa]" aria-label="Image coming soon">✦</div>
+            <div className="flex h-full items-center justify-center text-3xl text-[#ac99be]" aria-label="Image coming soon">✦</div>
           )}
-          <span className="absolute bottom-1 left-1 rounded bg-white/90 px-1 py-0.5 text-[7px] font-bold tracking-wide text-[#315d46] shadow-sm">CUSTOM MADE</span>
+          <span className="absolute bottom-1 left-1 rounded bg-white/90 px-1 py-0.5 text-[7px] font-bold tracking-wide text-[#644883] shadow-sm">CUSTOM MADE</span>
         </div>
       </Link>
       <button
         type="button" onClick={() => toggleFavorite(product)}
         aria-label={isSaved ? 'Remove ' + product.title + ' from saved' : 'Save ' + product.title}
-        className="absolute right-1 top-1 z-10 flex h-7 w-7 items-center justify-center rounded-full bg-white/95 text-[#315945] shadow-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-600"
+        className="absolute right-1 top-1 z-10 flex h-7 w-7 items-center justify-center rounded-full bg-white/95 text-[#614881] shadow-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-600"
       >
         {isSaved ? <FaHeart className="text-rose-500" /> : <FaRegHeart />}
       </button>
       <div className="p-2">
-        <Link to={'/products/' + id} className="block min-h-[34px] text-[10px] sm:text-[12px] font-extrabold leading-[1.35] text-[#243d34] line-clamp-2">
+        <Link to={'/products/' + id} className="block min-h-[34px] text-[10px] sm:text-[12px] font-extrabold leading-[1.35] text-[#48345f] line-clamp-2">
           {product.title}
         </Link>
-        <p className="mt-1 min-h-[13px] truncate text-[9px] text-[#799084]">{categoryName || 'Personalized for you'}</p>
-        <p className="mt-1 text-[11px] font-black sm:text-[14px] text-[#204f38]">{price}</p>
+        <p className="mt-1 min-h-[13px] truncate text-[9px] text-[#8b7d98]">{categoryName || 'Personalized for you'}</p>
+        <p className="mt-1 text-[11px] font-black sm:text-[14px] text-[#69508e]">{price}</p>
         <a href={href} target="_blank" rel="noopener noreferrer" onClick={onEnquire}
           aria-label={'Enquire on WhatsApp about ' + product.title}
-          className="mt-2 flex h-8 w-full items-center justify-center gap-1 rounded-lg bg-[#176a43] px-1 text-[10px] font-extrabold text-white hover:bg-[#115636] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-600">
+          className="mt-2 flex h-8 w-full items-center justify-center gap-1 rounded-lg bg-[#785aab] px-1 text-[10px] font-extrabold text-white hover:bg-[#62478e] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-600">
           <FaWhatsapp aria-hidden="true" /> Enquire
         </a>
       </div>

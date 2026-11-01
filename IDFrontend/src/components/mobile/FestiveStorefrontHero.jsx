@@ -10,13 +10,13 @@ import './festive-home.css';
 
 // These are service-page links only. Real catalog categories always take priority.
 const SERVICE_LINKS = [
-  { id: 'wedding', label: 'Wedding Cards', href: '/wedding-card-printing-gondia/', Icon: FaRegEnvelope, tint: '#e7c9aa' },
-  { id: 'gifting', label: 'Corporate Gifting', href: '/corporate-gifting-gondia/', Icon: FaGift, tint: '#e9d7bf' },
-  { id: 'invitations', label: 'Digital Invitations', href: '/digital-wedding-invitations/', Icon: FaRegEnvelope, tint: '#d8e5da' },
-  { id: 'printing', label: 'Printing Enquiries', href: '/contact', Icon: FaPrint, tint: '#e0d7cf' }
+  { id: 'wedding', label: 'Wedding Cards', href: '/wedding-card-printing-gondia/', Icon: FaRegEnvelope, tint: '#e8ddf6' },
+  { id: 'gifting', label: 'Corporate Gifting', href: '/corporate-gifting-gondia/', Icon: FaGift, tint: '#e8e1f5' },
+  { id: 'invitations', label: 'Digital Invitations', href: '/digital-wedding-invitations/', Icon: FaRegEnvelope, tint: '#e5ddf2' },
+  { id: 'printing', label: 'Printing Enquiries', href: '/contact', Icon: FaPrint, tint: '#f1e9f8' }
 ];
 
-const TINTS = ['#e7c9aa', '#e9d7bf', '#d8e5da', '#e0d7cf', '#dce2ed'];
+const TINTS = ['#e8ddf6', '#e8e1f5', '#e5ddf2', '#f1e9f8', '#e3dbf2'];
 const imageOf = (item) => {
   const image = Array.isArray(item?.images) ? item.images.find(Boolean) : item?.images;
   return image || item?.imageUrl || null;
@@ -32,7 +32,7 @@ const iconFor = (name = '') => {
 
 function FestiveStorefrontHero({
   listings = [], categories = [], searchTerm = '', onSearchChange,
-  selectedCategory, onCategorySelect, whatsappNumber, phoneNumber
+  onCategorySelect, whatsappNumber, phoneNumber
 }) {
   // Join the catalog on the exact category ID saved in each listing.
   // Order collections by actual product count, then preserve the admin order.
@@ -55,6 +55,32 @@ function FestiveStorefrontHero({
   }, [listings, categories]);
 
   const featured = collections[0];
+  // Autoplay categories only while visible and idle. Respect reduced motion,
+  // pause for touch/wheel/keyboard/focus, and keep native swipe navigation.
+  const carouselRef = useRef(null);
+  const lastInteractionRef = useRef(0);
+  const pauseCarousel = () => { lastInteractionRef.current = Date.now(); };
+  useEffect(() => {
+    const track = carouselRef.current;
+    if (!track || collections.length < 3) return undefined;
+    const reducedMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)');
+    if (reducedMotion?.matches) return undefined;
+    const timer = window.setInterval(() => {
+      if (document.visibilityState !== 'visible' || Date.now() - lastInteractionRef.current < 12000) return;
+      if (window.matchMedia?.('(hover: hover)')?.matches && track.matches(':hover')) return;
+      if (track.contains(document.activeElement)) return;
+      const card = track.querySelector('.sk-festive-tile');
+      if (!card) return;
+      const gap = parseFloat(window.getComputedStyle(track).columnGap || '10') || 10;
+      const step = card.getBoundingClientRect().width + gap;
+      const end = track.scrollWidth - track.clientWidth;
+      if (end < 5) return;
+      if (track.scrollLeft >= end - 8) track.scrollTo({ left: 0, behavior: 'auto' });
+      else track.scrollBy({ left: Math.min(step, end - track.scrollLeft), behavior: 'smooth' });
+    }, 4500);
+    return () => window.clearInterval(timer);
+  }, [collections.length]);
+
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef(null);
   useEffect(() => {
@@ -83,17 +109,6 @@ function FestiveStorefrontHero({
       event.currentTarget.blur();
       document.getElementById('sk-products')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
-  };
-
-  const renderTab = (item) => {
-    const { id, label, short, Icon, href, category } = item;
-    const active = category && selectedCategory?._id === category._id;
-    const content = <><Icon aria-hidden="true" /><span>{short || label}</span></>;
-    return href
-      ? <Link key={id} to={href} className="sk-festive-tab" title={label}>{content}</Link>
-      : <button key={id} type="button" onClick={() => chooseCategory(item)}
-          className={'sk-festive-tab ' + (active ? 'is-active' : '')}
-          aria-label={'Browse ' + label} aria-pressed={!!active}>{content}</button>;
   };
 
   const renderTile = (item) => {
@@ -170,25 +185,11 @@ function FestiveStorefrontHero({
           </div>
         </header>
 
-        <nav className="sk-festive-tabs sk-festive-container" aria-label="Product categories">
-          <button type="button" onClick={() => chooseCategory(null)}
-            className={'sk-festive-tab ' + (!selectedCategory ? 'is-active' : '')}
-            aria-pressed={!selectedCategory}>
-            <FaThLarge aria-hidden="true" /><span>All</span>
-          </button>
-          {collections.map(renderTab)}
-        </nav>
-
         <section className="sk-festive-showcase sk-festive-container" aria-labelledby="sk-festive-title">
           <div className="sk-festive-showcase-copy">
             <p className="sk-festive-kicker"><span className="sk-festive-sparkle">✦</span> GONDIA DESIGN STUDIO · SINCE 2006</p>
             <h1 id="sk-festive-title">Wedding cards, signage &amp; <em>flex printing in Gondia.</em></h1>
             <p>Laser-cut wedding invitations, 3D LED acrylic signs, corporate awards and banners — designed for Gondia and delivered across nearby cities.</p>
-            {featured?.category
-              ? <button type="button" onClick={() => chooseCategory(featured)}
-                  className="sk-festive-primary-cta">Explore designs <FaArrowRight aria-hidden="true" /></button>
-              : <Link to="/products" className="sk-festive-primary-cta">
-                  Explore designs <FaArrowRight aria-hidden="true" /></Link>}
           </div>
           <div className="sk-festive-showcase-art" aria-hidden="true">
             <span className="sk-festive-orb" />
@@ -205,7 +206,7 @@ function FestiveStorefrontHero({
           <div className="sk-festive-picks-heading">
             <h2>Discover our collections</h2><span>Swipe to explore <FaArrowRight aria-hidden="true" /></span>
           </div>
-          <div className="sk-festive-tiles">
+          <div ref={carouselRef} className="sk-festive-tiles" aria-label="Collections carousel, scroll horizontally" onTouchStart={pauseCarousel} onPointerDown={pauseCarousel} onWheel={pauseCarousel} onKeyDown={pauseCarousel} onFocusCapture={pauseCarousel}>
             {collections.map(renderTile)}
           </div>
         </section>

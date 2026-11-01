@@ -121,7 +121,7 @@ const appSource=readFileSync(new URL('../src/App.jsx',import.meta.url),'utf8');
 assert(homeSource.includes('<details id="sk-business-information"'),'Expandable business information missing');
 assert(homeSource.includes('<FAQSection />')&&homeSource.includes('<LocalContactFooter />'),'FAQs and contact must remain in the page');
 assert(homeSource.includes('groupedProducts')&&homeSource.includes('<CategoryProductCarousel section='),'Swipeable category previews missing');
-assert(homeSource.includes('categories={categories}')&&categorySource.includes('flex-nowrap'),'All categories must be in one scrollable strip');
+assert(!homeSource.includes('<StoryCategories') && !heroSource.includes('sk-festive-tabs sk-festive-container'),'Remove duplicate category strips; collections carousel owns category browsing');
 assert(carouselSource.includes('calc((100% - 16px) / 3)')&&carouselSource.includes('onScroll={onScroll}'),'Three-across lazy swipe gallery missing');
 assert(homeSource.includes('filteredProducts.slice(0, visibleCount)'),'Focused product pagination missing');
 assert(heroSource.includes('phoneNumber')&&heroSource.includes('dialHref'),'Top navigation call link missing');
@@ -143,9 +143,15 @@ assert(heroSource.includes('sk-festive-header-search') && heroSource.indexOf('sk
 assert(!heroSource.includes('sk-festive-search" role="search"'), 'Full-width search row must be removed');
 assert(heroSource.includes('{collections.map(renderTile)}'), 'All collection cards must be swipeable, not only first four');
 assert(festiveCss.includes('grid-auto-columns:calc(40% - 8px)'), 'Collection carousel should show roughly 2.5 cards on mobile');
-assert(festiveCss.includes('linear-gradient(145deg,#244c3e') && festiveCss.includes('#faf9f3'), 'Unified green and ivory palette required');
+assert(festiveCss.includes('/* Light-lavender homepage palette') && festiveCss.includes('#efe6fb'), 'Light lavender palette required across homepage');
 assert(homeSource.indexOf('<ServiceGallery />') > homeSource.indexOf('</main>'), 'Product catalog should precede signature services');
 assert(homeSource.includes('group-open:block'), 'Business information panel must remain compact until opened');
+
+assert(!heroSource.includes('Explore designs'), 'Hero Explore designs button must be removed');
+assert(heroSource.includes('ref={carouselRef}') && heroSource.includes('onTouchStart={pauseCarousel}'), 'Swipe carousel must pause on user input');
+assert(heroSource.includes('window.setInterval') && heroSource.includes("'prefers-reduced-motion: reduce'"), 'Carousel autoplay and reduced-motion support required');
+assert(heroSource.includes('collections.map(renderTile)'), 'All real catalog categories should be accessible in the collection carousel');
+assert(!heroSource.includes('const renderTab ='), 'Old top category icon navigation must be deleted');
 const prevFetch=globalThis.fetch;
 function mockResponse(){
   return {

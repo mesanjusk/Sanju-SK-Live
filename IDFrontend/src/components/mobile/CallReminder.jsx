@@ -56,19 +56,19 @@ export default function CallReminder({ phoneNumber = seo.phone }) {
   if (!visible || dismissed) return null;
   return (
     <aside role="status" aria-label="Call SANJU SK Digital"
-      className="fixed right-2 top-1/2 z-50 w-[178px] -translate-y-1/2 rounded-2xl border border-[#c8dfcf] bg-white/95 p-3 shadow-[0_12px_32px_rgba(24,62,42,.24)] backdrop-blur sm:right-5 sm:w-[210px]">
+      className="fixed right-2 top-1/2 z-50 w-[178px] -translate-y-1/2 rounded-2xl border border-[#dfd2ef] bg-white/95 p-3 shadow-[0_12px_32px_rgba(24,62,42,.24)] backdrop-blur sm:right-5 sm:w-[210px]">
       <button type="button" onClick={dismiss} aria-label="Dismiss call reminders for this visit"
-        className="absolute right-2 top-2 rounded-full p-1 text-[#60736a] focus-visible:outline-2 focus-visible:outline-emerald-700">
+        className="absolute right-2 top-2 rounded-full p-1 text-[#87789a] focus-visible:outline-2 focus-visible:outline-emerald-700">
         <FaTimes aria-hidden="true" />
       </button>
-      <div className="mb-2 flex h-8 w-8 items-center justify-center rounded-lg bg-[#e5f5e9] text-[#176a43]">
+      <div className="mb-2 flex h-8 w-8 items-center justify-center rounded-lg bg-[#efe5fa] text-[#785aa5]">
         <FaPhoneAlt aria-hidden="true" />
       </div>
-      <p className="pr-3 text-[12px] font-extrabold leading-4 text-[#254b36]">Need help choosing?</p>
-      <p className="mt-1 text-[10px] leading-4 text-[#617c6a]">Call our Gondia studio</p>
-      <p className="mt-1 text-[10px] font-bold text-[#254b36]">{displayNumber}</p>
+      <p className="pr-3 text-[12px] font-extrabold leading-4 text-[#4e3768]">Need help choosing?</p>
+      <p className="mt-1 text-[10px] leading-4 text-[#8a7a98]">Call our Gondia studio</p>
+      <p className="mt-1 text-[10px] font-bold text-[#4e3768]">{displayNumber}</p>
       <a href={'tel:' + dialNumber} onClick={dismiss}
-        className="mt-2 flex w-full items-center justify-center gap-1 rounded-lg bg-[#176a43] px-2 py-2 text-xs font-bold text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#176a43]">
+        className="mt-2 flex w-full items-center justify-center gap-1 rounded-lg bg-[#785aa5] px-2 py-2 text-xs font-bold text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#785aa5]">
         <FaPhoneAlt aria-hidden="true" /> Call now
       </a>
     </aside>
