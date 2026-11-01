@@ -55,30 +55,52 @@ function FestiveStorefrontHero({
   }, [listings, categories]);
 
   const featured = collections[0];
-  // Autoplay categories only while visible and idle. Respect reduced motion,
-  // pause for touch/wheel/keyboard/focus, and keep native swipe navigation.
+  // Duplicate only the visual carousel sequence to make its slow autoplay seamless.
+  // The repeated controls are excluded from keyboard and screen-reader navigation.
   const carouselRef = useRef(null);
   const lastInteractionRef = useRef(0);
   const pauseCarousel = () => { lastInteractionRef.current = Date.now(); };
+
   useEffect(() => {
     const track = carouselRef.current;
-    if (!track || collections.length < 3) return undefined;
+    if (!track || collections.length < 2) return undefined;
+    track.scrollLeft = 0;
+
     const reducedMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)');
-    if (reducedMotion?.matches) return undefined;
-    const timer = window.setInterval(() => {
-      if (document.visibilityState !== 'visible' || Date.now() - lastInteractionRef.current < 12000) return;
-      if (window.matchMedia?.('(hover: hover)')?.matches && track.matches(':hover')) return;
-      if (track.contains(document.activeElement)) return;
-      const card = track.querySelector('.sk-festive-tile');
-      if (!card) return;
-      const gap = parseFloat(window.getComputedStyle(track).columnGap || '10') || 10;
-      const step = card.getBoundingClientRect().width + gap;
-      const end = track.scrollWidth - track.clientWidth;
-      if (end < 5) return;
-      if (track.scrollLeft >= end - 8) track.scrollTo({ left: 0, behavior: 'auto' });
-      else track.scrollBy({ left: Math.min(step, end - track.scrollLeft), behavior: 'smooth' });
-    }, 4500);
-    return () => window.clearInterval(timer);
+    const hoverCapable = window.matchMedia?.('(hover: hover)');
+    let isVisible = true;
+    let lastFrame = 0;
+    let frameId;
+    const observer = typeof IntersectionObserver !== 'undefined'
+      ? new IntersectionObserver(([entry]) => { isVisible = Boolean(entry?.isIntersecting); }, { threshold: 0.05 })
+      : null;
+    observer?.observe(track);
+
+    const move = (now) => {
+      const elapsed = lastFrame ? Math.min(now - lastFrame, 64) : 0;
+      lastFrame = now;
+      const canMove = isVisible && document.visibilityState === 'visible' &&
+        !reducedMotion?.matches && Date.now() - lastInteractionRef.current > 11000 &&
+        !track.contains(document.activeElement) &&
+        !(hoverCapable?.matches && track.matches(':hover'));
+      if (canMove) {
+        const first = track.querySelector('.sk-festive-tile');
+        if (first) {
+          const gap = parseFloat(window.getComputedStyle(track).columnGap || '10') || 10;
+          const cycleWidth = (first.getBoundingClientRect().width + gap) * collections.length;
+          if (cycleWidth > track.clientWidth) {
+            const next = track.scrollLeft + elapsed * 0.065; // about 65px/sec
+            track.scrollLeft = next >= cycleWidth ? next - cycleWidth : next;
+          }
+        }
+      }
+      frameId = window.requestAnimationFrame(move);
+    };
+    frameId = window.requestAnimationFrame(move);
+    return () => {
+      window.cancelAnimationFrame(frameId);
+      observer?.disconnect();
+    };
   }, [collections.length]);
 
   const [menuOpen, setMenuOpen] = useState(false);
@@ -111,24 +133,31 @@ function FestiveStorefrontHero({
     }
   };
 
-  const renderTile = (item) => {
+  const renderTile = (item, repeated = false) => {
     const { id, label, subtitle, Icon, image, tint, href } = item;
     const content = <>
+      <span className="sk-festive-tile-media">
+        {image ? <img src={image} alt={repeated ? '' : label + ' designs at SANJU SK Digital in Gondia'}
+          loading="lazy" decoding="async" width="320" height="300" />
+          : <Icon className="sk-festive-tile-fallback" aria-hidden="true" />}
+      </span>
       <span className="sk-festive-tile-top">
         <span className="sk-festive-tile-title">{label}</span>
         <span className="sk-festive-tile-subtitle">{subtitle}</span>
       </span>
-      <span className="sk-festive-tile-media">
-        {image ? <img src={image} alt={label + ' designs at SANJU SK Digital in Gondia'} loading="lazy" decoding="async"
-          width="240" height="160" /> : <Icon className="sk-festive-tile-fallback" aria-hidden="true" />}
-      </span>
       <span className="sk-festive-tile-arrow"><FaArrowRight aria-hidden="true" /></span>
     </>;
-    const style = { '--sk-tile-tint': tint };
+    const props = {
+      key: id + (repeated ? '-loop' : ''),
+      className: 'sk-festive-tile',
+      style: { '--sk-tile-tint': tint },
+      'aria-hidden': repeated ? true : undefined,
+      tabIndex: repeated ? -1 : undefined,
+    };
     return href
-      ? <Link key={id} to={href} className="sk-festive-tile" style={style} aria-label={'Explore ' + label}>{content}</Link>
-      : <button key={id} type="button" onClick={() => chooseCategory(item)}
-          className="sk-festive-tile" style={style} aria-label={'Browse ' + label}>{content}</button>;
+      ? <Link {...props} to={href} aria-label={repeated ? undefined : 'Explore ' + label}>{content}</Link>
+      : <button {...props} type="button" onClick={() => chooseCategory(item)}
+          aria-label={repeated ? undefined : 'Browse ' + label}>{content}</button>;
   };
 
   return (
@@ -206,9 +235,15 @@ function FestiveStorefrontHero({
           <div className="sk-festive-picks-heading">
             <h2>Discover our collections</h2><span>Swipe to explore <FaArrowRight aria-hidden="true" /></span>
           </div>
-          <div ref={carouselRef} className="sk-festive-tiles" aria-label="Collections carousel, scroll horizontally" onTouchStart={pauseCarousel} onPointerDown={pauseCarousel} onWheel={pauseCarousel} onKeyDown={pauseCarousel} onFocusCapture={pauseCarousel}>
-            {collections.map(renderTile)}
+          <div ref={carouselRef} className="sk-festive-tiles" role="region"
+            aria-label="Featured collections; swipe left or right to browse"
+            onTouchStart={pauseCarousel} onPointerDown={pauseCarousel}
+            onWheel={pauseCarousel} onKeyDown={pauseCarousel}
+            onFocusCapture={pauseCarousel}>
+            {collections.map(item => renderTile(item))}
+            {collections.length > 1 && collections.map(item => renderTile(item, true))}
           </div>
+          <div className="sk-festive-carousel-dots" aria-hidden="true" />
         </section>
 
         <div className="sk-festive-quote sk-festive-container">

@@ -129,7 +129,7 @@ assert(cardSource.includes('loading="lazy"')&&cardSource.includes('Enquire'),'Li
 assert(heroSource.includes('FaEllipsisV')&&heroSource.includes('sk-top-navigation'),'Three-dot website menu missing');
 const festiveCss=readFileSync(new URL('../src/components/mobile/festive-home.css',import.meta.url),'utf8');
 assert(heroSource.includes('sk-festive-tile-top')&&heroSource.includes('sk-festive-tile-media'),'Collection photo and label must have separate layout regions');
-assert(festiveCss.includes('grid-auto-columns: calc((100% - 16px) / 3)'),'Show three collection tiles in the mobile viewport');
+assert(festiveCss.includes('grid-auto-columns:44%'),'Video-style carousel should show about two large cards plus a peek of next');
 assert(festiveCss.includes('.sk-festive-tile-media img')&&festiveCss.includes('position: static'),'Collection photo must stay within its own media region');
 assert(bottomNavSource.includes('fixed right-2')&&bottomNavSource.includes('h-10 w-10'),'Contact dock must stay compact and right-aligned');
 assert(heroSource.includes('Made with <FaHeart')&&heroSource.includes('sk-festive-top-phone'),'One-line heart and phone information missing');
@@ -141,17 +141,23 @@ assert(appSource.includes('<CallReminder />'),'Call reminders must work across p
 
 assert(heroSource.includes('sk-festive-header-search') && heroSource.indexOf('sk-festive-header-search') < heroSource.indexOf('sk-festive-header-actions relative'), 'Search must sit in the top navigation before the three-dot menu');
 assert(!heroSource.includes('sk-festive-search" role="search"'), 'Full-width search row must be removed');
-assert(heroSource.includes('{collections.map(renderTile)}'), 'All collection cards must be swipeable, not only first four');
-assert(festiveCss.includes('grid-auto-columns:calc(40% - 8px)'), 'Collection carousel should show roughly 2.5 cards on mobile');
+assert(heroSource.includes('collections.map(item => renderTile(item))'), 'All collection cards must be swipeable, not only first four');
+assert(festiveCss.includes('grid-auto-columns:44%'), 'Use video-style collection card sizing on mobile');
 assert(festiveCss.includes('/* Light-lavender homepage palette') && festiveCss.includes('#efe6fb'), 'Light lavender palette required across homepage');
 assert(homeSource.indexOf('<ServiceGallery />') > homeSource.indexOf('</main>'), 'Product catalog should precede signature services');
 assert(homeSource.includes('group-open:block'), 'Business information panel must remain compact until opened');
 
 assert(!heroSource.includes('Explore designs'), 'Hero Explore designs button must be removed');
 assert(heroSource.includes('ref={carouselRef}') && heroSource.includes('onTouchStart={pauseCarousel}'), 'Swipe carousel must pause on user input');
-assert(heroSource.includes('window.setInterval') && heroSource.includes('prefers-reduced-motion: reduce'), 'Carousel autoplay and reduced-motion support required');
-assert(heroSource.includes('collections.map(renderTile)'), 'All real catalog categories should be accessible in the collection carousel');
+assert(heroSource.includes('window.requestAnimationFrame(move)') && heroSource.includes('prefers-reduced-motion: reduce'), 'Carousel autoplay and reduced-motion support required');
+assert(heroSource.includes('collections.map(item => renderTile(item))'), 'All real catalog categories should be accessible in the collection carousel');
 assert(!heroSource.includes('const renderTab ='), 'Old top category icon navigation must be deleted');
+const browserHTML=readFileSync(new URL('../index.html',import.meta.url),'utf8');
+assert(browserHTML.includes('<meta name="theme-color" content="#EFE6FB" />'),'Browser theme should match lavender website');
+assert(heroSource.includes('window.requestAnimationFrame(move)') && heroSource.includes('window.cancelAnimationFrame(frameId)'),'Carousel animation must clean up animation frames');
+assert(heroSource.includes('collections.map(item => renderTile(item, true))'),'Carousel needs a duplicated visual sequence for seamless looping');
+assert(heroSource.includes('prefers-reduced-motion: reduce') && heroSource.includes('onPointerDown={pauseCarousel}'),'Autoscroll must respect reduced motion and manual interaction');
+assert(festiveCss.includes('/* Promotional, image-first carousel') && festiveCss.includes('object-fit:cover'),'Carousel must use large photo-led cards');
 const prevFetch=globalThis.fetch;
 function mockResponse(){
   return {
