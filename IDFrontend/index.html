@@ -8,14 +8,63 @@
     <meta name="format-detection" content="telephone=yes" />
     <link rel="preconnect" href="https://res.cloudinary.com" crossorigin />
     <style id="sk-initial-seo-style">
-      #sk-seo-initial {max-width:720px;margin:auto;padding:24px 18px;font-family:system-ui,sans-serif;color:#243b32;background:#f8f8f2}
-      #sk-seo-initial h1 {font-size:26px;line-height:1.2}
-      #sk-seo-initial h2 {font-size:20px}
-      #sk-seo-initial h3 {font-size:15px}
-      #sk-seo-initial p,#sk-seo-initial li {font-size:14px;line-height:1.65}
-      #sk-seo-initial li {margin-bottom:8px}
-      #sk-seo-initial a {color:#245b42;text-decoration:underline}
-      #sk-seo-initial section {margin-top:20px}
+      /* Styled first paint: matches the actual mobile storefront while the app loads. */
+      html { background:#f8f3fc; }
+      body { margin:0; }
+      #sk-seo-initial { margin:0; min-height:100vh; font-family:Inter,"Segoe UI",Roboto,system-ui,sans-serif; background:#f8f3fc; color:#4d3764; }
+      #sk-seo-initial * { box-sizing:border-box; }
+      #sk-seo-initial a { text-decoration:none; }
+      #sk-seo-initial .sk-boot-shell { background:linear-gradient(155deg,#efe6fb 0%,#e8def7 60%,#f5eefe 100%); padding-bottom:16px; }
+      #sk-seo-initial .sk-boot-container { max-width:1120px; margin:0 auto; }
+      #sk-seo-initial .sk-boot-header { display:flex; align-items:center; gap:8px; padding:12px 14px 0; }
+      #sk-seo-initial .sk-boot-brand { display:flex; align-items:center; gap:8px; white-space:nowrap; color:#45345f; font-weight:850; font-size:13px; }
+      #sk-seo-initial .sk-boot-mark { display:grid; place-items:center; flex:none; width:31px; height:31px; border:1px solid #dcc8ed; border-radius:11px; background:linear-gradient(145deg,#fff,#ddcff0); color:#51396e; font-size:15px; box-shadow:0 3px 12px #8063a424; }
+      #sk-seo-initial .sk-boot-search { display:flex; align-items:center; flex:1 1 80px; min-width:0; height:36px; padding:0 11px; border:1px solid #ddcaed; border-radius:999px; background:#fffaff; color:#88749d; font-size:12px; box-shadow:0 3px 12px #7f5c9a21; }
+      #sk-seo-initial .sk-boot-menu { display:grid; place-items:center; flex:none; width:34px; height:34px; border:1px solid #d3c0e5; border-radius:50%; color:#695089; font-size:23px; }
+      #sk-seo-initial .sk-boot-location { display:flex; align-items:center; justify-content:space-between; gap:5px; padding:11px 14px 2px; color:#6f5a82; font-size:10px; }
+      #sk-seo-initial .sk-boot-location strong { color:#51396a; }
+      #sk-seo-initial .sk-boot-location a { color:#624587; font-weight:800; text-decoration:underline; white-space:nowrap; }
+      #sk-seo-initial .sk-boot-hero { display:flex; align-items:center; gap:7px; min-height:176px; padding:18px 14px 11px; }
+      #sk-seo-initial .sk-boot-copy { min-width:0; flex:1 1 72%; }
+      #sk-seo-initial .sk-boot-kicker { margin:0; font-size:8px; font-weight:800; letter-spacing:.12em; color:#906eaf; }
+      #sk-seo-initial h1 { margin:7px 0; max-width:430px; color:#44305c; font-size:clamp(20px,5.4vw,27px); line-height:1.12; letter-spacing:-.03em; }
+      #sk-seo-initial h1 em { color:#8b68b0; }
+      #sk-seo-initial .sk-boot-description { margin:0; max-width:410px; color:#6e5c80; font-size:10px; line-height:1.5; }
+      #sk-seo-initial .sk-boot-art { display:grid; place-items:center; flex:0 0 28%; min-width:0; height:145px; background:radial-gradient(circle,#fff9ff 0 38%,#d7c6ed 68%,transparent 70%); }
+      #sk-seo-initial .sk-boot-art img { width:83%; max-height:125px; border:3px solid #fffaff; border-radius:14px; object-fit:cover; box-shadow:5px 9px 20px #7a5b9037; transform:rotate(7deg); }
+      #sk-seo-initial .sk-boot-quote { display:flex; align-items:center; justify-content:space-between; gap:8px; margin:5px 13px 16px; min-height:54px; padding:10px 13px; border:1px solid #c6b0e0; border-radius:17px; background:linear-gradient(100deg,#b8a0d8,#8e70b8); box-shadow:0 5px 16px #775c9b2c; color:#fff; }
+      #sk-seo-initial .sk-boot-quote strong { display:block; font-size:12px; }
+      #sk-seo-initial .sk-boot-quote small { display:block; margin-top:4px; font-size:10px; color:#f9efff; }
+      #sk-seo-initial .sk-boot-quote-arrow { font-size:24px; }
+      #sk-seo-initial .sk-boot-picks { padding:0 13px 12px; }
+      #sk-seo-initial .sk-boot-heading { display:flex; align-items:center; justify-content:space-between; gap:8px; margin:0 0 10px; }
+      #sk-seo-initial .sk-boot-heading h2 { margin:0; color:#48325e; font-size:16px; line-height:1.2; }
+      #sk-seo-initial .sk-boot-heading span { flex:none; color:#816597; font-size:10px; }
+      #sk-seo-initial .sk-boot-collections { display:flex; gap:10px; overflow-x:auto; scrollbar-width:none; padding:2px 1px 10px; }
+      #sk-seo-initial .sk-boot-collections::-webkit-scrollbar { display:none; }
+      #sk-seo-initial .sk-boot-card { display:flex; flex:0 0 44%; flex-direction:column; overflow:hidden; height:220px; border:1px solid #d9c9e9; border-radius:17px; background:#eee3f8; box-shadow:0 6px 19px #71558f2c; }
+      #sk-seo-initial .sk-boot-card img { display:block; flex:1; width:100%; height:0; min-height:0; object-fit:cover; background:#dfcfed; }
+      #sk-seo-initial .sk-boot-card span { display:flex; align-items:center; min-height:55px; padding:8px 10px; background:linear-gradient(110deg,#9c78c6,#7653a7); color:white; font-size:11px; font-weight:750; line-height:1.2; }
+      #sk-seo-initial .sk-boot-benefits { padding:12px 14px; text-align:center; background:#faf7fe; color:#826e99; font-size:10px; }
+      #sk-seo-initial .sk-boot-more { width:calc(100% - 32px); max-width:720px; margin:16px auto 40px; padding:12px; border:1px solid #e6dbef; border-radius:15px; background:#fffbff; }
+      #sk-seo-initial .sk-boot-more summary { cursor:pointer; color:#513969; font-size:13px; font-weight:750; }
+      #sk-seo-initial .sk-boot-more section { margin-top:16px; }
+      #sk-seo-initial .sk-boot-more h2 { margin:10px 0 7px; font-size:17px; color:#4d3764; }
+      #sk-seo-initial .sk-boot-more h3 { margin:12px 0 4px; font-size:14px; color:#4d3764; }
+      #sk-seo-initial .sk-boot-more p,#sk-seo-initial .sk-boot-more li { font-size:13px; line-height:1.6; color:#69577b; }
+      #sk-seo-initial .sk-boot-more a { color:#78559e; text-decoration:underline; }
+      #sk-seo-initial .sk-boot-more footer { margin-top:20px; font-size:13px; line-height:1.8; }
+      @media (min-width:640px) {
+        #sk-seo-initial .sk-boot-header { padding:20px 26px 0; }
+        #sk-seo-initial .sk-boot-brand { font-size:18px; }
+        #sk-seo-initial .sk-boot-hero { min-height:255px; padding:20px 30px; }
+        #sk-seo-initial h1 { font-size:clamp(33px,4vw,48px); }
+        #sk-seo-initial .sk-boot-description { font-size:13px; }
+        #sk-seo-initial .sk-boot-art { height:210px; }
+        #sk-seo-initial .sk-boot-picks { padding:0 26px 15px; }
+        #sk-seo-initial .sk-boot-card { flex-basis:210px; height:254px; }
+        #sk-seo-initial .sk-boot-card span { font-size:14px; }
+      }
     </style>
     <!-- SEO GENERATED HEAD START -->
     <!-- The predev/prebuild script generates crawlable meta tags and JSON-LD here. -->

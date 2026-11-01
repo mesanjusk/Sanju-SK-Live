@@ -122,14 +122,52 @@ fs.writeFileSync(indexFile, source.replace(new RegExp(start + '[\\s\\S]*?' + end
 // The React storefront replaces this fallback without any change to the UI.
 const bodyStart = '<!-- SEO STATIC BODY START -->';
 const bodyEnd = '<!-- SEO STATIC BODY END -->';
+const staticCategoryImages = [
+  '/images/services/wedding-cards.svg',
+  '/images/services/led-signage.svg',
+  '/images/services/trophies.svg',
+  '/images/services/flex-banners.svg',
+];
+const quoteNumber = String(seo.phone).replace(/\D/g, '');
+const quoteUrl = 'https://wa.me/' + quoteNumber + '?text=' +
+  encodeURIComponent('Hi Sanju SK Digital, I would like a quotation for custom printing.');
+const staticCards = coreServiceLinks.map(([url, label], index) =>
+  '<a class="sk-boot-card" href="' + url + '">' +
+  '<img src="' + staticCategoryImages[index] + '" alt="' + esc(label) +
+  ' by SANJU SK Digital in Gondia" width="320" height="300" />' +
+  '<span>' + esc(label) + '</span></a>'
+).join('');
 const rootMarkup = [
   '<main id="sk-seo-initial" aria-label="SANJU SK Digital services">',
-  '<header><h1>' + esc(seo.businessName) + ' — Printing, 3D Signage and Wedding Cards in Gondia</h1>',
-  '<p>' + esc(seo.description) + '</p>',
-  '<nav aria-label="Our services"><a href="/wedding-card-printing-gondia/">Wedding invitation printing</a> · ',
-  '<a href="/digital-wedding-invitations/">Digital invitations</a> · ',
-  '<a href="/corporate-gifting-gondia/">Corporate gifting</a> · <a href="/products">Product collection</a></nav></header>',
-  '<section aria-label="Printing and design services"><h2>What we do</h2><ul>',
+  '<div class="sk-boot-shell">',
+  '<header class="sk-boot-header sk-boot-container">',
+  '<a href="/" class="sk-boot-brand" aria-label="SANJU SK Digital homepage">',
+  '<span class="sk-boot-mark">SK</span><span>SANJU SK</span></a>',
+  '<div class="sk-boot-search" aria-label="Product search is loading">⌕ &nbsp;Search products</div>',
+  '<a href="/contact" class="sk-boot-menu" aria-label="Contact SANJU SK Digital">⋮</a>',
+  '</header>',
+  '<div class="sk-boot-location sk-boot-container">',
+  '<span>Made with ♥ in <strong>Gondia, Maharashtra</strong></span>',
+  '<a href="tel:' + seo.phone + '">' + esc(seo.displayPhone) + '</a></div>',
+  '<section class="sk-boot-hero sk-boot-container" aria-label="Printing and design in Gondia">',
+  '<div class="sk-boot-copy">',
+  '<p class="sk-boot-kicker">✦ GONDIA DESIGN STUDIO · SINCE 2006</p>',
+  '<h1>Wedding cards, signage &amp; <em>flex printing in Gondia.</em></h1>',
+  '<p class="sk-boot-description">Laser-cut wedding invitations, 3D LED acrylic signs, corporate awards and banners — designed for Gondia and delivered across nearby cities.</p>',
+  '</div><div class="sk-boot-art" aria-hidden="true">',
+  '<img src="/images/services/wedding-cards.svg" alt="" width="240" height="280" />',
+  '</div></section>',
+  '<div class="sk-boot-container"><a class="sk-boot-quote" href="' + quoteUrl + '">',
+  '<span><strong>Have something special in mind?</strong><small>Let’s create it together · Get a quote</small></span>',
+  '<span class="sk-boot-quote-arrow" aria-hidden="true">→</span></a></div>',
+  '<section class="sk-boot-picks sk-boot-container" aria-labelledby="sk-boot-collections-title">',
+  '<div class="sk-boot-heading"><h2 id="sk-boot-collections-title">Discover our collections</h2>',
+  '<span>Swipe to explore →</span></div>',
+  '<div class="sk-boot-collections">' + staticCards + '</div></section>',
+  '</div>',
+  '<div class="sk-boot-benefits">✉ Custom designs &nbsp; ◈ Made to order &nbsp; ♡ Corporate gifting</div>',
+  '<details class="sk-boot-more"><summary>Services, FAQs &amp; store information</summary>',
+  '<section aria-label="Printing and design services"><h2>Our signature services</h2><ul>',
   ...seo.services.map(s => '<li><strong>' + esc(s.name) + '</strong> — ' + esc(s.description) + '</li>'),
   '</ul></section><section aria-label="Our core product and printing categories"><h2>Explore our core services</h2><ul>',
   ...coreServiceLinks.map(([url, label]) => '<li><a href="' + url + '">' + esc(label) + ' in Gondia</a></li>'),
@@ -139,7 +177,7 @@ const rootMarkup = [
   esc(seo.address.streetAddress) + ', ' + esc(seo.address.addressLocality) + ', ' +
   esc(seo.address.addressRegion) + ' ' + esc(seo.address.postalCode) + ', India',
   '</address><a href="tel:' + seo.phone + '">' + esc(seo.displayPhone) + '</a> · ',
-  'Monday–Saturday 10 AM–8 PM · Sunday closed</footer></main>',
+  'Monday–Saturday 10 AM–8 PM · Sunday closed</footer></details></main>',
 ].join('');
 const currentIndex = fs.readFileSync(indexFile, 'utf8');
 if (!currentIndex.includes(bodyStart) || !currentIndex.includes(bodyEnd)) {

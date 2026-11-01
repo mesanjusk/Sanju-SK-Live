@@ -12,6 +12,15 @@ const product={
 };
 const index=readFileSync(new URL('../index.html',import.meta.url),'utf8');
 const siteMap=readFileSync(new URL('../public/sitemap.xml',import.meta.url),'utf8');
+const appBootSource=readFileSync(new URL('../src/App.jsx',import.meta.url),'utf8');
+assert(appBootSource.includes("import Home from './components/Home'"), 'Homepage must render directly instead of flashing the suspense loader');
+assert(!appBootSource.includes("lazy(() => import('./components/Home'))"), 'Do not lazy load homepage behind a second skeleton');
+assert(index.includes('class="sk-boot-header"') && index.includes('class="sk-boot-hero'), 'Homepage initial HTML must match lavender storefront layout');
+assert(index.includes('class="sk-boot-quote"') && index.includes('class="sk-boot-collections"'), 'Initial HTML must include quote before collections');
+assert(index.indexOf('sk-boot-quote') < index.indexOf('sk-boot-collections'), 'Quote must appear before initial collections');
+assert(index.includes('<details class="sk-boot-more">') && index.includes('Common questions'), 'Initial SEO information must remain available without JS');
+assert(index.includes('class="sk-boot-card"') && index.includes('images/services/wedding-cards.svg'), 'Initial collection links and images must be present');
+assert(index.includes('sk-initial-seo-style') && index.includes('#f8f3fc'), 'First paint needs lavender background instead of old green fallback');
 assert(index.includes('id="sk-seo-initial"'),'Homepage initial HTML content missing');
 assert(index.includes('structured-data-jsonld'),'Homepage business JSON-LD missing');
 const seoConfig=JSON.parse(readFileSync(new URL('../src/config/local-seo.json',import.meta.url),'utf8'));
