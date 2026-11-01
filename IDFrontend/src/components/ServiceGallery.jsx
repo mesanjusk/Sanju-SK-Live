@@ -16,7 +16,7 @@ const SERVICES = [
     alt: '3D LED Channel Letters and Acrylic Sign Boards in Gondia - SANJU SK Digital'
   },
   {
-    title: 'Customized Trophies, Mementos & Corporate Awards',
+    title: 'Custom Trophies, Mementos & Corporate Awards',
     description: 'Personalized trophies, engraved awards and premium mementos for schools, events, recognition ceremonies and businesses.',
     url: '/custom-trophies-awards-gondia/',
     image: '/images/services/trophies.svg',

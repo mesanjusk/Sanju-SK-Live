@@ -1,6 +1,17 @@
 {
   "redirects": [
     {
+      "source": "/:path*",
+      "has": [
+        {
+          "type": "host",
+          "value": "sanjusk.in"
+        }
+      ],
+      "destination": "https://www.sanjusk.in/:path*",
+      "statusCode": 301
+    },
+    {
       "source": "/sitemap-products.xml",
       "destination": "/api/sitemap-products",
       "permanent": false

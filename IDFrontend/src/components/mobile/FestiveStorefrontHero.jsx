@@ -134,9 +134,9 @@ function FestiveStorefrontHero({
 
         <section className="sk-festive-showcase sk-festive-container" aria-labelledby="sk-festive-title">
           <div className="sk-festive-showcase-copy">
-            <p className="sk-festive-kicker"><span className="sk-festive-sparkle">✦</span> THE CELEBRATION EDIT</p>
-            <h1 id="sk-festive-title">Beautiful things for <em>every occasion.</em></h1>
-            <p>From the first invitation to the finishing touch — design, printing & thoughtful gifting under one roof.</p>
+            <p className="sk-festive-kicker"><span className="sk-festive-sparkle">✦</span> GONDIA DESIGN STUDIO · SINCE 2006</p>
+            <h1 id="sk-festive-title">Wedding cards, signage &amp; <em>flex printing in Gondia.</em></h1>
+            <p>Laser-cut wedding invitations, 3D LED acrylic signs, corporate awards and banners — designed for Gondia and delivered across nearby cities.</p>
             {featured?.category
               ? <button type="button" onClick={() => chooseCategory(featured)}
                   className="sk-festive-primary-cta">Explore designs <FaArrowRight aria-hidden="true" /></button>
