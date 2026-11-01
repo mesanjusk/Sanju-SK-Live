@@ -8,11 +8,12 @@ import NotFound from './pages/NotFound';
 import { useAnalytics } from './hooks/useAnalytics';
 import { checkAndApplyAccessToken } from './components/ScrollGatePopup';
 import CallReminder from './components/mobile/CallReminder';
+import Home from './components/Home';
 
 // Apply ?access=TOKEN from URL before anything renders
 checkAndApplyAccessToken();
 
-const Home           = lazy(() => import('./components/Home'));
+// Load the storefront with the initial app bundle to avoid a second loading-screen flash.
 const AllListing     = lazy(() => import('./components/allLisiting'));
 const Home1          = lazy(() => import('./pages/Home1'));
 const StoryGallery   = lazy(() => import('./components/StoryGallery'));
