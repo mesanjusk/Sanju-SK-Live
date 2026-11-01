@@ -15,9 +15,9 @@ function StoryCategories({ categories = [], onSelect, selectedId }) {
           <p className="sk-story-item__name">All designs</p>
         </button>
         {categories.map((cat,i) => (
-          <button type="button" key={cat._id || i} onClick={() => onSelect?.(cat)}
-            className="sk-story-item flex-shrink-0 snap-start text-center" aria-pressed={selectedId === cat._id}>
-            <div className={`sk-story-item__outer ${selectedId === cat._id ? 'is-selected' : ''}`}>
+          <button type="button" key={cat._id || cat.category_uuid || i} onClick={() => onSelect?.(cat)}
+            className="sk-story-item flex-shrink-0 snap-start text-center" aria-pressed={Boolean(selectedId) && selectedId === (cat._id || cat.category_uuid)}>
+            <div className={`sk-story-item__outer ${Boolean(selectedId) && selectedId === (cat._id || cat.category_uuid) ? 'is-selected' : ''}`}>
               <div className="sk-story-item__inner">
                 {cat.imageUrl
                   ? <img src={optimizedImage(cat.imageUrl, 160)} alt="" className="h-full w-full object-cover" loading="lazy" decoding="async" width="65" height="65" />

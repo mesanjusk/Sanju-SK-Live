@@ -1,41 +1,19 @@
-import { useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } from 'react';
-import api from '../api';
-import FestiveStorefrontHero from './mobile/FestiveStorefrontHero';
+import { useDeferredValue, useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { FaArrowRight, FaChevronDown, FaPlay } from 'react-icons/fa';
+import api from '../api';
+import seo from '../config/local-seo.json';
+import FestiveStorefrontHero from './mobile/FestiveStorefrontHero';
 import StoryCategories from './mobile/StoryCategories';
-import ProductFeedCard from './mobile/ProductFeedCard';
+import CompactProductCard from './mobile/CompactProductCard';
 import VideoFeedCard from './mobile/VideoFeedCard';
 import MobileBottomNav from './mobile/MobileBottomNav';
 import LoadingSkeleton from './common/LoadingSkeleton';
-import ScrollGatePopup from './ScrollGatePopup';
 import FAQSection from './FAQSection';
 import LocalContactFooter from './LocalContactFooter';
 import ServiceGallery from './ServiceGallery';
 
-// Fisher-Yates shuffle — new order on every page load
-function shuffle(arr) {
-  const a = [...arr];
-  for (let i = a.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [a[i], a[j]] = [a[j], a[i]];
-  }
-  return a;
-}
-
-// Interleave videos into the product feed every N products
-function interleaveFeed(products, videos) {
-  if (!videos.length) return products.map((p) => ({ ...p, _feedType: 'product' }));
-  const result = [];
-  let vIdx = 0;
-  products.forEach((p, i) => {
-    result.push({ ...p, _feedType: 'product' });
-    // Insert a video after every 5th product
-    if ((i + 1) % 5 === 0 && vIdx < videos.length) {
-      result.push({ ...videos[vIdx++], _feedType: 'video' });
-    }
-  });
-  return result;
-}
+const idOf = (value) => String(value?._id || value?.category_uuid || value || '');
 
 export default function Home() {
   const [listings, setListings] = useState([]);
@@ -47,18 +25,17 @@ export default function Home() {
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [selectedSubcategory, setSelectedSubcategory] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [visibleCount, setVisibleCount] = useState(12);
+  const [showAllCategories, setShowAllCategories] = useState(false);
+  const [showVideos, setShowVideos] = useState(false);
   const deferredSearch = useDeferredValue(searchTerm);
-  const [viewedIds, setViewedIds] = useState(new Set());
-  const [showPopup, setShowPopup] = useState(false);
-  const [visibleCount, setVisibleCount] = useState(8);
   const loadMoreRef = useRef(null);
-  const hasShownPopup = useRef(false);
+  const whatsappNumber = config.whatsappNumber || config.phone || '919372333633';
+  const phoneNumber = seo.phone;
 
   useEffect(() => {
     let active = true;
     let retryTimer;
-    // The product feed must not wait for secondary APIs (videos, configs, etc).
-    // A slower optional service must never hold back products on a cold start.
     const loadProducts = async () => {
       try {
         const response = await api.get('/api/listings', { timeout: 12000 });
@@ -67,8 +44,7 @@ export default function Home() {
         if (!Array.isArray(rows)) throw new Error('Unexpected product API format');
         setListings(rows);
       } catch {
-        if (!active) return;
-        retryTimer = setTimeout(loadProducts, 20000);
+        if (active) retryTimer = setTimeout(loadProducts, 20000);
       } finally {
         if (active) setLoading(false);
       }
@@ -89,15 +65,6 @@ export default function Home() {
     return () => { active = false; clearTimeout(retryTimer); };
   }, []);
 
-  const shuffled = useMemo(() => shuffle(listings), [listings]);
-
-  const visibleSubcategories = useMemo(() => {
-    if (!selectedCategory) return [];
-    return subcategories.filter(
-      (s) => s.categoryId?._id === selectedCategory._id || s.categoryId === selectedCategory._id
-    );
-  }, [subcategories, selectedCategory]);
-
   const categoryById = useMemo(() => {
     const index = new Map();
     for (const category of categories) {
@@ -107,86 +74,93 @@ export default function Home() {
     return index;
   }, [categories]);
 
+  const groupedProducts = useMemo(() => {
+    const sections = categories.map((category, i) => ({
+      id: idOf(category) || 'category-' + i,
+      category, name: category.name || 'Collection',
+      products: [],
+    }));
+    const byId = new Map();
+    sections.forEach((section) => {
+      if (section.category._id) byId.set(String(section.category._id), section);
+      if (section.category.category_uuid) byId.set(String(section.category.category_uuid), section);
+    });
+    const otherProducts = [];
+    for (const product of listings) {
+      const bucket = byId.get(idOf(product.category));
+      if (bucket) bucket.products.push(product);
+      else otherProducts.push(product);
+    }
+    const populated = sections.filter(section => section.products.length > 0);
+    if (otherProducts.length) populated.push({
+      id: 'other', category: null, name: populated.length ? 'More designs' : 'Latest creations',
+      products: otherProducts,
+    });
+    return populated;
+  }, [categories, listings]);
+
+  const visibleSubcategories = useMemo(() => {
+    if (!selectedCategory) return [];
+    const ids = [selectedCategory._id, selectedCategory.category_uuid].filter(Boolean).map(String);
+    return subcategories.filter(sub => ids.includes(idOf(sub.categoryId)));
+  }, [subcategories, selectedCategory]);
+
   const filteredProducts = useMemo(() => {
     const query = deferredSearch.trim().toLowerCase();
-    const categoryIds = selectedCategory
+    const ids = selectedCategory
       ? [selectedCategory._id, selectedCategory.category_uuid].filter(Boolean).map(String)
       : null;
-    const selectedSubId = selectedSubcategory?._id;
-    const matched = shuffled.filter((product) => {
-      const productCategoryId = String(product.category?._id || product.category || '');
-      if (categoryIds && !categoryIds.includes(productCategoryId)) return false;
-      if (selectedSubcategory &&
-          product.subcategory !== selectedSubId &&
-          product.subcategory !== selectedSubcategory.name) return false;
+    return listings.filter((product) => {
+      const categoryId = idOf(product.category);
+      if (ids && !ids.includes(categoryId)) return false;
+      if (selectedSubcategory) {
+        const subId = idOf(product.subcategory);
+        const selectedId = idOf(selectedSubcategory);
+        if (subId !== selectedId && product.subcategory !== selectedSubcategory.name) return false;
+      }
       if (!query) return true;
-      const assignedCategory = categoryById.get(productCategoryId);
-      const searchable = [product.title, product.description, assignedCategory?.name]
-        .filter(Boolean).join(' ').toLowerCase();
+      const categoryName = categoryById.get(categoryId)?.name || product.category?.name || '';
+      const searchable = [product.title, product.description, categoryName].filter(Boolean).join(' ').toLowerCase();
       return searchable.includes(query);
     });
-    return selectedCategory || query ? matched : matched.slice(0, 40);
-  }, [shuffled, categoryById, selectedCategory, selectedSubcategory, deferredSearch]);
+  }, [listings, deferredSearch, selectedCategory, selectedSubcategory, categoryById]);
 
-  // Videos belong to the discovery feed, not filtered product results.
-  const feed = useMemo(() => {
-    if (selectedCategory || deferredSearch.trim()) {
-      return filteredProducts.map((product) => ({ ...product, _feedType: 'product' }));
-    }
-    return interleaveFeed(filteredProducts, shuffle(videos));
-  }, [filteredProducts, videos, selectedCategory, deferredSearch]);
+  const focused = Boolean(selectedCategory || deferredSearch.trim());
+  const visibleSections = showAllCategories ? groupedProducts : groupedProducts.slice(0, 6);
 
-  // Progressive feed: render only the first 8 cards and extend near the viewport.
-  // This avoids initializing dozens of 3D viewers and image nodes on first paint.
-  useEffect(() => { setVisibleCount(8); }, [selectedCategory, selectedSubcategory, deferredSearch]);
+  useEffect(() => { setVisibleCount(12); }, [selectedCategory, selectedSubcategory, deferredSearch]);
   useEffect(() => {
-    if (visibleCount >= feed.length || !loadMoreRef.current) return;
-    if (!('IntersectionObserver' in window)) return;
+    if (!focused || visibleCount >= filteredProducts.length || !loadMoreRef.current) return undefined;
+    if (!('IntersectionObserver' in window)) return undefined;
     const observer = new IntersectionObserver(([entry]) => {
-      if (entry.isIntersecting) setVisibleCount(count => Math.min(count + 8, feed.length));
-    }, { rootMargin: '480px 0px', threshold: 0 });
+      if (entry.isIntersecting) setVisibleCount(count => Math.min(count + 12, filteredProducts.length));
+    }, { rootMargin: '350px 0px', threshold: 0 });
     observer.observe(loadMoreRef.current);
     return () => observer.disconnect();
-  }, [visibleCount, feed.length]);
+  }, [focused, visibleCount, filteredProducts.length]);
 
-  const handleCategorySelect = (cat) => {
+  const scrollToProducts = () => {
+    requestAnimationFrame(() => document.getElementById('sk-products')?.scrollIntoView({
+      behavior: 'smooth', block: 'start',
+    }));
+  };
+  const handleCategorySelect = (category) => {
     setSearchTerm('');
-    if (!cat) { setSelectedCategory(null); setSelectedSubcategory(null); return; }
-    setSelectedCategory((prev) => {
-      if (prev?._id === cat._id) { setSelectedSubcategory(null); return null; }
-      setSelectedSubcategory(null);
-      return cat;
-    });
+    setSelectedSubcategory(null);
+    setSelectedCategory(prev => category && prev && idOf(prev) === idOf(category) ? null : category);
+    if (category) scrollToProducts();
   };
-
-  const handleSubcategorySelect = (sub) => {
-    setSelectedSubcategory((prev) => (prev?._id === sub._id ? null : sub));
-  };
-
-  const handleHeroCategorySelect = (category) => {
-    handleCategorySelect(category);
-    if (category) requestAnimationFrame(() =>
-      document.getElementById('sk-products')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-    );
-  };
-
   const handleSearchChange = (value) => {
     setSearchTerm(value);
     setSelectedCategory(null);
     setSelectedSubcategory(null);
   };
-
-  const handleProductView = useCallback((id) => {
-    setViewedIds((prev) => {
-      const next = new Set(prev);
-      next.add(id);
-      if (next.size >= 10 && !hasShownPopup.current) {
-        hasShownPopup.current = true;
-        setShowPopup(true);
-      }
-      return next;
-    });
-  }, []);
+  const showCategory = (category) => {
+    setSearchTerm('');
+    setSelectedSubcategory(null);
+    setSelectedCategory(category);
+    scrollToProducts();
+  };
 
   return (
     <div className="sk-storefront sk-festive-home min-h-screen pb-24">
@@ -196,118 +170,184 @@ export default function Home() {
         searchTerm={searchTerm}
         onSearchChange={handleSearchChange}
         selectedCategory={selectedCategory}
-        onCategorySelect={handleHeroCategorySelect}
-        whatsappNumber={config.whatsappNumber || config.phone || '919372333633'}
+        onCategorySelect={handleCategorySelect}
+        whatsappNumber={whatsappNumber}
+        phoneNumber={phoneNumber}
       />
       <ServiceGallery />
-      <main className="mx-auto w-full max-w-2xl py-1">
+      <main className="mx-auto w-full max-w-6xl py-1">
         <div className="sk-section-label sk-festive-collections-label">
-          <div><span className="sk-festive-eyebrow">CURATED FOR YOU</span><h2>Explore collections</h2><p>Find your next favourite design</p></div>
-          <Link to="/allCategories">View all →</Link>
+          <div>
+            <span className="sk-festive-eyebrow">SHOP BY COLLECTION</span>
+            <h2>Explore our categories</h2>
+            <p>Find designs by product type</p>
+          </div>
+          <Link to="/allCategories">All categories →</Link>
         </div>
         <StoryCategories
           categories={categories.slice(0, 12)}
           onSelect={handleCategorySelect}
-          selectedId={selectedCategory?._id}
+          selectedId={selectedCategory?._id || selectedCategory?.category_uuid}
         />
 
         {visibleSubcategories.length > 0 && (
-          <div className="flex gap-2 overflow-x-auto px-4 py-2 scrollbar-none">
-            {visibleSubcategories.map((sub) => (
-              <button
-                key={sub._id}
-                onClick={() => handleSubcategorySelect(sub)}
-                className={`shrink-0 rounded-full border px-4 py-1.5 text-xs font-semibold transition-all ${
-                  selectedSubcategory?._id === sub._id
-                    ? 'border-gray-900 bg-gray-900 text-white'
-                    : 'border-gray-200 bg-white text-gray-700 hover:border-gray-400'
-                }`}
-              >
+          <div className="flex gap-2 overflow-x-auto px-4 py-3 scrollbar-hide">
+            <button type="button" onClick={() => setSelectedSubcategory(null)}
+              className={'shrink-0 rounded-full px-4 py-2 text-xs font-bold ' +
+                (!selectedSubcategory ? 'bg-[#176a43] text-white' : 'border border-[#d6e3da] bg-white text-[#38614a]')}>
+              All types
+            </button>
+            {visibleSubcategories.map(sub => (
+              <button type="button" key={sub._id} onClick={() => setSelectedSubcategory(sub)}
+                className={'shrink-0 rounded-full px-4 py-2 text-xs font-bold ' +
+                  (selectedSubcategory?._id === sub._id ? 'bg-[#176a43] text-white' : 'border border-[#d6e3da] bg-white text-[#38614a]')}>
                 {sub.name}
               </button>
             ))}
           </div>
         )}
 
-        {(loading || feed.length > 0 || !!selectedCategory || !!deferredSearch.trim()) && (<>
-        <div className="sk-section-label" id="sk-products" style={{ paddingTop: 20, scrollMarginTop: 16 }}>
-          <div><h2>{deferredSearch.trim() ? 'Search results' : selectedCategory ? selectedCategory.name : 'The latest creations'}</h2><p>{deferredSearch.trim() ? 'Showing matches for “' + deferredSearch.trim() + '”' : 'Discover your next favourite design'}</p></div>
-          <Link to="/products">All products →</Link>
-        </div>
-        <section className="mt-1">
-          {loading ? (
-            <div className="grid gap-4 p-4">
-              {[...Array(4)].map((_, i) => <LoadingSkeleton key={i} />)}
-            </div>
-          ) : feed.length > 0 ? (
-            feed.slice(0, visibleCount).map((item, index) =>
-              item._feedType === 'video' ? (
-                <VideoFeedCard key={`v-${item._id}`} video={item} />
-              ) : (
-                <ProductFeedCard
-                  key={item._id}
-                  product={item}
-                  whatsappNumber={config.whatsappNumber || config.phone || '919372333633'}
-                  onView={handleProductView}
-                  priority={index === 0}
-                />
-              )
-            )
-          ) : (
-              <div className="mx-4 my-10 rounded-2xl bg-white p-8 text-center text-sm text-gray-600">
-                No matching designs found. Try another collection or search.
-                <button type="button" onClick={() => { handleSearchChange(''); setSelectedCategory(null); }}
-                  className="mx-auto mt-4 block rounded-full bg-[#07566a] px-5 py-2 font-bold text-white">Show all designs</button>
+        <div id="sk-products" className="scroll-mt-4 px-4 pb-6 sm:px-6">
+          {loading && listings.length === 0 ? (
+            <section aria-label="Loading collections" className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+              {[0, 1, 2, 3, 4, 5].map(key => <LoadingSkeleton key={key} />)}
+            </section>
+          ) : focused ? (
+            <section aria-labelledby="focused-products-heading" className="mt-5">
+              <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+                <div>
+                  <p className="text-[10px] font-bold uppercase tracking-[.16em] text-[#5c8769]">YOUR SELECTION</p>
+                  <h2 id="focused-products-heading" className="mt-1 text-xl font-extrabold text-[#203f30]">
+                    {selectedCategory?.name || 'Search results'}
+                  </h2>
+                  <p className="text-xs text-[#718678]">{filteredProducts.length} designs {deferredSearch.trim() ? 'matching your search' : 'available'}</p>
+                </div>
+                <button type="button" onClick={() => { setSelectedCategory(null); setSelectedSubcategory(null); setSearchTerm(''); }}
+                  className="rounded-full border border-[#ccdfd0] bg-white px-4 py-2 text-xs font-bold text-[#2b6641]">
+                  ← All categories
+                </button>
               </div>
-            )}
-          {feed.length > visibleCount && !loading && (
-            <div ref={loadMoreRef} className="px-4 pb-4 pt-2 text-center">
-              <button type="button" className="sk-order-button !w-full" onClick={() => setVisibleCount(n => Math.min(n + 8, feed.length))}>
-                Show more designs
-              </button>
+              {filteredProducts.length ? (
+                <>
+                  <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+                    {filteredProducts.slice(0, visibleCount).map((product) => (
+                      <CompactProductCard key={product._id} product={product}
+                        categoryName={categoryById.get(idOf(product.category))?.name || ''}
+                        whatsappNumber={whatsappNumber} />
+                    ))}
+                  </div>
+                  {filteredProducts.length > visibleCount && (
+                    <div ref={loadMoreRef} className="mt-5 text-center">
+                      <button type="button" onClick={() => setVisibleCount(n => Math.min(n + 12, filteredProducts.length))}
+                        className="rounded-full border border-[#bedcc8] bg-[#e8f6ed] px-6 py-2.5 text-sm font-extrabold text-[#216943]">
+                        Load more designs ({filteredProducts.length - visibleCount} remaining)
+                      </button>
+                    </div>
+                  )}
+                </>
+              ) : (
+                <div className="rounded-2xl border border-[#e0e9e1] bg-white p-7 text-center text-sm text-[#567462]">
+                  No designs matched. Try a different category or search.
+                </div>
+              )}
+            </section>
+          ) : groupedProducts.length ? (
+            <div className="space-y-8 pt-5">
+              {visibleSections.map(section => (
+                <section key={section.id} aria-labelledby={'category-' + section.id}>
+                  <div className="mb-3 flex items-end justify-between gap-3">
+                    <div>
+                      <p className="text-[10px] font-extrabold uppercase tracking-[.17em] text-[#719377]">HANDPICKED FOR YOU</p>
+                      <h2 id={'category-' + section.id} className="mt-1 text-lg font-extrabold text-[#243f33] sm:text-xl">{section.name}</h2>
+                      <p className="text-[11px] text-[#7b8f80]">{section.products.length} designs</p>
+                    </div>
+                    {section.category ? (
+                      <button type="button" onClick={() => showCategory(section.category)}
+                        className="inline-flex shrink-0 items-center gap-1 text-xs font-extrabold text-[#216943]">
+                        View all <FaArrowRight aria-hidden="true" className="text-[10px]" />
+                      </button>
+                    ) : (
+                      <Link to="/products" className="text-xs font-extrabold text-[#216943]">View all →</Link>
+                    )}
+                  </div>
+                  <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+                    {section.products.slice(0, 4).map(product => (
+                      <CompactProductCard key={product._id} product={product}
+                        categoryName={section.name} whatsappNumber={whatsappNumber} />
+                    ))}
+                  </div>
+                </section>
+              ))}
+              {groupedProducts.length > 6 && (
+                <div className="pb-2 text-center">
+                  <button type="button" onClick={() => setShowAllCategories(v => !v)}
+                    className="inline-flex items-center gap-2 rounded-full border border-[#bad7c4] bg-white px-5 py-3 text-sm font-extrabold text-[#236841] shadow-sm">
+                    {showAllCategories ? 'Show fewer categories' : 'Explore all ' + groupedProducts.length + ' categories'}
+                    <FaChevronDown aria-hidden="true" className={showAllCategories ? 'rotate-180' : ''} />
+                  </button>
+                </div>
+              )}
             </div>
-          )}
-        </section>
-        </>)}
-        <section aria-label="SK Digital printing and invitation services" className="mx-auto my-10 max-w-2xl px-4">
-          <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
-            <h2 className="text-lg font-bold text-gray-900">Wedding cards, digital invitations &amp; corporate gifts</h2>
-            <p className="mt-2 text-sm leading-6 text-gray-600">
-              Explore services from SK Digital – Mahi Creation in Gondia. Get custom wedding card printing,
-              create a digital invitation or enquire about branded gifts and print packaging.
-            </p>
-            <nav aria-label="Explore SK Digital services" className="mt-4 flex flex-col gap-3 text-sm font-semibold text-gray-900">
-              <a className="underline underline-offset-4" href="/wedding-card-printing-gondia/">Wedding card printing in Gondia</a>
-              <a className="underline underline-offset-4" href="/digital-wedding-invitations/">Digital wedding invitations in India</a>
-              <a className="underline underline-offset-4" href="/corporate-gifting-gondia/">Corporate gifts &amp; custom branding in Gondia</a>
-              <a className="underline underline-offset-4" href="/3d-led-sign-boards-gondia/">3D LED sign boards in Gondia</a>
-              <a className="underline underline-offset-4" href="/custom-trophies-awards-gondia/">Custom trophies and awards in Gondia</a>
-              <a className="underline underline-offset-4" href="/flex-banner-printing-gondia/">Flex banner printing in Gondia</a>
-            </nav>
-          </div>
-        </section>
+          ) : null}
+        </div>
+
+        {videos.length > 0 && (
+          <section className="mx-4 mb-7 rounded-2xl border border-[#e2eae2] bg-white p-4 sm:mx-6" aria-label="Design inspiration videos">
+            <button type="button" onClick={() => setShowVideos(v => !v)}
+              aria-expanded={showVideos}
+              className="flex w-full items-center justify-between gap-3 text-left text-sm font-extrabold text-[#27543a]">
+              <span className="inline-flex items-center gap-2"><FaPlay aria-hidden="true" /> Watch our latest design videos</span>
+              <FaChevronDown aria-hidden="true" className={showVideos ? 'rotate-180' : ''} />
+            </button>
+            {showVideos && <div className="mt-4 space-y-4">{videos.slice(0, 2).map(video =>
+              <VideoFeedCard key={video._id} video={video} />)}</div>}
+          </section>
+        )}
       </main>
 
-      {/* Keep SEO contact and FAQs after the original mobile storefront, never above products. */}
-      <section className="mx-auto mb-6 max-w-2xl px-4" aria-label="How to order custom printing in Gondia">
-        <div className="rounded-2xl border border-[#e8e6d7] bg-white p-5 shadow-sm">
-          <h2 className="text-lg font-bold text-[#294334]">Custom printing, made easy</h2>
-          <p className="mt-2 text-sm leading-6 text-[#687b6a]">
-            Browse real product photos, share your preferred design on WhatsApp and tell us your quantity,
-            size and deadline. We prepare a quotation and confirm your artwork before production.
-            Visit us in Krishnapura Ward, Gondia, or enquire from Nagpur and Balaghat.
-          </p>
-          <a href="https://www.sanjusk.in/contact" className="mt-3 inline-block text-sm font-bold text-[#2a634b] underline">Contact our Gondia studio</a>
+      <details id="sk-business-information" className="group mx-auto mb-8 w-full max-w-3xl px-4">
+        <summary className="flex cursor-pointer list-none items-center justify-between gap-3 rounded-2xl border border-[#d9e4db] bg-white px-5 py-4 shadow-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-700">
+          <span>
+            <span className="block text-[10px] font-extrabold uppercase tracking-[.15em] text-[#43875b]">MORE ABOUT US</span>
+            <span className="mt-1 block text-base font-extrabold text-[#284734]">Services, FAQs & store information</span>
+            <span className="mt-1 block text-xs text-[#708475]">Opening hours, directions and ordering guidance</span>
+          </span>
+          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#e7f3e9] text-[#287143] transition-transform group-open:rotate-180">
+            <FaChevronDown aria-hidden="true" />
+          </span>
+        </summary>
+        <div className="pt-3">
+          <section aria-label="SK Digital printing and invitation services" className="mx-auto my-5 max-w-2xl">
+            <div className="rounded-2xl border border-[#e1e7e0] bg-white p-5 shadow-sm">
+              <h2 className="text-lg font-bold text-[#294334]">Wedding cards, digital invitations & corporate gifts</h2>
+              <p className="mt-2 text-sm leading-6 text-[#617467]">
+                Explore local design and print services from SANJU SK Digital – Mahi Creation, Gondia.
+              </p>
+              <nav aria-label="Explore SANJU SK Digital services" className="mt-4 grid gap-3 text-sm font-semibold text-[#315b45] sm:grid-cols-2">
+                <a href="/wedding-card-printing-gondia/" className="underline underline-offset-4">Wedding cards in Gondia</a>
+                <a href="/digital-wedding-invitations/" className="underline underline-offset-4">Digital invitations</a>
+                <a href="/corporate-gifting-gondia/" className="underline underline-offset-4">Corporate gifts</a>
+                <a href="/3d-led-sign-boards-gondia/" className="underline underline-offset-4">3D LED sign boards</a>
+                <a href="/custom-trophies-awards-gondia/" className="underline underline-offset-4">Trophies and awards</a>
+                <a href="/flex-banner-printing-gondia/" className="underline underline-offset-4">Flex banner printing</a>
+              </nav>
+            </div>
+          </section>
+          <section className="mx-auto mb-5 max-w-2xl" aria-label="How to order custom printing in Gondia">
+            <div className="rounded-2xl border border-[#e8e6d7] bg-white p-5 shadow-sm">
+              <h2 className="text-lg font-bold text-[#294334]">Custom printing, made easy</h2>
+              <p className="mt-2 text-sm leading-6 text-[#687b6a]">
+                Browse our product photos, share your preferred design on WhatsApp, and tell us the quantity,
+                size and deadline. We'll prepare a quotation and confirm artwork before production.
+                Visit Krishnapura Ward, Gondia, or enquire from Nagpur and Balaghat.
+              </p>
+              <a href="/contact" className="mt-3 inline-block text-sm font-bold text-[#2a634b] underline">Contact our Gondia studio</a>
+            </div>
+          </section>
+          <FAQSection />
+          <LocalContactFooter />
         </div>
-      </section>
-      <FAQSection />
-      <LocalContactFooter />
-      <ScrollGatePopup
-        visible={showPopup}
-        waNumber={config.whatsappNumber || config.phone || '919372333633'}
-        onUnlock={() => setShowPopup(false)}
-      />
-
+      </details>
       <MobileBottomNav />
     </div>
   );

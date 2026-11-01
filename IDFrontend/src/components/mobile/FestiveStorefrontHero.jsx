@@ -2,7 +2,7 @@ import { memo, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import {
   FaArrowRight, FaBoxOpen, FaGift, FaHeart, FaLightbulb, FaMapMarkerAlt,
-  FaPalette, FaPrint, FaRegEnvelope, FaSearch, FaThLarge, FaTimes,
+  FaPalette, FaPhoneAlt, FaPrint, FaRegEnvelope, FaSearch, FaThLarge, FaTimes,
   FaTrophy, FaWhatsapp
 } from 'react-icons/fa';
 import { optimizedImage } from '../../utils/media';
@@ -32,7 +32,7 @@ const iconFor = (name = '') => {
 
 function FestiveStorefrontHero({
   listings = [], categories = [], searchTerm = '', onSearchChange,
-  selectedCategory, onCategorySelect, whatsappNumber
+  selectedCategory, onCategorySelect, whatsappNumber, phoneNumber
 }) {
   // Join the catalog on the exact category ID saved in each listing.
   // Order collections by actual product count, then preserve the admin order.
@@ -56,6 +56,9 @@ function FestiveStorefrontHero({
 
   const featured = collections[0];
   const wa = String(whatsappNumber || '919372333633').replace(/\D/g, '');
+  const dialDigits = String(phoneNumber || '919372333633').replace(/\D/g, '');
+  const dialHref = 'tel:' + (dialDigits.length === 10 ? '+91' + dialDigits : '+' + dialDigits);
+  const displayPhone = dialDigits === '919372333633' ? '+91 93723 33633' : '+' + dialDigits;
   const quoteUrl = 'https://wa.me/' + wa + '?text=' +
     encodeURIComponent('Hello SANJU SK Digital! I would like a custom printing or gifting quotation.');
 
@@ -107,12 +110,18 @@ function FestiveStorefrontHero({
               </span>
             </Link>
             <div className="sk-festive-header-actions">
+              <a href={dialHref} aria-label={'Call SANJU SK Digital at ' + displayPhone} className="sk-festive-action"><FaPhoneAlt /></a>
               <Link to="/favorites" aria-label="Saved designs" className="sk-festive-action"><FaHeart /></Link>
               <a href={quoteUrl} target="_blank" rel="noopener noreferrer"
                 aria-label="Chat with SK Digital on WhatsApp" className="sk-festive-action"><FaWhatsapp /></a>
             </div>
           </div>
-          <p className="sk-festive-location"><FaMapMarkerAlt aria-hidden="true" /> Made with care in <strong>Gondia, Maharashtra</strong></p>
+          <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
+            <p className="sk-festive-location"><FaMapMarkerAlt aria-hidden="true" /> Made with care in <strong>Gondia, Maharashtra</strong></p>
+            <a href={dialHref} className="text-[11px] font-extrabold text-[#f7e4b9] underline underline-offset-2" aria-label={'Call ' + displayPhone}>
+              <FaPhoneAlt aria-hidden="true" className="mr-1 inline" />{displayPhone}
+            </a>
+          </div>
           <div className="sk-festive-search" role="search">
             <FaSearch className="sk-festive-search-icon" aria-hidden="true" />
             <input type="search" value={searchTerm} onChange={(event) => onSearchChange?.(event.target.value)}

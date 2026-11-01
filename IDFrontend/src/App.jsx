@@ -7,6 +7,7 @@ import { routeMeta } from './config/routeMeta';
 import NotFound from './pages/NotFound';
 import { useAnalytics } from './hooks/useAnalytics';
 import { checkAndApplyAccessToken } from './components/ScrollGatePopup';
+import CallReminder from './components/mobile/CallReminder';
 
 // Apply ?access=TOKEN from URL before anything renders
 checkAndApplyAccessToken();
@@ -85,6 +86,8 @@ const PageWithSeo = ({ children }) => {
 
 function AppRoutes() {
   useAnalytics();
+  const { pathname } = useLocation();
+  const isPrivateRoute = /^\/(?:admin|login|profile|upload|add|listing|list\/|SocialMedia)/i.test(pathname);
   return (
     <PageWithSeo>
       <Suspense fallback={<div className="p-8"><LoadingSkeleton count={3} /></div>}>
@@ -144,6 +147,7 @@ function AppRoutes() {
           <Route path="*" element={<NotFound />} />
         </Routes>
       </Suspense>
+      {!isPrivateRoute && <CallReminder />}
     </PageWithSeo>
   );
 }
