@@ -17,10 +17,12 @@ const areaServed = [
   ['Gondia', 'Maharashtra'],
   ['Nagpur', 'Maharashtra'],
   ['Balaghat', 'Madhya Pradesh'],
+  ['Bhandara', 'Maharashtra'],
 ].map(([city, state]) => ({
   '@type': 'City', name: city,
   containedInPlace: { '@type': 'AdministrativeArea', name: state },
 }));
+areaServed.push({ '@type': 'AdministrativeArea', name: 'Maharashtra' });
 const schema = {
   '@context': 'https://schema.org',
   '@graph': [
@@ -36,7 +38,7 @@ const schema = {
       logo: img(seo.logoPath),
       image: img(seo.ogImagePath),
       telephone: seo.phone,
-      priceRange: '₹₹',
+      priceRange: seo.priceRange || '₹₹',
       currenciesAccepted: 'INR',
       address: { '@type': 'PostalAddress', ...seo.address },
       geo: { '@type': 'GeoCoordinates', ...seo.geo },
@@ -87,7 +89,7 @@ const tags = [
   '<title>' + esc(seo.headline) + '</title>',
   '<meta name="description" content="' + esc(seo.description) + '" />',
   '<meta name="author" content="' + esc(seo.businessName) + '" />',
-  '<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />',
+  '<meta name="robots" content="index, follow" />',
   '<link rel="canonical" href="' + home + '" />',
   '<meta property="og:locale" content="en_IN" />',
   '<meta property="og:type" content="website" />',
@@ -148,32 +150,34 @@ fs.writeFileSync(indexFile, currentIndex.replace(
   () => bodyStart + '\n' + rootMarkup + '\n' + bodyEnd
 ));
 
-const routes = [
-  '/', '/wedding-card-printing-gondia/', '/digital-wedding-invitations/',
-  '/corporate-gifting-gondia/', '/3d-led-sign-boards-gondia/',
-  '/custom-trophies-awards-gondia/', '/flex-banner-printing-gondia/',
-  '/products', '/allListing', '/home1', '/contact',
+// A real content-modification date, not the Vercel build date.
+// Update when changing these primary landing pages; don't bump on every deployment.
+const primaryPageUpdatedAt = '2026-11-01';
+const primaryRoutes = [
+  { route: '/', changefreq: 'weekly', priority: '1.0' },
+  { route: '/wedding-card-printing-gondia/', changefreq: 'monthly', priority: '0.8' },
+  { route: '/3d-led-sign-boards-gondia/', changefreq: 'monthly', priority: '0.8' },
+  { route: '/custom-trophies-awards-gondia/', changefreq: 'monthly', priority: '0.8' },
+  { route: '/flex-banner-printing-gondia/', changefreq: 'monthly', priority: '0.8' },
 ];
-fs.mkdirSync(publicDir, { recursive: true });
-const sitemapPages = '<?xml version="1.0" encoding="UTF-8"?>\n' +
+const otherRoutes = [
+  '/digital-wedding-invitations/', '/corporate-gifting-gondia/',
+  '/products', '/allListing', '/home1', '/contact',
+].map(route => ({ route, changefreq: 'monthly', priority: '0.5' }));
+const xmlPage = ({ route, changefreq, priority }, isPrimary) =>
+  '  <url><loc>' + seo.siteUrl + route + '</loc>' +
+  (isPrimary ? '<lastmod>' + primaryPageUpdatedAt + '</lastmod>' : '') +
+  '<changefreq>' + changefreq + '</changefreq><priority>' + priority + '</priority></url>';
+const xmlPages = [
+  ...primaryRoutes.map(entry => xmlPage(entry, true)),
+  ...otherRoutes.map(entry => xmlPage(entry, false)),
+];
+const sitemapXml = '<?xml version="1.0" encoding="UTF-8"?>\n' +
   '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' +
-  routes.map(route => '  <url><loc>' + seo.siteUrl + route + '</loc></url>').join('\n') +
-  '\n</urlset>\n';
-const sitemapIndex = '<?xml version="1.0" encoding="UTF-8"?>\n' +
-  '<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' +
-  '  <sitemap><loc>' + seo.siteUrl + '/sitemap-pages.xml</loc></sitemap>\n' +
-  '  <sitemap><loc>' + seo.siteUrl + '/api/sitemap-products</loc></sitemap>\n' +
-  '</sitemapindex>\n';
-const robots = `User-agent: OAI-SearchBot
-Allow: /
-
-User-agent: PerplexityBot
-Allow: /
-
-User-agent: Claude-SearchBot
-Allow: /
-
-User-agent: *
+  xmlPages.join('\n') + '\n</urlset>\n';
+// Keep the old sitemap-pages URL working for integrations that already use it.
+// The root /sitemap.xml is the canonical static sitemap requested for GSC.
+const robots = `User-agent: *
 Allow: /
 Disallow: /admin
 Disallow: /login
@@ -182,9 +186,12 @@ Disallow: /UploadCategory
 Disallow: /UploadSubcategory
 Disallow: /UploadBanner
 Disallow: /add
+
 Sitemap: ${seo.siteUrl}/sitemap.xml
+Sitemap: ${seo.siteUrl}/api/sitemap-products
 `;
-fs.writeFileSync(path.join(publicDir, 'sitemap-pages.xml'), sitemapPages);
-fs.writeFileSync(path.join(publicDir, 'sitemap.xml'), sitemapIndex);
+fs.mkdirSync(publicDir, { recursive: true });
+fs.writeFileSync(path.join(publicDir, 'sitemap-pages.xml'), sitemapXml);
+fs.writeFileSync(path.join(publicDir, 'sitemap.xml'), sitemapXml);
 fs.writeFileSync(path.join(publicDir, 'robots.txt'), robots);
-console.log('Generated SEO initial HTML, business graph and dynamic sitemap index for', home);
+console.log('Generated SEO initial HTML, business graph and static sitemap for', home);
