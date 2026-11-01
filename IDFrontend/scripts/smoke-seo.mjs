@@ -111,6 +111,19 @@ const homeSource=readFileSync(new URL('../src/components/Home.jsx',import.meta.u
 assert(!homeSource.includes('Our online catalog is temporarily offline'),'Offline copy must never render on home');
 const gallerySource=readFileSync(new URL('../src/components/ServiceGallery.jsx',import.meta.url),'utf8');
 for(const slug of landingSlugs)assert(gallerySource.includes('/'+slug+'/'),'Service gallery missing '+slug);
+const heroSource=readFileSync(new URL('../src/components/mobile/FestiveStorefrontHero.jsx',import.meta.url),'utf8');
+const cardSource=readFileSync(new URL('../src/components/mobile/CompactProductCard.jsx',import.meta.url),'utf8');
+const reminderSource=readFileSync(new URL('../src/components/mobile/CallReminder.jsx',import.meta.url),'utf8');
+const appSource=readFileSync(new URL('../src/App.jsx',import.meta.url),'utf8');
+assert(homeSource.includes('<details id="sk-business-information"'),'Expandable business information missing');
+assert(homeSource.includes('<FAQSection />')&&homeSource.includes('<LocalContactFooter />'),'FAQs and contact must remain in the page');
+assert(homeSource.includes('groupedProducts')&&homeSource.includes('section.products.slice(0, 4)'),'Category-based product previews missing');
+assert(homeSource.includes('filteredProducts.slice(0, visibleCount)'),'Focused product pagination missing');
+assert(heroSource.includes('phoneNumber')&&heroSource.includes('dialHref'),'Top navigation call link missing');
+assert(cardSource.includes('loading="lazy"')&&cardSource.includes('Enquire'),'Lightweight product gallery card missing');
+assert(reminderSource.includes('REMINDER_INTERVAL_MS = 15000'),'Call reminder must use 15-second interval');
+assert(reminderSource.includes('sessionStorage.setItem(DISMISSED_KEY'),'Call reminders must be dismissible for the session');
+assert(appSource.includes('<CallReminder />'),'Call reminders must work across public routes');
 const prevFetch=globalThis.fetch;
 function mockResponse(){
   return {
