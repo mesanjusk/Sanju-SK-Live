@@ -231,6 +231,15 @@ function FestiveStorefrontHero({
           </div>
         </section>
 
+        <div className="sk-festive-quote sk-festive-container">
+          <a href={quoteUrl} target="_blank" rel="noopener noreferrer"
+            className="sk-festive-quote-bar">
+            <span className="sk-festive-quote-icon"><FaPalette aria-hidden="true" /></span>
+            <span><strong>Have something special in mind?</strong><small>Let's create it together · Get a quote</small></span>
+            <FaArrowRight className="sk-festive-quote-arrow" aria-hidden="true" />
+          </a>
+        </div>
+
         <section className="sk-festive-picks sk-festive-container" aria-label="Shop by category">
           <div className="sk-festive-picks-heading">
             <h2>Discover our collections</h2><span>Swipe to explore <FaArrowRight aria-hidden="true" /></span>
@@ -246,14 +255,6 @@ function FestiveStorefrontHero({
           <div className="sk-festive-carousel-dots" aria-hidden="true" />
         </section>
 
-        <div className="sk-festive-quote sk-festive-container">
-          <a href={quoteUrl} target="_blank" rel="noopener noreferrer"
-            className="sk-festive-quote-bar">
-            <span className="sk-festive-quote-icon"><FaPalette aria-hidden="true" /></span>
-            <span><strong>Have something special in mind?</strong><small>Let's create it together · Get a quote</small></span>
-            <FaArrowRight className="sk-festive-quote-arrow" aria-hidden="true" />
-          </a>
-        </div>
         <div className="sk-festive-scallop" aria-hidden="true" />
       </div>
       <div className="sk-festive-benefits" aria-label="Our services">
