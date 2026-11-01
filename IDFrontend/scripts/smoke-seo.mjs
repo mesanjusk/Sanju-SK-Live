@@ -158,6 +158,11 @@ assert(heroSource.includes('window.requestAnimationFrame(move)') && heroSource.i
 assert(heroSource.includes('collections.map(item => renderTile(item, true))'),'Carousel needs a duplicated visual sequence for seamless looping');
 assert(heroSource.includes('prefers-reduced-motion: reduce') && heroSource.includes('onPointerDown={pauseCarousel}'),'Autoscroll must respect reduced motion and manual interaction');
 assert(festiveCss.includes('/* Promotional, image-first carousel') && festiveCss.includes('object-fit:cover'),'Carousel must use large photo-led cards');
+
+assert(heroSource.indexOf('sk-festive-quote sk-festive-container') < heroSource.indexOf('sk-festive-picks sk-festive-container'), 'Custom quote banner must appear above the auto-scrolling collections carousel');
+assert(cardSource.includes('sk-gallery-product-caption') && cardSource.includes('sk-gallery-product-photo'), 'Product gallery must share collection-card photo and lavender caption structure');
+assert(cardSource.includes('saveEnquiryLead') && cardSource.includes('toggleFavorite(product)') && cardSource.includes('Enquire'), 'Product enquiries and favourites must remain functional');
+assert(festiveCss.includes('/* Image-led product cards match') && festiveCss.includes('.sk-gallery-product-photo img'), 'Image-led gallery styling must be present');
 const prevFetch=globalThis.fetch;
 function mockResponse(){
   return {

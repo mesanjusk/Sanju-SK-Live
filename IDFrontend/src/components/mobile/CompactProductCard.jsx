@@ -6,6 +6,8 @@ import { optimizedImage } from '../../utils/media';
 import { trackWhatsAppClick } from '../../hooks/useAnalytics';
 import { saveEnquiryLead } from '../../hooks/useWhatsApp';
 
+// Image-first gallery tile aligned with Discover our collections.
+// Keep actual product pricing, favourites, navigation and enquiry tracking.
 function CompactProductCard({ product, whatsappNumber, categoryName = '' }) {
   const { favorites, toggleFavorite } = useFavorites();
   const images = Array.isArray(product.images)
@@ -35,38 +37,41 @@ function CompactProductCard({ product, whatsappNumber, categoryName = '' }) {
   };
 
   return (
-    <article className="relative min-w-0 overflow-hidden rounded-[14px] border border-[#e6dcef] bg-white shadow-[0_8px_26px_-20px_rgba(29,70,47,.35)]">
-      <Link to={'/products/' + id} className="block">
-        <div className="relative aspect-square overflow-hidden bg-[#f8f2fd]">
-          {image ? (
-            <img
-              src={optimizedImage(image, 300)}
-              alt={product.title + ' by SANJU SK Digital in Gondia'}
-              width="300" height="300" loading="lazy" decoding="async"
-              className="h-full w-full object-contain transition-transform duration-300 hover:scale-[1.035]"
-            />
-          ) : (
-            <div className="flex h-full items-center justify-center text-3xl text-[#ac99be]" aria-label="Image coming soon">✦</div>
-          )}
-          <span className="absolute bottom-1 left-1 rounded bg-white/90 px-1 py-0.5 text-[7px] font-bold tracking-wide text-[#644883] shadow-sm">CUSTOM MADE</span>
-        </div>
+    <article className="sk-gallery-product-card group relative flex h-full min-w-0 flex-col overflow-hidden rounded-[17px] border border-[#ded0ee]">
+      <Link to={'/products/' + id} className="sk-gallery-product-photo relative block overflow-hidden"
+        aria-label={'View ' + product.title}>
+        {image ? (
+          <img
+            src={optimizedImage(image, 340)}
+            alt={product.title + ' by SANJU SK Digital in Gondia'}
+            width="340" height="400" loading="lazy" decoding="async"
+            className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.035]"
+          />
+        ) : (
+          <span className="flex h-full w-full items-center justify-center text-3xl text-[#9977ba]"
+            aria-label="Image coming soon">✦</span>
+        )}
+        <span className="sk-gallery-product-label absolute bottom-2 left-2 rounded-full px-2 py-1 text-[8px] font-bold tracking-wide">
+          CUSTOM MADE
+        </span>
       </Link>
-      <button
-        type="button" onClick={() => toggleFavorite(product)}
+      <button type="button" onClick={() => toggleFavorite(product)}
         aria-label={isSaved ? 'Remove ' + product.title + ' from saved' : 'Save ' + product.title}
-        className="absolute right-1 top-1 z-10 flex h-7 w-7 items-center justify-center rounded-full bg-white/95 text-[#614881] shadow-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-600"
-      >
+        className="sk-gallery-product-fav absolute right-2 top-2 z-10 flex h-8 w-8 items-center justify-center rounded-full bg-white/95 text-[#77549e] shadow-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600">
         {isSaved ? <FaHeart className="text-rose-500" /> : <FaRegHeart />}
       </button>
-      <div className="p-2">
-        <Link to={'/products/' + id} className="block min-h-[34px] text-[10px] sm:text-[12px] font-extrabold leading-[1.35] text-[#48345f] line-clamp-2">
+      <div className="sk-gallery-product-caption flex min-h-[126px] flex-1 flex-col p-2 sm:p-3">
+        <Link to={'/products/' + id}
+          className="sk-gallery-product-title block min-h-[28px] text-[11px] font-extrabold leading-tight line-clamp-2 sm:text-[13px]">
           {product.title}
         </Link>
-        <p className="mt-1 min-h-[13px] truncate text-[9px] text-[#8b7d98]">{categoryName || 'Personalized for you'}</p>
-        <p className="mt-1 text-[11px] font-black sm:text-[14px] text-[#69508e]">{price}</p>
+        <p className="sk-gallery-product-category mt-1 truncate text-[9px]">
+          {categoryName || 'Personalized for you'}
+        </p>
+        <p className="sk-gallery-product-price mt-auto pt-1 text-[12px] font-black sm:text-[14px]">{price}</p>
         <a href={href} target="_blank" rel="noopener noreferrer" onClick={onEnquire}
           aria-label={'Enquire on WhatsApp about ' + product.title}
-          className="mt-2 flex h-8 w-full items-center justify-center gap-1 rounded-lg bg-[#785aab] px-1 text-[10px] font-extrabold text-white hover:bg-[#62478e] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-600">
+          className="sk-gallery-product-enquire mt-2 flex min-h-8 w-full items-center justify-center gap-1 rounded-lg px-1 text-[10px] font-extrabold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600">
           <FaWhatsapp aria-hidden="true" /> Enquire
         </a>
       </div>

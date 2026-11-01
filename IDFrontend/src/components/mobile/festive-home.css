@@ -580,3 +580,65 @@
   .sk-festive-tile-media img { transition:none; }
   .sk-festive-tile:hover img { transform:none; }
 }
+
+/* Image-led product cards match the purple collection carousel while staying 3-across. */
+.sk-festive-home #sk-products .sk-gallery-product-card {
+  background:#f9f2ff;
+  border:1px solid #dcc9ed;
+  border-radius:18px;
+  box-shadow:0 7px 20px #7956a127;
+  height:100%;
+}
+.sk-festive-home .sk-gallery-product-photo {
+  aspect-ratio:4/5;
+  width:100%;
+  background:linear-gradient(145deg,#f7effe,#dfc9f0);
+}
+.sk-festive-home .sk-gallery-product-photo img {
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  object-position:center;
+}
+.sk-festive-home .sk-gallery-product-label {
+  color:#654580;
+  background:#fffaffec;
+  box-shadow:0 2px 7px #412a5929;
+}
+.sk-festive-home #sk-products .sk-gallery-product-caption {
+  color:#fff;
+  background:linear-gradient(125deg,#9b76c5 0%,#7652a5 100%);
+}
+.sk-festive-home #sk-products .sk-gallery-product-title {
+  color:#fff;
+}
+.sk-festive-home #sk-products .sk-gallery-product-category {
+  color:#f0e1fb;
+}
+.sk-festive-home #sk-products .sk-gallery-product-price {
+  color:#fff8ff;
+}
+.sk-festive-home #sk-products .sk-gallery-product-enquire {
+  color:#67488b;
+  background:#fffaff;
+  box-shadow:0 2px 7px #4b305c25;
+}
+.sk-festive-home #sk-products .sk-gallery-product-enquire:hover {
+  background:#eee0fa;
+}
+.sk-festive-home .sk-gallery-product-fav {
+  color:#79519f;
+  box-shadow:0 3px 11px #5e398d2b;
+}
+.sk-festive-home .sk-festive-quote {
+  padding-top:6px;
+  padding-bottom:11px;
+}
+.sk-festive-home .sk-festive-picks {
+  padding-top:12px;
+}
+@media (max-width:359px) {
+  .sk-festive-home #sk-products .sk-gallery-product-caption { padding:7px 5px; }
+  .sk-festive-home #sk-products .sk-gallery-product-title { font-size:10px; }
+  .sk-festive-home #sk-products .sk-gallery-product-enquire { font-size:9px; }
+}
