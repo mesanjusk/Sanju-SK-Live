@@ -301,7 +301,7 @@ export default function Home() {
         )}
       </main>
 
-      <details id="sk-business-information" className="group mx-auto mb-8 w-full max-w-sm px-3 sm:max-w-md">
+      <details id="sk-business-information" className="group mx-auto mb-8 w-full max-w-[260px] px-2 sm:max-w-[280px]">
         <summary className="flex cursor-pointer list-none items-center justify-between gap-2 rounded-2xl border border-[#d9e4db] bg-white px-3 py-3 shadow-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-700">
           <span>
             <span className="block text-[10px] font-extrabold uppercase tracking-[.15em] text-[#43875b]">MORE ABOUT US</span>
