@@ -128,6 +128,14 @@ function FestiveStorefrontHero({
                 <small>DIGITAL · MAHI CREATION</small>
               </span>
             </Link>
+            <div className="sk-festive-search sk-festive-header-search" role="search">
+              <FaSearch className="sk-festive-search-icon" aria-hidden="true" />
+              <input type="search" value={searchTerm} onChange={(event) => onSearchChange?.(event.target.value)}
+                onKeyDown={submitSearch} placeholder="Search products"
+                aria-label="Search SK Digital products" />
+              {searchTerm && <button type="button" onClick={() => onSearchChange?.('')}
+                aria-label="Clear search"><FaTimes /></button>}
+            </div>
             <div className="sk-festive-header-actions relative" ref={menuRef}>
               <button type="button" className="sk-festive-action"
                 aria-label="Open website navigation" aria-haspopup="true"
@@ -159,14 +167,6 @@ function FestiveStorefrontHero({
             <a href={dialHref} className="sk-festive-top-phone" aria-label={'Call ' + displayPhone}>
               <FaPhoneAlt aria-hidden="true" />{displayPhone}
             </a>
-          </div>
-          <div className="sk-festive-search" role="search">
-            <FaSearch className="sk-festive-search-icon" aria-hidden="true" />
-            <input type="search" value={searchTerm} onChange={(event) => onSearchChange?.(event.target.value)}
-              onKeyDown={submitSearch} placeholder="Search wedding cards, gifts, printing..."
-              aria-label="Search SK Digital products" />
-            {searchTerm && <button type="button" onClick={() => onSearchChange?.('')}
-              aria-label="Clear search"><FaTimes /></button>}
           </div>
         </header>
 
@@ -203,10 +203,10 @@ function FestiveStorefrontHero({
 
         <section className="sk-festive-picks sk-festive-container" aria-label="Shop by category">
           <div className="sk-festive-picks-heading">
-            <h2>Discover our collections</h2><span>{categories.length ? 'From our real catalog' : 'Explore our services'}</span>
+            <h2>Discover our collections</h2><span>Swipe to explore <FaArrowRight aria-hidden="true" /></span>
           </div>
           <div className="sk-festive-tiles">
-            {collections.slice(0, 4).map(renderTile)}
+            {collections.map(renderTile)}
           </div>
         </section>
 

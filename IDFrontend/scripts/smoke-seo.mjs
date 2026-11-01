@@ -138,6 +138,14 @@ assert(reminderSource.includes('FIRST_REMINDER_DELAY_MS = 15000')&&reminderSourc
 assert(reminderSource.includes('top-1/2')&&reminderSource.includes('w-[178px]'),'Call reminder must stay narrow at right-center');
 assert(reminderSource.includes('sessionStorage.setItem(DISMISSED_KEY'),'Call reminders must be dismissible for the session');
 assert(appSource.includes('<CallReminder />'),'Call reminders must work across public routes');
+
+assert(heroSource.includes('sk-festive-header-search') && heroSource.indexOf('sk-festive-header-search') < heroSource.indexOf('sk-festive-header-actions relative'), 'Search must sit in the top navigation before the three-dot menu');
+assert(!heroSource.includes('sk-festive-search" role="search"'), 'Full-width search row must be removed');
+assert(heroSource.includes('{collections.map(renderTile)}'), 'All collection cards must be swipeable, not only first four');
+assert(festiveCss.includes('grid-auto-columns:calc(40% - 8px)'), 'Collection carousel should show roughly 2.5 cards on mobile');
+assert(festiveCss.includes('linear-gradient(145deg,#244c3e') && festiveCss.includes('#faf9f3'), 'Unified green and ivory palette required');
+assert(homeSource.indexOf('<ServiceGallery />') > homeSource.indexOf('</main>'), 'Product catalog should precede signature services');
+assert(homeSource.includes('group-open:block'), 'Business information panel must remain compact until opened');
 const prevFetch=globalThis.fetch;
 function mockResponse(){
   return {

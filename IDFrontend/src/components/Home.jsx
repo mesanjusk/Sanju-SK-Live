@@ -175,7 +175,6 @@ export default function Home() {
         whatsappNumber={whatsappNumber}
         phoneNumber={phoneNumber}
       />
-      <ServiceGallery />
       <main className="mx-auto w-full max-w-6xl py-1">
         <div className="sk-section-label sk-festive-collections-label">
           <div>
@@ -253,7 +252,7 @@ export default function Home() {
               )}
             </section>
           ) : groupedProducts.length ? (
-            <div className="space-y-8 pt-5">
+            <div className="space-y-5 pt-3">
               {visibleSections.map(section => (
                 <section key={section.id} aria-labelledby={'category-' + section.id}>
                   <div className="mb-3 flex items-end justify-between gap-3">
@@ -275,9 +274,9 @@ export default function Home() {
                 </section>
               ))}
               {groupedProducts.length > 6 && (
-                <div className="pb-2 text-center">
+                <div className="pb-1 text-center">
                   <button type="button" onClick={() => setShowAllCategories(v => !v)}
-                    className="inline-flex items-center gap-2 rounded-full border border-[#bad7c4] bg-white px-5 py-3 text-sm font-extrabold text-[#236841] shadow-sm">
+                    className="inline-flex items-center gap-2 rounded-full border border-[#bad7c4] bg-[#fffdf8] px-4 py-2 text-xs font-extrabold text-[#236841] shadow-sm">
                     {showAllCategories ? 'Show fewer categories' : 'Explore all ' + groupedProducts.length + ' categories'}
                     <FaChevronDown aria-hidden="true" className={showAllCategories ? 'rotate-180' : ''} />
                   </button>
@@ -287,33 +286,34 @@ export default function Home() {
           ) : null}
         </div>
 
+      </main>
+      <ServiceGallery />
         {videos.length > 0 && (
-          <section className="mx-4 mb-7 rounded-2xl border border-[#e2eae2] bg-white p-4 sm:mx-6" aria-label="Design inspiration videos">
+          <section className="mx-auto mb-3 w-[calc(100%-28px)] max-w-md rounded-xl border border-[#dbe5d8] bg-[#fffdf8] px-3 py-3 shadow-sm" aria-label="Design inspiration videos">
             <button type="button" onClick={() => setShowVideos(v => !v)}
               aria-expanded={showVideos}
-              className="flex w-full items-center justify-between gap-3 text-left text-sm font-extrabold text-[#27543a]">
+              className="flex w-full items-center justify-between gap-2 text-left text-xs font-extrabold text-[#27543a]">
               <span className="inline-flex items-center gap-2"><FaPlay aria-hidden="true" /> Watch our latest design videos</span>
               <FaChevronDown aria-hidden="true" className={showVideos ? 'rotate-180' : ''} />
             </button>
-            {showVideos && <div className="mt-4 space-y-4">{videos.slice(0, 2).map(video =>
+            {showVideos && <div className="mt-3 space-y-3">{videos.slice(0, 2).map(video =>
               <VideoFeedCard key={video._id} video={video} />)}</div>}
           </section>
         )}
-      </main>
 
-      <details id="sk-business-information" className="group mx-auto mb-8 w-full max-w-[260px] px-2 sm:max-w-[280px]">
-        <summary className="flex cursor-pointer list-none items-center justify-between gap-2 rounded-2xl border border-[#d9e4db] bg-white px-3 py-3 shadow-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-700">
+      <details id="sk-business-information" className="group mx-auto mb-5 mt-2 w-full max-w-[280px] px-2 open:max-w-2xl">
+        <summary className="flex cursor-pointer list-none items-center justify-between gap-2 rounded-xl border border-[#d9e4db] bg-[#fffdf8] px-3 py-2.5 shadow-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-700">
           <span>
             <span className="block text-[10px] font-extrabold uppercase tracking-[.15em] text-[#43875b]">MORE ABOUT US</span>
             <span className="mt-1 block text-sm font-extrabold text-[#284734]">Services, FAQs & store information</span>
-            <span className="mt-1 block text-[11px] leading-4 text-[#708475]">Opening hours, directions and ordering guidance</span>
+            <span className="mt-1 hidden text-[11px] leading-4 text-[#708475] group-open:block">Opening hours, directions and ordering guidance</span>
           </span>
           <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#e7f3e9] text-[#287143] transition-transform group-open:rotate-180">
             <FaChevronDown aria-hidden="true" />
           </span>
         </summary>
-        <div className="pt-3">
-          <section aria-label="SK Digital printing and invitation services" className="mx-auto my-5 max-w-2xl">
+        <div className="pt-2">
+          <section aria-label="SK Digital printing and invitation services" className="mx-auto my-3 max-w-2xl">
             <div className="rounded-2xl border border-[#e1e7e0] bg-white p-5 shadow-sm">
               <h2 className="text-lg font-bold text-[#294334]">Wedding cards, digital invitations & corporate gifts</h2>
               <p className="mt-2 text-sm leading-6 text-[#617467]">
@@ -329,7 +329,7 @@ export default function Home() {
               </nav>
             </div>
           </section>
-          <section className="mx-auto mb-5 max-w-2xl" aria-label="How to order custom printing in Gondia">
+          <section className="mx-auto mb-3 max-w-2xl" aria-label="How to order custom printing in Gondia">
             <div className="rounded-2xl border border-[#e8e6d7] bg-white p-5 shadow-sm">
               <h2 className="text-lg font-bold text-[#294334]">Custom printing, made easy</h2>
               <p className="mt-2 text-sm leading-6 text-[#687b6a]">
