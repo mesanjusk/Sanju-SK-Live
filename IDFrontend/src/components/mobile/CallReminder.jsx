@@ -3,8 +3,9 @@ import { FaPhoneAlt, FaTimes } from 'react-icons/fa';
 import seo from '../../config/local-seo.json';
 
 const DISMISSED_KEY = 'sk_call_reminder_dismissed';
-const REMINDER_INTERVAL_MS = 15000;
-const VISIBLE_FOR_MS = 7000;
+const FIRST_REMINDER_DELAY_MS = 15000;
+const REPEAT_REMINDER_DELAY_MS = 8000;
+const VISIBLE_FOR_MS = 4200;
 
 export default function CallReminder({ phoneNumber = seo.phone }) {
   const [dismissed, setDismissed] = useState(() => {
@@ -21,15 +22,21 @@ export default function CallReminder({ phoneNumber = seo.phone }) {
 
   useEffect(() => {
     if (dismissed) return undefined;
-    const timer = window.setInterval(() => {
+    const remind = () => {
       if (document.visibilityState === 'visible') setVisible(true);
-    }, REMINDER_INTERVAL_MS);
+    };
+    let repeatTimer;
+    const firstTimer = window.setTimeout(() => {
+      remind();
+      repeatTimer = window.setInterval(remind, REPEAT_REMINDER_DELAY_MS);
+    }, FIRST_REMINDER_DELAY_MS);
     const onVisibility = () => {
       if (document.visibilityState !== 'visible') setVisible(false);
     };
     document.addEventListener('visibilitychange', onVisibility);
     return () => {
-      window.clearInterval(timer);
+      window.clearTimeout(firstTimer);
+      window.clearInterval(repeatTimer);
       document.removeEventListener('visibilitychange', onVisibility);
     };
   }, [dismissed]);
@@ -49,22 +56,21 @@ export default function CallReminder({ phoneNumber = seo.phone }) {
   if (!visible || dismissed) return null;
   return (
     <aside role="status" aria-label="Call SANJU SK Digital"
-      className="fixed bottom-24 left-3 right-3 z-50 mx-auto max-w-sm rounded-2xl border border-[#c8dfcf] bg-white p-3 shadow-[0_12px_38px_rgba(24,62,42,.2)] md:bottom-6 md:left-auto md:right-6">
-      <div className="flex items-center gap-3">
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#e5f5e9] text-[#176a43]"><FaPhoneAlt aria-hidden="true" /></div>
-        <div className="min-w-0 flex-1">
-          <p className="text-[12px] font-extrabold text-[#254b36]">Need help choosing?</p>
-          <p className="text-[11px] text-[#617c6a]">Call our Gondia studio · {displayNumber}</p>
-        </div>
-        <a href={'tel:' + dialNumber} onClick={dismiss}
-          className="inline-flex shrink-0 items-center gap-1 rounded-xl bg-[#176a43] px-3 py-2 text-xs font-bold text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#176a43]">
-          <FaPhoneAlt aria-hidden="true" /> Call
-        </a>
-        <button type="button" onClick={dismiss} aria-label="Dismiss call reminders for this visit"
-          className="shrink-0 rounded-full p-1 text-[#60736a] focus-visible:outline-2 focus-visible:outline-emerald-700">
-          <FaTimes aria-hidden="true" />
-        </button>
+      className="fixed right-2 top-1/2 z-50 w-[178px] -translate-y-1/2 rounded-2xl border border-[#c8dfcf] bg-white/95 p-3 shadow-[0_12px_32px_rgba(24,62,42,.24)] backdrop-blur sm:right-5 sm:w-[210px]">
+      <button type="button" onClick={dismiss} aria-label="Dismiss call reminders for this visit"
+        className="absolute right-2 top-2 rounded-full p-1 text-[#60736a] focus-visible:outline-2 focus-visible:outline-emerald-700">
+        <FaTimes aria-hidden="true" />
+      </button>
+      <div className="mb-2 flex h-8 w-8 items-center justify-center rounded-lg bg-[#e5f5e9] text-[#176a43]">
+        <FaPhoneAlt aria-hidden="true" />
       </div>
+      <p className="pr-3 text-[12px] font-extrabold leading-4 text-[#254b36]">Need help choosing?</p>
+      <p className="mt-1 text-[10px] leading-4 text-[#617c6a]">Call our Gondia studio</p>
+      <p className="mt-1 text-[10px] font-bold text-[#254b36]">{displayNumber}</p>
+      <a href={'tel:' + dialNumber} onClick={dismiss}
+        className="mt-2 flex w-full items-center justify-center gap-1 rounded-lg bg-[#176a43] px-2 py-2 text-xs font-bold text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#176a43]">
+        <FaPhoneAlt aria-hidden="true" /> Call now
+      </a>
     </aside>
   );
 }
