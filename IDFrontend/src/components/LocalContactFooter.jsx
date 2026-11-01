@@ -4,10 +4,10 @@ import seo from '../config/local-seo.json';
 export default function LocalContactFooter() {
   const addr = seo.address;
   return (
-    <footer className="mx-auto mb-8 w-full max-w-2xl px-4 text-gray-700">
+    <footer className="mx-auto mb-3 w-full max-w-2xl px-1 text-[#4a6454] sm:px-3">
       <div itemScope itemType="https://schema.org/LocalBusiness"
-        className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
-        <h2 className="text-base font-bold text-gray-900" itemProp="name">{seo.businessName}</h2>
+        className="rounded-xl border border-[#e1e5d9] bg-[#fffefa] p-3 shadow-sm sm:p-5">
+        <h2 className="text-sm font-bold text-[#264838] sm:text-base" itemProp="name">{seo.businessName}</h2>
         <p className="mt-2 text-sm leading-6" itemProp="address" itemScope itemType="https://schema.org/PostalAddress">
           <span itemProp="streetAddress">{addr.streetAddress}</span>,{' '}
           <span itemProp="addressLocality">{addr.addressLocality}</span>,{' '}

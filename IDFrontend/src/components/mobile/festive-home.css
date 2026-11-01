@@ -253,3 +253,136 @@
   .sk-festive-location-line .sk-festive-location,
   .sk-festive-location-line .sk-festive-top-phone { font-size: 8px; }
 }
+
+
+/* 2026 storefront refinement: forest green / warm ivory, compact mobile hierarchy. */
+.sk-festive-home {
+  background: linear-gradient(180deg, #faf9f3 0%, #f5f6ef 58%, #faf8f1 100%);
+  color: #264638;
+}
+.sk-festive-dark {
+  background:
+    radial-gradient(circle at 92% 20%, rgba(224,203,151,.14), transparent 28%),
+    linear-gradient(145deg,#244c3e 0%,#143f34 44%,#10392f 100%);
+}
+.sk-festive-header { padding: 12px 14px 0; }
+.sk-festive-header-row { gap: 8px; }
+.sk-festive-brand { gap: 7px; flex: 0 1 auto; }
+.sk-festive-header-actions { flex: none; }
+.sk-festive-header-search {
+  display:flex; flex:1 1 120px; min-width:0; max-width:340px;
+  height:40px; border-radius:999px; gap:7px; padding:0 11px;
+  background:#fffefa; border-color:#e4e6dc; box-shadow:0 3px 12px #082b1b28;
+}
+.sk-festive-header-search .sk-festive-search-icon { font-size:15px; color:#336b52; }
+.sk-festive-header-search input { font-size:12px; }
+.sk-festive-action { width:36px; height:36px; }
+.sk-festive-location-line .sk-festive-location { margin:9px 0 8px; }
+.sk-festive-tabs { padding:8px 12px 0; gap:2px; }
+.sk-festive-tab { min-width:62px; gap:4px; padding:5px 6px 10px; font-size:10px; color:#dfebdc; }
+.sk-festive-tab svg { font-size:18px; height:22px; }
+.sk-festive-tab.is-active::after { background:#e7cf96; }
+.sk-festive-showcase {
+  min-height:176px; display:flex; align-items:center; gap:8px;
+  padding:12px 14px 10px;
+}
+.sk-festive-showcase-copy { width:72%; flex:1 1 auto; min-width:0; padding:0; }
+.sk-festive-kicker { font-size:8px; letter-spacing:.1em; color:#e7ca99; }
+.sk-festive-sparkle { font-size:11px; }
+.sk-festive-showcase h1 {
+  margin:5px 0 7px; font-family:inherit;
+  font-size:clamp(20px,5.4vw,27px); line-height:1.12; letter-spacing:-.04em;
+}
+.sk-festive-showcase h1 em { color:#e7d39f; }
+.sk-festive-showcase-copy > p:not(.sk-festive-kicker) {
+  font-size:10px; line-height:1.45; color:#d9e7db;
+  display:-webkit-box; -webkit-box-orient:vertical; -webkit-line-clamp:2; overflow:hidden;
+}
+.sk-festive-primary-cta {
+  margin-top:8px; padding:7px 11px; font-size:10px;
+  background:#f0dfb2; border-color:#f0dfb2; color:#254535;
+  box-shadow:0 5px 10px #0a302534;
+}
+.sk-festive-showcase-art { position:relative; inset:auto; width:28%; flex:0 0 28%; height:146px; }
+.sk-festive-orb {
+  width:114px; height:114px; right:-8px; top:8px;
+  filter:drop-shadow(0 0 11px #cbd4b54d);
+}
+.sk-festive-art-card {
+  width:83px; height:104px; right:0; top:27px;
+  border-width:3px; transform:rotate(7deg);
+}
+.sk-festive-art-sparkle-a { right:0; top:1px; font-size:18px; }
+.sk-festive-art-sparkle-b { right:75px; bottom:6px; font-size:11px; }
+.sk-festive-picks { padding:8px 13px 13px; }
+.sk-festive-picks-heading { margin-bottom:10px; }
+.sk-festive-picks-heading h2 { font-size:16px; color:#fffdf5; }
+.sk-festive-picks-heading span { display:inline-flex; align-items:center; gap:5px; font-size:10px; color:#ead6a7; }
+.sk-festive-picks-heading span svg { font-size:10px; }
+.sk-festive-tiles {
+  grid-auto-columns:calc(40% - 8px); gap:10px; padding-bottom:7px;
+  scroll-padding-left:1px;
+}
+.sk-festive-tile {
+  height:204px; padding:10px 8px; border-radius:17px;
+  border-color:#e7dcc6;
+  background:linear-gradient(175deg,#fffaf0 0%,#f5eddd 55%,var(--sk-tile-tint,#e5dbcb) 135%);
+}
+.sk-festive-tile-top { flex-basis:52px; }
+.sk-festive-tile-title { font-size:12px; line-height:1.15; color:#233e31; }
+.sk-festive-tile-subtitle { font-size:9px; color:#746953; }
+.sk-festive-tile-media img { object-fit:contain; }
+.sk-festive-tile-arrow { background:#fff8e8; color:#20523e; }
+.sk-festive-quote { padding:0 13px 10px; }
+.sk-festive-quote-bar {
+  min-height:54px; padding:8px 11px; gap:9px;
+  border-color:#b59e6f; background:linear-gradient(110deg,#386b4e,#20523c);
+}
+.sk-festive-quote-icon { width:34px; height:34px; font-size:16px; border-radius:10px; }
+.sk-festive-quote-bar strong { font-size:12px; }
+.sk-festive-quote-bar small { font-size:10px; }
+.sk-festive-scallop { height:12px; background:
+  radial-gradient(circle at 11px 0,#10392f 10px,transparent 11px) repeat-x,#faf9f3;
+  background-size:22px 12px,auto;
+}
+.sk-festive-benefits {
+  padding:9px 12px; background:#faf9f3; border-color:#e7e6dc;
+  gap:18px;
+}
+.sk-festive-benefits span { color:#416b56; }
+.sk-festive-home .sk-festive-collections-label { background:#faf9f3; padding-top:12px; }
+.sk-festive-home .sk-section-label h2 { color:#224e3b; }
+.sk-festive-home .sk-section-label a { color:#27694b; }
+.sk-festive-home .sk-story-row { background:#faf9f3; border-color:#e9e6d9; padding-bottom:12px; }
+.sk-festive-home #sk-business-information[open] { max-width:680px; }
+.sk-festive-home #sk-business-information summary { border-color:#dedfce; }
+.sk-festive-home #sk-business-information summary:focus-visible { outline-color:#21573c; }
+@media (max-width:480px) {
+  .sk-festive-brand-mark { width:31px; height:31px; font-size:15px; border-radius:10px; }
+  .sk-festive-brand-name { font-size:clamp(11px,3.1vw,14px); letter-spacing:0; }
+  .sk-festive-brand-name small { display:none; }
+  .sk-festive-header-search { height:36px; flex-basis:85px; padding:0 9px; gap:5px; }
+  .sk-festive-header-search input { font-size:11px; }
+  .sk-festive-action { width:34px; height:34px; }
+  .sk-festive-location-line .sk-festive-location,
+  .sk-festive-location-line .sk-festive-top-phone { font-size:clamp(8px,2.4vw,10px); }
+  .sk-festive-benefits span { font-size:9px; }
+}
+@media (min-width:640px) {
+  .sk-festive-header { padding:18px 24px 0; }
+  .sk-festive-brand-name { font-size:19px; }
+  .sk-festive-header-search { height:45px; }
+  .sk-festive-showcase { min-height:254px; padding:20px 30px; }
+  .sk-festive-showcase h1 { font-size:clamp(33px,4.2vw,48px); }
+  .sk-festive-showcase-copy > p:not(.sk-festive-kicker) { font-size:12px; -webkit-line-clamp:3; }
+  .sk-festive-showcase-art { width:34%; flex-basis:34%; height:204px; }
+  .sk-festive-orb { width:200px; height:200px; right:0; top:0; }
+  .sk-festive-art-card { width:122px; height:150px; right:32px; top:33px; }
+  .sk-festive-tiles { grid-auto-columns:205px; gap:14px; }
+  .sk-festive-tile { height:226px; }
+}
+@media (min-width:850px) {
+  .sk-festive-showcase { min-height:290px; }
+  .sk-festive-tiles { grid-template-columns:repeat(4,minmax(0,1fr)); grid-auto-columns:auto; }
+  .sk-festive-tile { height:238px; }
+}
