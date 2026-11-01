@@ -149,7 +149,7 @@ assert(homeSource.includes('group-open:block'), 'Business information panel must
 
 assert(!heroSource.includes('Explore designs'), 'Hero Explore designs button must be removed');
 assert(heroSource.includes('ref={carouselRef}') && heroSource.includes('onTouchStart={pauseCarousel}'), 'Swipe carousel must pause on user input');
-assert(heroSource.includes('window.setInterval') && heroSource.includes("'prefers-reduced-motion: reduce'"), 'Carousel autoplay and reduced-motion support required');
+assert(heroSource.includes('window.setInterval') && heroSource.includes('prefers-reduced-motion: reduce'), 'Carousel autoplay and reduced-motion support required');
 assert(heroSource.includes('collections.map(renderTile)'), 'All real catalog categories should be accessible in the collection carousel');
 assert(!heroSource.includes('const renderTab ='), 'Old top category icon navigation must be deleted');
 const prevFetch=globalThis.fetch;
