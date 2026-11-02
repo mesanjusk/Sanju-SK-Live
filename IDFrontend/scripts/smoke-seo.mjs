@@ -172,6 +172,16 @@ assert(heroSource.indexOf('sk-festive-quote sk-festive-container') < heroSource.
 assert(cardSource.includes('sk-gallery-product-caption') && cardSource.includes('sk-gallery-product-photo'), 'Product gallery must share collection-card photo and lavender caption structure');
 assert(cardSource.includes('saveEnquiryLead') && cardSource.includes('toggleFavorite(product)') && cardSource.includes('Enquire'), 'Product enquiries and favourites must remain functional');
 assert(festiveCss.includes('/* Image-led product cards match') && festiveCss.includes('.sk-gallery-product-photo img'), 'Image-led gallery styling must be present');
+const themeSource=readFileSync(new URL('../src/components/mobile/categoryThemes.js',import.meta.url),'utf8');
+assert(themeSource.includes('getCategoryTheme') && themeSource.includes("key:'signage'") && themeSource.includes("key:'wedding'"), 'Category themes must support wedding, signage and service categories');
+assert(heroSource.includes('sk-festive-sticky-shell') && heroSource.includes('sk-shopping-tabs'), 'Sticky category navigation must be present');
+assert(heroSource.includes('onTabCategorySelect') && heroSource.includes('aria-pressed={active}'), 'Category tabs must switch the active theme and filter state');
+assert(heroSource.includes('sk-merch-feature') && heroSource.includes('Request a custom quote'), 'Category-specific hero promotion required');
+assert(homeSource.includes('sk-subcategory-rail') && homeSource.includes('selectedSubcategory'), 'Image-led subcategories must stay functional');
+assert(homeSource.includes('sk-back-to-top') && homeSource.includes('window.scrollTo({ top: 0'), 'Back-to-top action required');
+assert(homeSource.includes('bulkQuoteUrl') && homeSource.includes('CategoryProductCarousel'), 'Bulk quote and three-across product carousels required');
+assert(festiveCss.includes('position:sticky') && festiveCss.includes('var(--sk-theme-bg)'), 'Category navigation and theme colours required');
+assert(index.includes('sk-boot-category-tabs'), 'Pre-React loading layout should reflect the new category navigation');
 const prevFetch=globalThis.fetch;
 function mockResponse(){
   return {

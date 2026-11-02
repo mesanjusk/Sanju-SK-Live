@@ -32,7 +32,7 @@ const iconFor = (name = '') => {
 
 function FestiveStorefrontHero({
   listings = [], categories = [], searchTerm = '', onSearchChange,
-  onCategorySelect, whatsappNumber, phoneNumber
+  onCategorySelect, onTabCategorySelect, selectedCategory, theme, whatsappNumber, phoneNumber
 }) {
   // Join the catalog on the exact category ID saved in each listing.
   // Order collections by actual product count, then preserve the admin order.
@@ -54,7 +54,10 @@ function FestiveStorefrontHero({
     }).sort((a, b) => b.count - a.count || a.index - b.index);
   }, [listings, categories]);
 
-  const featured = collections[0];
+  const featured = selectedCategory
+    ? collections.find((item) => item.category &&
+      String(item.category._id || item.category.category_uuid) === String(selectedCategory._id || selectedCategory.category_uuid)) || collections[0]
+    : collections[0];
   // Duplicate only the visual carousel sequence to make its slow autoplay seamless.
   // The repeated controls are excluded from keyboard and screen-reader navigation.
   const carouselRef = useRef(null);
@@ -126,6 +129,11 @@ function FestiveStorefrontHero({
     encodeURIComponent('Hello SANJU SK Digital! I would like a custom printing or gifting quotation.');
 
   const chooseCategory = (item) => onCategorySelect?.(item?.category || null);
+  const chooseTab = (item) => onTabCategorySelect?.(item?.category || null);
+  const themeTitle = selectedCategory?.name || 'Custom printing in Gondia';
+  const promotionalText = theme?.promo || 'Custom-made for moments that matter';
+  const promoMessage = 'Hi Sanju SK Digital, please send me options and a quotation for ' + themeTitle + '.';
+  const promoQuoteUrl = 'https://wa.me/' + wa + '?text=' + encodeURIComponent(promoMessage);
   const submitSearch = (event) => {
     if (event.key === 'Enter') {
       event.currentTarget.blur();
@@ -162,7 +170,7 @@ function FestiveStorefrontHero({
 
   return (
     <>
-      <div className="sk-festive-dark">
+      <div className="sk-festive-sticky-shell">
         <header className="sk-festive-header sk-festive-container">
           <div className="sk-festive-header-row">
             <Link to="/" className="sk-festive-brand" aria-label="SANJU SK Digital homepage">
@@ -213,12 +221,41 @@ function FestiveStorefrontHero({
             </a>
           </div>
         </header>
-
+        <nav className="sk-shopping-tabs sk-festive-container" aria-label="Shop by category">
+          <button type="button" className={'sk-shopping-tab' + (!selectedCategory ? ' is-active' : '')}
+            aria-pressed={!selectedCategory} onClick={() => chooseTab(null)}>
+            <FaThLarge aria-hidden="true" /><span>All</span>
+          </button>
+          {collections.map((item) => {
+            const active = Boolean(selectedCategory && item.category &&
+              String(item.category._id || item.category.category_uuid) === String(selectedCategory._id || selectedCategory.category_uuid));
+            const TabIcon = item.Icon;
+            return item.href
+              ? <Link key={item.id} to={item.href} className="sk-shopping-tab" aria-label={'Explore ' + item.label}>
+                  <TabIcon aria-hidden="true" /><span>{item.label}</span>
+                </Link>
+              : <button key={item.id} type="button" className={'sk-shopping-tab' + (active ? ' is-active' : '')}
+                  aria-pressed={active} onClick={() => chooseTab(item)}>
+                  <TabIcon aria-hidden="true" /><span>{item.label}</span>
+                </button>;
+          })}
+        </nav>
+      </div>
+      <div className="sk-festive-dark">
         <section className="sk-festive-showcase sk-festive-container" aria-labelledby="sk-festive-title">
           <div className="sk-festive-showcase-copy">
             <p className="sk-festive-kicker"><span className="sk-festive-sparkle">✦</span> GONDIA DESIGN STUDIO · SINCE 2006</p>
-            <h1 id="sk-festive-title">Wedding cards, signage &amp; <em>flex printing in Gondia.</em></h1>
-            <p>Laser-cut wedding invitations, 3D LED acrylic signs, corporate awards and banners — designed for Gondia and delivered across nearby cities.</p>
+            {selectedCategory ? (
+              <>
+                <h1 id="sk-festive-title">{selectedCategory.name} <em>made for you in Gondia.</em></h1>
+                <p>{theme?.strapline || 'Explore personalized designs'} · Send your size and quantity for a custom quote.</p>
+              </>
+            ) : (
+              <>
+                <h1 id="sk-festive-title">Wedding cards, signage &amp; <em>flex printing in Gondia.</em></h1>
+                <p>Laser-cut wedding invitations, 3D LED acrylic signs, corporate awards and banners — designed for Gondia and delivered across nearby cities.</p>
+              </>
+            )}
           </div>
           <div className="sk-festive-showcase-art" aria-hidden="true">
             <span className="sk-festive-orb" />
@@ -231,6 +268,22 @@ function FestiveStorefrontHero({
           </div>
         </section>
 
+        <section className="sk-merch-feature sk-festive-container" aria-label="Featured custom work">
+          <div className="sk-merch-feature-inner">
+            <div className="sk-merch-feature-copy">
+              <span className="sk-merch-feature-kicker">DESIGNED & MADE IN GONDIA</span>
+              <h2>{promotionalText}</h2>
+              <p>{selectedCategory ? theme?.strapline : 'Wedding invitations, custom signage, awards and printing — tailored to your brief.'}</p>
+              <a href={promoQuoteUrl} target="_blank" rel="noopener noreferrer">
+                Request a custom quote <FaArrowRight aria-hidden="true" />
+              </a>
+            </div>
+            <div className="sk-merch-feature-visual" aria-hidden="true">
+              {featured?.image ? <img src={featured.image} alt="" loading="lazy" decoding="async" width="230" height="250" />
+                : <FaPalette />}
+            </div>
+          </div>
+        </section>
         <div className="sk-festive-quote sk-festive-container">
           <a href={quoteUrl} target="_blank" rel="noopener noreferrer"
             className="sk-festive-quote-bar">
