@@ -735,7 +735,7 @@
 }
 .sk-shopping-tab:focus-visible { outline:2px solid currentColor;outline-offset:-2px; }
 .sk-festive-home .sk-festive-dark {
-  overflow:visible;
+  overflow:hidden;
   color:var(--sk-theme-ink);
   background:
     radial-gradient(circle at 85% 8%,#ffffff55 0%,transparent 33%),

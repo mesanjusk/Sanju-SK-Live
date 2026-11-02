@@ -41,7 +41,7 @@ export default function Home() {
     '--sk-theme-ink': activeTheme.ink,
     '--sk-theme-soft': activeTheme.soft,
   };
-  const bulkQuoteUrl = 'https://wa.me/' + String(whatsappNumber).replace(/\\D/g, '') +
+  const bulkQuoteUrl = 'https://wa.me/' + String(whatsappNumber).replace(/\D/g, '') +
     '?text=' + encodeURIComponent('Hi Sanju SK Digital, please share a bulk order quotation and production timeline.');
 
   useEffect(() => {
