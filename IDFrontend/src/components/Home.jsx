@@ -1,9 +1,10 @@
 import { useDeferredValue, useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { FaArrowRight, FaChevronDown, FaPlay } from 'react-icons/fa';
+import { FaArrowRight, FaArrowUp, FaChevronDown, FaPlay, FaThLarge } from 'react-icons/fa';
 import api from '../api';
 import seo from '../config/local-seo.json';
 import FestiveStorefrontHero from './mobile/FestiveStorefrontHero';
+import { getCategoryTheme } from './mobile/categoryThemes';
 import CompactProductCard from './mobile/CompactProductCard';
 import CategoryProductCarousel from './mobile/CategoryProductCarousel';
 import VideoFeedCard from './mobile/VideoFeedCard';
@@ -28,10 +29,20 @@ export default function Home() {
   const [visibleCount, setVisibleCount] = useState(12);
   const [showAllCategories, setShowAllCategories] = useState(false);
   const [showVideos, setShowVideos] = useState(false);
+  const [showBackToTop, setShowBackToTop] = useState(false);
   const deferredSearch = useDeferredValue(searchTerm);
   const loadMoreRef = useRef(null);
   const whatsappNumber = config.whatsappNumber || config.phone || '919372333633';
   const phoneNumber = seo.phone;
+  const activeTheme = getCategoryTheme(selectedCategory?.name);
+  const merchStyles = {
+    '--sk-theme-bg': activeTheme.background,
+    '--sk-theme-accent': activeTheme.accent,
+    '--sk-theme-ink': activeTheme.ink,
+    '--sk-theme-soft': activeTheme.soft,
+  };
+  const bulkQuoteUrl = 'https://wa.me/' + String(whatsappNumber).replace(/\\D/g, '') +
+    '?text=' + encodeURIComponent('Hi Sanju SK Digital, please share a bulk order quotation and production timeline.');
 
   useEffect(() => {
     let active = true;
@@ -139,6 +150,19 @@ export default function Home() {
     return () => observer.disconnect();
   }, [focused, visibleCount, filteredProducts.length]);
 
+  useEffect(() => {
+    const onScroll = () => setShowBackToTop(window.scrollY > 620);
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+
+  const handleTabCategorySelect = (category) => {
+    setSearchTerm('');
+    setSelectedSubcategory(null);
+    setSelectedCategory(category || null);
+  };
+
   const scrollToProducts = () => {
     requestAnimationFrame(() => document.getElementById('sk-products')?.scrollIntoView({
       behavior: 'smooth', block: 'start',
@@ -163,33 +187,49 @@ export default function Home() {
   };
 
   return (
-    <div className="sk-storefront sk-festive-home min-h-screen pb-24">
+    <div className={'sk-storefront sk-festive-home sk-theme-' + activeTheme.key + ' min-h-screen pb-24'} style={merchStyles}>
       <FestiveStorefrontHero
         listings={listings}
         categories={categories}
         searchTerm={searchTerm}
         onSearchChange={handleSearchChange}
         selectedCategory={selectedCategory}
+        theme={activeTheme}
         onCategorySelect={handleCategorySelect}
+        onTabCategorySelect={handleTabCategorySelect}
         whatsappNumber={whatsappNumber}
         phoneNumber={phoneNumber}
       />
       <main className="mx-auto w-full max-w-6xl py-1">
         {visibleSubcategories.length > 0 && (
-          <div className="flex gap-2 overflow-x-auto px-4 py-3 scrollbar-hide">
-            <button type="button" onClick={() => setSelectedSubcategory(null)}
-              className={'shrink-0 rounded-full px-4 py-2 text-xs font-bold ' +
-                (!selectedSubcategory ? 'bg-[#77609e] text-white' : 'border border-[#d6e3da] bg-white text-[#38614a]')}>
-              All types
-            </button>
-            {visibleSubcategories.map(sub => (
-              <button type="button" key={sub._id} onClick={() => setSelectedSubcategory(sub)}
-                className={'shrink-0 rounded-full px-4 py-2 text-xs font-bold ' +
-                  (selectedSubcategory?._id === sub._id ? 'bg-[#77609e] text-white' : 'border border-[#d6e3da] bg-white text-[#38614a]')}>
-                {sub.name}
+          <section className="sk-subcategory-section px-4 py-3 sm:px-6" aria-label="Browse subcategories">
+            <div className="sk-subcategory-title">
+              <h2>Explore {selectedCategory?.name} styles</h2>
+              <span>Pick your favourite</span>
+            </div>
+            <div className="sk-subcategory-rail">
+              <button type="button" onClick={() => setSelectedSubcategory(null)}
+                aria-pressed={!selectedSubcategory}
+                className={'sk-subcategory-card' + (!selectedSubcategory ? ' is-active' : '')}>
+                <span className="sk-subcategory-image"><FaThLarge aria-hidden="true" /></span>
+                <span>All styles</span>
               </button>
-            ))}
-          </div>
+              {visibleSubcategories.map((sub) => {
+                const pic = sub.imageUrl || sub.image || (Array.isArray(sub.images) ? sub.images[0] : null);
+                const active = idOf(sub) === idOf(selectedSubcategory);
+                return (
+                  <button type="button" key={idOf(sub)} onClick={() => setSelectedSubcategory(sub)}
+                    aria-pressed={active} className={'sk-subcategory-card' + (active ? ' is-active' : '')}>
+                    <span className="sk-subcategory-image">
+                      {pic ? <img src={pic} alt={sub.name + ' design category'} loading="lazy" decoding="async" />
+                        : <FaThLarge aria-hidden="true" />}
+                    </span>
+                    <span>{sub.name}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </section>
         )}
 
         <div id="sk-products" className="scroll-mt-4 px-4 pb-6 sm:px-6">
@@ -256,6 +296,10 @@ export default function Home() {
                     )}
                   </div>
                   <CategoryProductCarousel section={section} whatsappNumber={whatsappNumber} />
+                  {section.products.length >= 3 && (
+                    <a href={bulkQuoteUrl} target="_blank" rel="noopener noreferrer"
+                      className="sk-merch-bulk-link">Need multiple pieces? Request a bulk quote <FaArrowRight aria-hidden="true" /></a>
+                  )}
                 </section>
               ))}
               {groupedProducts.length > 6 && (
@@ -329,6 +373,12 @@ export default function Home() {
           <LocalContactFooter />
         </div>
       </details>
+      {showBackToTop && (
+        <button type="button" className="sk-back-to-top"
+          onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} aria-label="Back to top">
+          <FaArrowUp aria-hidden="true" /><span>Top</span>
+        </button>
+      )}
       <MobileBottomNav whatsappNumber={whatsappNumber} phoneNumber={phoneNumber} />
     </div>
   );
