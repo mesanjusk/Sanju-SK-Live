@@ -5,11 +5,13 @@ export const routeMeta = {
   },
   '/allListing': {
     title: 'All Listings',
-    description: 'Browse complete listings curated by category and preference.',
+    description: 'Legacy product listings; see the current product gallery instead.',
+    noIndex: true,
   },
   '/home1': {
     title: 'Wedding Collection',
-    description: 'Discover premium wedding invitation designs and personalized options.',
+    description: 'Legacy wedding collection page; see current wedding services.',
+    noIndex: true,
   },
   '/allCategories': {
     title: 'All Categories',

@@ -332,7 +332,7 @@ const primaryRoutes = [
 ];
 const otherRoutes = [
   '/digital-wedding-invitations/', '/corporate-gifting-gondia/',
-  '/products', '/allListing', '/home1', '/contact',
+  '/products', '/contact',
 ].map(route => ({ route, changefreq: 'monthly', priority: '0.5' }));
 const xmlPage = ({ route, changefreq, priority }, isPrimary) =>
   '  <url><loc>' + seo.siteUrl + route + '</loc>' +
@@ -361,7 +361,7 @@ Disallow: /UploadBanner
 Disallow: /add
 
 Sitemap: ${seo.siteUrl}/sitemap.xml
-Sitemap: ${seo.siteUrl}/api/sitemap-products
+Sitemap: ${seo.siteUrl}/sitemap-products.xml
 `;
 fs.mkdirSync(publicDir, { recursive: true });
 fs.writeFileSync(path.join(publicDir, 'sitemap-pages.xml'), sitemapXml);
