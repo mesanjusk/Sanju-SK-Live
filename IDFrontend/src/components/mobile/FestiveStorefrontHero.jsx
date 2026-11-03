@@ -42,7 +42,7 @@ function FestiveStorefrontHero({
     if (!categories.length) return SERVICE_LINKS.map((item) => ({ ...item, subtitle: 'Explore service' }));
     return categories.map((category, index) => {
       const ids = [category._id, category.category_uuid].filter(Boolean).map(String);
-      const products = listings.filter((product) => ids.includes(String(product.category?._id || product.category || '')));
+      const products = listings.filter((product) => ids.includes(String(product.category?._id || product.category?.category_uuid || product.category || '')));
       const image = imageOf(products.find((product) => imageOf(product))) || category.imageUrl;
       return {
         id: String(category._id || category.category_uuid || index),
@@ -202,7 +202,7 @@ function FestiveStorefrontHero({
                   className="sk-header-overflow-menu">
                   {[
                     { to: '/', label: 'Home', Icon: FaHome },
-                    { to: '/allCategories', label: 'Explore categories', Icon: FaThLarge },
+                    ...(catalogReady ? [{ to: '/allCategories', label: 'Explore categories', Icon: FaThLarge }] : []),
                     { to: '/contact', label: 'Contact us', Icon: FaPhoneAlt },
                     { to: '/favorites', label: 'Saved designs', Icon: FaHeart },
                     { to: '/profile', label: 'My profile', Icon: FaUser },

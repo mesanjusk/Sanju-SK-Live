@@ -92,7 +92,7 @@ export default function Home() {
 
   const catalogReady = catalogStatus.listings === 'ready' && catalogStatus.categories === 'ready';
   const catalogFailed = catalogStatus.listings === 'error' || catalogStatus.categories === 'error';
-  const catalogPending = !catalogReady && !catalogFailed;
+  const catalogPending = catalogStatus.listings === 'loading' || catalogStatus.categories === 'loading';
   const retryCatalog = () => {
     setSelectedCategory(null);
     setSelectedSubcategory(null);
