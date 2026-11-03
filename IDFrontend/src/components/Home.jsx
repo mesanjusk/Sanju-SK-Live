@@ -1,6 +1,6 @@
 import { useDeferredValue, useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { FaArrowRight, FaArrowUp, FaChevronDown, FaPlay, FaThLarge } from 'react-icons/fa';
+import { FaArrowRight, FaChevronDown, FaPlay, FaThLarge } from 'react-icons/fa';
 import api from '../api';
 import seo from '../config/local-seo.json';
 import FestiveStorefrontHero from './mobile/FestiveStorefrontHero';
@@ -29,10 +29,11 @@ export default function Home() {
   const [visibleCount, setVisibleCount] = useState(12);
   const [showAllCategories, setShowAllCategories] = useState(false);
   const [showVideos, setShowVideos] = useState(false);
-  const [showBackToTop, setShowBackToTop] = useState(false);
+  const [showBottomNav, setShowBottomNav] = useState(true);
   const deferredSearch = useDeferredValue(searchTerm);
   const loadMoreRef = useRef(null);
-  const whatsappNumber = config.whatsappNumber || config.phone || '919372333633';
+  // All public enquiry links use the verified Gondia business WhatsApp number.
+  const whatsappNumber = String(seo.phone || '+919372333633').replace(/\D/g, '');
   const phoneNumber = seo.phone;
   const activeTheme = getCategoryTheme(selectedCategory?.name);
   const merchStyles = {
@@ -148,11 +149,41 @@ export default function Home() {
     return () => observer.disconnect();
   }, [focused, visibleCount, filteredProducts.length]);
 
+  // Scroll-aware shopping bar: disappears as customers browse down, reappears
+  // as they scroll up or approach the start/end. No floating More/Top buttons.
   useEffect(() => {
-    const onScroll = () => setShowBackToTop(window.scrollY > 620);
-    onScroll();
+    let previousY = Math.max(0, window.scrollY);
+    let directionTravel = 0;
+    let animationFrame = 0;
+    const update = () => {
+      animationFrame = 0;
+      const y = Math.max(0, window.scrollY);
+      const delta = y - previousY;
+      previousY = y;
+      if (Math.sign(delta) !== Math.sign(directionTravel)) directionTravel = 0;
+      directionTravel += delta;
+      const bottom = Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
+      if (y < 150 || y >= bottom - 110) {
+        directionTravel = 0;
+        setShowBottomNav(true);
+      } else if (directionTravel > 40) {
+        directionTravel = 0;
+        setShowBottomNav(false);
+      } else if (directionTravel < -24) {
+        directionTravel = 0;
+        setShowBottomNav(true);
+      }
+    };
+    const onScroll = () => {
+      if (!animationFrame) animationFrame = window.requestAnimationFrame(update);
+    };
     window.addEventListener('scroll', onScroll, { passive: true });
-    return () => window.removeEventListener('scroll', onScroll);
+    window.addEventListener('resize', onScroll, { passive: true });
+    return () => {
+      if (animationFrame) window.cancelAnimationFrame(animationFrame);
+      window.removeEventListener('scroll', onScroll);
+      window.removeEventListener('resize', onScroll);
+    };
   }, []);
 
   const handleTabCategorySelect = (category) => {
@@ -356,21 +387,13 @@ export default function Home() {
             <FAQSection />
             <LocalContactFooter />
         <div className="sk-store-footer-bottom">
-          <span>Made with care in Gondia · Since 2006</span>
-          <button type="button" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
-            Back to top <FaArrowUp aria-hidden="true" />
-          </button>
+          <span>Made with ♥ in Gondia, Maharashtra · Since 2006</span>
         </div>
           </div>
         </details>
       </footer>
-      {showBackToTop && (
-        <button type="button" className="sk-back-to-top"
-          onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} aria-label="Back to top">
-          <FaArrowUp aria-hidden="true" /><span>Top</span>
-        </button>
-      )}
-      <MobileBottomNav whatsappNumber={whatsappNumber} phoneNumber={phoneNumber} />
+      <MobileBottomNav whatsappNumber={whatsappNumber} phoneNumber={phoneNumber}
+        visible={showBottomNav} />
     </div>
   );
 }
