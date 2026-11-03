@@ -62,7 +62,7 @@ for(const [route,priority,freq] of requiredRoutes){
 const robots=readFileSync(new URL('../public/robots.txt',import.meta.url),'utf8');
 assert(robots.includes('User-agent: *')&&robots.includes('Allow: /'),'Robots must allow all crawlers');
 assert(robots.includes('Sitemap: https://www.sanjusk.in/sitemap.xml'),'Missing sitemap discovery');
-assert(robots.includes('Sitemap: https://www.sanjusk.in/api/sitemap-products'),'Product sitemap not preserved');
+assert(robots.includes('Sitemap: https://www.sanjusk.in/sitemap-products.xml'),'Product sitemap discovery must use the direct XML route');
 const landingSlugs=[
   '3d-led-sign-boards-gondia',
   'custom-trophies-awards-gondia',
