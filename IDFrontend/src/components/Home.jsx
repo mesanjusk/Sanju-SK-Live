@@ -7,6 +7,7 @@ import FestiveStorefrontHero from './mobile/FestiveStorefrontHero';
 import { getCategoryTheme } from './mobile/categoryThemes';
 import CompactProductCard from './mobile/CompactProductCard';
 import CategoryProductCarousel from './mobile/CategoryProductCarousel';
+import CategorySeoBlurb from './mobile/CategorySeoBlurb';
 import VideoFeedCard from './mobile/VideoFeedCard';
 import MobileBottomNav from './mobile/MobileBottomNav';
 import LoadingSkeleton from './common/LoadingSkeleton';
@@ -281,6 +282,7 @@ export default function Home() {
                   ← All categories
                 </button>
               </div>
+              {selectedCategory && <CategorySeoBlurb name={selectedCategory.name} />}
               {filteredProducts.length ? (
                 <>
                   <div className="grid grid-cols-3 gap-2 sm:gap-3">
@@ -324,6 +326,7 @@ export default function Home() {
                       <Link to="/products" className="text-xs font-extrabold text-[#74559f]">View all →</Link>
                     )}
                   </div>
+                  <CategorySeoBlurb name={section.name} />
                   <CategoryProductCarousel section={section} whatsappNumber={whatsappNumber} />
                 </section>
               ))}

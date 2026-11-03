@@ -195,6 +195,47 @@ assert(!homeSource.includes('Need multiple pieces? Request a bulk quote'), 'No r
 assert(!homeSource.includes('pb-24') && !homeSource.includes('sk-back-to-top'), 'No excessive whitespace or floating Top button');
 assert(homeSource.indexOf('sk-store-footer-heading') > homeSource.indexOf('sk-store-footer-expanded'), 'Business links must be hidden until the footer is expanded');
 assert(festiveCss.includes('/* PR #60: one hero quote CTA') && festiveCss.includes('.sk-mobile-bottom-nav.is-hidden'), 'Smart navigation stylesheet required');
+
+const categoryGuideData=JSON.parse(readFileSync(new URL('../src/config/category-seo.json',import.meta.url),'utf8'));
+const guideSource=readFileSync(new URL('../src/components/mobile/CategorySeoBlurb.jsx',import.meta.url),'utf8');
+const navSource=readFileSync(new URL('../src/components/mobile/MobileBottomNav.jsx',import.meta.url),'utf8');
+const vercelRules=JSON.parse(readFileSync(new URL('../vercel.json',import.meta.url),'utf8'));
+assert(categoryGuideData.length>=9,'Require authored category content for observed catalog categories');
+assert(new Set(categoryGuideData.map(g=>g.slug)).size===categoryGuideData.length,'Category SEO guide slugs must be unique');
+assert(homeSource.includes('<CategorySeoBlurb name={section.name} />') && homeSource.includes('<CategorySeoBlurb name={selectedCategory.name} />'),
+  'SEO summary must follow each actual live category and focused selection');
+assert(guideSource.includes('getCategoryGuide') && guideSource.includes('Browse ' + "' + name + '"),
+  'Every unknown live category needs a relevant no-fabrication fallback description');
+assert(festiveCss.includes('Floating three-icon dock') && festiveCss.includes('.sk-mobile-bottom-nav.sk-floating-actions'),
+  'Return three contact buttons to a compact floating dock');
+assert(navSource.includes('sk-floating-actions') && navSource.includes('visible = true'),
+  'Floating actions must respect the existing scroll-aware show/hide state');
+const newPages=categoryGuideData.filter(g=>!g.existingUrl);
+assert(newPages.length>=7,'Require new helpful indexable pages in addition to existing service pages');
+assert(vercelRules.rewrites.some(r=>r.source==='/categories/:slug/' && r.destination==='/categories/:slug/index.html'),
+  'Vercel must serve generated category pages rather than React fallback');
+for(const guide of newPages) {
+  const canonical='https://www.sanjusk.in/categories/'+guide.slug+'/';
+  const html=readFileSync(new URL('../public/categories/'+guide.slug+'/index.html',import.meta.url),'utf8');
+  assert(html.includes('<title>'+guide.title.replace(/&/g,'&amp;')+'</title>'),guide.slug+' title missing');
+  assert(html.includes('<meta name="description"'),guide.slug+' missing description');
+  assert(html.includes('<link rel="canonical" href="'+canonical+'">'),guide.slug+' canonical missing');
+  assert(html.includes('<h1>') && html.includes('in Gondia</h1>'),guide.slug+' unique H1 missing');
+  assert(html.includes('Krishnapura Ward') && html.includes('tel:+919372333633'),guide.slug+' business details missing');
+  assert(html.includes('Request a quotation') && html.includes('Browse '+guide.name+' products'),guide.slug+' enquiry or products link missing');
+  assert(html.includes('<nav class="links"'),guide.slug+' internal category links missing');
+  const schemaText=(html.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/)||[])[1];
+  assert(schemaText,guide.slug+' JSON-LD absent');
+  const graph=JSON.parse(schemaText)['@graph'];
+  assert(graph.some(node=>node['@type']==='CollectionPage'),guide.slug+' CollectionPage schema missing');
+  assert(graph.some(node=>node['@type']==='BreadcrumbList'),guide.slug+' breadcrumb schema missing');
+  assert(!graph.some(node=>node['@type']==='Product'),guide.slug+' must not use Product rich-result schema for a category list');
+  assert(siteMap.includes('<loc>'+canonical+'</loc><lastmod>2026-11-03</lastmod>'),guide.slug+' sitemap entry missing');
+}
+for(const guide of categoryGuideData) {
+  const path=guide.existingUrl || '/categories/'+guide.slug+'/';
+  assert(index.includes('href="'+path+'"'),guide.slug+' missing homepage crawlable internal link');
+}
 const prevFetch=globalThis.fetch;
 function mockResponse(){
   return {
