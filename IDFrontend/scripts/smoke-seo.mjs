@@ -178,7 +178,7 @@ assert(heroSource.includes('sk-festive-sticky-shell') && heroSource.includes('sk
 assert(heroSource.includes('onTabCategorySelect') && heroSource.includes('aria-pressed={active}'), 'Category tabs must switch the active theme and filter state');
 assert(heroSource.includes('sk-unified-quote-cta') && heroSource.includes('promoQuoteUrl'), 'Category-specific hero quotation must be available');
 assert(homeSource.includes('sk-subcategory-rail') && homeSource.includes('selectedSubcategory'), 'Image-led subcategories must stay functional');
-assert(homeSource.includes('sk-back-to-top') && homeSource.includes('window.scrollTo({ top: 0'), 'Back-to-top action required');
+assert(!homeSource.includes('sk-back-to-top') && !homeSource.includes('window.scrollTo({ top: 0'), 'No floating Back-to-top control should interrupt browsing');
 assert(homeSource.includes('CategoryProductCarousel') && homeSource.includes('whatsappNumber'), 'Three-across product and contact controls required');
 assert(festiveCss.includes('position:sticky') && festiveCss.includes('var(--sk-theme-bg)'), 'Category navigation and theme colours required');
 assert(index.includes('sk-boot-category-tabs'), 'Pre-React loading layout should reflect the new category navigation');
