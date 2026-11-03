@@ -32,6 +32,10 @@ export default function Home() {
   const [showBackToTop, setShowBackToTop] = useState(false);
   const deferredSearch = useDeferredValue(searchTerm);
   const loadMoreRef = useRef(null);
+  const footerRef = useRef(null);
+  const lastScrollRef = useRef(0);
+  const [scrollingDown, setScrollingDown] = useState(false);
+  const [footerVisible, setFooterVisible] = useState(false);
   const whatsappNumber = config.whatsappNumber || config.phone || '919372333633';
   const phoneNumber = seo.phone;
   const activeTheme = getCategoryTheme(selectedCategory?.name);
@@ -150,11 +154,38 @@ export default function Home() {
     return () => observer.disconnect();
   }, [focused, visibleCount, filteredProducts.length]);
 
+  // Mimic Myntra's mobile controls: slim down actions on downward browsing,
+  // restore them while scrolling up, and let the real footer own the bottom.
   useEffect(() => {
-    const onScroll = () => setShowBackToTop(window.scrollY > 620);
+    let scheduled = false;
+    const onScroll = () => {
+      if (scheduled) return;
+      scheduled = true;
+      window.requestAnimationFrame(() => {
+        const y = Math.max(0, window.scrollY);
+        setShowBackToTop(y > 620);
+        const delta = y - lastScrollRef.current;
+        if (Math.abs(delta) >= 12) {
+          setScrollingDown(y > 240 && delta > 0);
+          lastScrollRef.current = y;
+        }
+        scheduled = false;
+      });
+    };
+    lastScrollRef.current = window.scrollY;
     onScroll();
     window.addEventListener('scroll', onScroll, { passive: true });
     return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+
+  useEffect(() => {
+    const footer = footerRef.current;
+    if (!footer || typeof IntersectionObserver === 'undefined') return undefined;
+    const observer = new IntersectionObserver(([entry]) => {
+      setFooterVisible(Boolean(entry?.isIntersecting));
+    }, { threshold: 0, rootMargin: '0px 0px -40px 0px' });
+    observer.observe(footer);
+    return () => observer.disconnect();
   }, []);
 
   const handleTabCategorySelect = (category) => {
@@ -303,10 +334,11 @@ export default function Home() {
                 </section>
               ))}
               {groupedProducts.length > 6 && (
-                <div className="pb-1 text-center">
+                <div className="sk-feed-more-categories">
                   <button type="button" onClick={() => setShowAllCategories(v => !v)}
-                    className="inline-flex items-center gap-2 rounded-full border border-[#dfd0f0] bg-[#fffaff] px-4 py-2 text-xs font-extrabold text-[#785a9d] shadow-sm">
-                    {showAllCategories ? 'Show fewer categories' : 'Explore all ' + groupedProducts.length + ' categories'}
+                    aria-expanded={showAllCategories} aria-controls="sk-products"
+                    className="sk-feed-more-button">
+                    <span>{showAllCategories ? 'Show fewer categories' : 'Explore all ' + groupedProducts.length + ' categories'}</span>
                     <FaChevronDown aria-hidden="true" className={showAllCategories ? 'rotate-180' : ''} />
                   </button>
                 </div>
@@ -316,70 +348,67 @@ export default function Home() {
         </div>
 
       </main>
-      <ServiceGallery />
-        {videos.length > 0 && (
-          <section className="mx-auto mb-3 w-[calc(100%-28px)] max-w-md rounded-xl border border-[#dbe5d8] bg-[#fffaff] px-3 py-3 shadow-sm" aria-label="Design inspiration videos">
-            <button type="button" onClick={() => setShowVideos(v => !v)}
-              aria-expanded={showVideos}
-              className="flex w-full items-center justify-between gap-2 text-left text-xs font-extrabold text-[#594276]">
-              <span className="inline-flex items-center gap-2"><FaPlay aria-hidden="true" /> Watch our latest design videos</span>
-              <FaChevronDown aria-hidden="true" className={showVideos ? 'rotate-180' : ''} />
-            </button>
-            {showVideos && <div className="mt-3 space-y-3">{videos.slice(0, 2).map(video =>
-              <VideoFeedCard key={video._id} video={video} />)}</div>}
-          </section>
-        )}
-
-      <details id="sk-business-information" className="group mx-auto mb-5 mt-2 w-full max-w-[280px] px-2 open:max-w-2xl">
-        <summary className="flex cursor-pointer list-none items-center justify-between gap-2 rounded-xl border border-[#e4dbef] bg-[#fffaff] px-3 py-2.5 shadow-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-700">
-          <span>
-            <span className="block text-[10px] font-extrabold uppercase tracking-[.15em] text-[#8765a9]">MORE ABOUT US</span>
-            <span className="mt-1 block text-sm font-extrabold text-[#4b355f]">Services, FAQs & store information</span>
-            <span className="mt-1 hidden text-[11px] leading-4 text-[#8b7d96] group-open:block">Opening hours, directions and ordering guidance</span>
-          </span>
-          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#f3edfc] text-[#7a57a3] transition-transform group-open:rotate-180">
-            <FaChevronDown aria-hidden="true" />
-          </span>
-        </summary>
-        <div className="pt-2">
-          <section aria-label="SK Digital printing and invitation services" className="mx-auto my-3 max-w-2xl">
-            <div className="rounded-2xl border border-[#e8def1] bg-white p-5 shadow-sm">
-              <h2 className="text-lg font-bold text-[#4a355f]">Wedding cards, digital invitations & corporate gifts</h2>
-              <p className="mt-2 text-sm leading-6 text-[#796b86]">
-                Explore local design and print services from SANJU SK Digital – Mahi Creation, Gondia.
-              </p>
-              <nav aria-label="Explore SANJU SK Digital services" className="mt-4 grid gap-3 text-sm font-semibold text-[#694f87] sm:grid-cols-2">
-                <a href="/wedding-card-printing-gondia/" className="underline underline-offset-4">Wedding cards in Gondia</a>
-                <a href="/digital-wedding-invitations/" className="underline underline-offset-4">Digital invitations</a>
-                <a href="/corporate-gifting-gondia/" className="underline underline-offset-4">Corporate gifts</a>
-                <a href="/3d-led-sign-boards-gondia/" className="underline underline-offset-4">3D LED sign boards</a>
-                <a href="/custom-trophies-awards-gondia/" className="underline underline-offset-4">Trophies and awards</a>
-                <a href="/flex-banner-printing-gondia/" className="underline underline-offset-4">Flex banner printing</a>
-              </nav>
-            </div>
-          </section>
-          <section className="mx-auto mb-3 max-w-2xl" aria-label="How to order custom printing in Gondia">
-            <div className="rounded-2xl border border-[#e8deef] bg-white p-5 shadow-sm">
-              <h2 className="text-lg font-bold text-[#4a355f]">Custom printing, made easy</h2>
-              <p className="mt-2 text-sm leading-6 text-[#82758c]">
-                Browse our product photos, share your preferred design on WhatsApp, and tell us the quantity,
-                size and deadline. We'll prepare a quotation and confirm artwork before production.
-                Visit Krishnapura Ward, Gondia, or enquire from Nagpur and Balaghat.
-              </p>
-              <a href="/contact" className="mt-3 inline-block text-sm font-bold text-[#715496] underline">Contact our Gondia studio</a>
-            </div>
-          </section>
-          <FAQSection />
-          <LocalContactFooter />
+      <footer ref={footerRef} id="sk-store-footer" className="sk-store-footer" aria-label="SANJU SK Digital business information">
+        <div className="sk-store-footer-heading">
+          <div className="sk-store-footer-mark" aria-hidden="true">SK</div>
+          <div>
+            <p className="sk-store-footer-brand">SANJU SK Digital <span>· Mahi Creation</span></p>
+            <p className="sk-store-footer-caption">Personalised printing & gifting from Gondia, Maharashtra</p>
+          </div>
         </div>
-      </details>
-      {showBackToTop && (
+        <nav className="sk-footer-quick-links" aria-label="Popular printing services">
+          <a href="/wedding-card-printing-gondia/">Wedding cards</a>
+          <a href="/3d-led-sign-boards-gondia/">3D signs</a>
+          <a href="/custom-trophies-awards-gondia/">Awards</a>
+          <a href="/flex-banner-printing-gondia/">Flex printing</a>
+        </nav>
+        <details id="sk-business-information" className="sk-store-footer-details group">
+          <summary className="sk-store-footer-summary">
+            <span>More about SANJU SK Digital</span>
+            <FaChevronDown aria-hidden="true" className="sk-store-footer-chevron" />
+          </summary>
+          <div className="sk-store-footer-expanded">
+            <ServiceGallery />
+            {videos.length > 0 && (
+              <section className="sk-store-footer-video" aria-label="Latest design videos">
+                <button type="button" onClick={() => setShowVideos(v => !v)}
+                  aria-expanded={showVideos} className="sk-store-footer-video-toggle">
+                  <span><FaPlay aria-hidden="true" /> Watch recent design videos</span>
+                  <FaChevronDown aria-hidden="true" className={showVideos ? 'rotate-180' : ''} />
+                </button>
+                {showVideos && (
+                  <div className="sk-store-footer-video-list">
+                    {videos.slice(0, 2).map(video => <VideoFeedCard key={video._id} video={video} />)}
+                  </div>
+                )}
+              </section>
+            )}
+            <section className="sk-store-footer-info" aria-label="Services and ordering guidance">
+              <h2>Custom printing, made easy</h2>
+              <p>Browse our real product photos, share a design on WhatsApp and tell us the quantity,
+                size and deadline. We prepare a quotation and confirm the artwork before production.</p>
+              <p>Visit our Gondia studio or enquire from Nagpur, Balaghat and nearby cities.</p>
+              <a href="/contact">Contact our Gondia studio <FaArrowRight aria-hidden="true" /></a>
+            </section>
+            <FAQSection />
+            <LocalContactFooter />
+          </div>
+        </details>
+        <div className="sk-store-footer-bottom">
+          <span>Made with care in Gondia · Since 2006</span>
+          <button type="button" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
+            Back to top <FaArrowUp aria-hidden="true" />
+          </button>
+        </div>
+      </footer>
+      {showBackToTop && !footerVisible && (
         <button type="button" className="sk-back-to-top"
           onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} aria-label="Back to top">
           <FaArrowUp aria-hidden="true" /><span>Top</span>
         </button>
       )}
-      <MobileBottomNav whatsappNumber={whatsappNumber} phoneNumber={phoneNumber} />
+      <MobileBottomNav whatsappNumber={whatsappNumber} phoneNumber={phoneNumber}
+        compact={scrollingDown} atFooter={footerVisible} />
     </div>
   );
 }

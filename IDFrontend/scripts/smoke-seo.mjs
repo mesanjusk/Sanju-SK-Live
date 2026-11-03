@@ -154,7 +154,7 @@ assert(heroSource.includes('collections.map(item => renderTile(item))'), 'All co
 assert(festiveCss.includes('grid-auto-columns:44%'), 'Use video-style collection card sizing on mobile');
 assert(festiveCss.includes('/* Light-lavender homepage palette') && festiveCss.includes('#efe6fb'), 'Light lavender palette required across homepage');
 assert(homeSource.indexOf('<ServiceGallery />') > homeSource.indexOf('</main>'), 'Product catalog should precede signature services');
-assert(homeSource.includes('group-open:block'), 'Business information panel must remain compact until opened');
+assert(homeSource.includes('sk-store-footer-summary') && homeSource.includes('<details id="sk-business-information"'), 'Footer information must stay compact and expandable');
 
 assert(!heroSource.includes('Explore designs'), 'Hero Explore designs button must be removed');
 assert(heroSource.includes('ref={carouselRef}') && heroSource.includes('onTouchStart={pauseCarousel}'), 'Swipe carousel must pause on user input');
@@ -182,6 +182,13 @@ assert(homeSource.includes('sk-back-to-top') && homeSource.includes('window.scro
 assert(homeSource.includes('bulkQuoteUrl') && homeSource.includes('CategoryProductCarousel'), 'Bulk quote and three-across product carousels required');
 assert(festiveCss.includes('position:sticky') && festiveCss.includes('var(--sk-theme-bg)'), 'Category navigation and theme colours required');
 assert(index.includes('sk-boot-category-tabs'), 'Pre-React loading layout should reflect the new category navigation');
+const footerNavSource=readFileSync(new URL('../src/components/mobile/MobileBottomNav.jsx',import.meta.url),'utf8');
+assert(homeSource.includes('sk-store-footer') && homeSource.includes('footerRef') && homeSource.includes('IntersectionObserver'), 'Footer must detect when it enters the viewport');
+assert(homeSource.includes('scrollingDown') && homeSource.includes('setScrollingDown') && homeSource.includes('lastScrollRef'), 'Scroll direction must control quick actions');
+assert(homeSource.includes('More about SANJU SK Digital') && homeSource.includes('Back to top'), 'Myntra-style compact footer and return action required');
+assert(homeSource.includes('<ServiceGallery />') && homeSource.includes('<FAQSection />') && homeSource.includes('<LocalContactFooter />'), 'SEO services, FAQ and contact must survive inside disclosure');
+assert(footerNavSource.includes('compact = false') && footerNavSource.includes('atFooter = false') && footerNavSource.includes('sk-quick-more'), 'Dock must collapse while scrolling and hide near footer');
+assert(festiveCss.includes('/* Myntra-inspired tidy footer') && festiveCss.includes('.sk-store-footer-summary'), 'New mobile footer styles missing');
 const prevFetch=globalThis.fetch;
 function mockResponse(){
   return {
