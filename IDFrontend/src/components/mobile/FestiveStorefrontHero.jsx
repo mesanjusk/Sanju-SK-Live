@@ -6,6 +6,7 @@ import {
   FaTrophy, FaUser, FaWhatsapp
 } from 'react-icons/fa';
 import { optimizedImage } from '../../utils/media';
+import CatalogLoadingState from './CatalogLoadingState';
 import './festive-home.css';
 
 // These are service-page links only. Real catalog categories always take priority.
@@ -32,7 +33,8 @@ const iconFor = (name = '') => {
 
 function FestiveStorefrontHero({
   listings = [], categories = [], searchTerm = '', onSearchChange,
-  onCategorySelect, onTabCategorySelect, selectedCategory, theme, whatsappNumber, phoneNumber
+  onCategorySelect, onTabCategorySelect, selectedCategory, theme, whatsappNumber, phoneNumber,
+  catalogReady = true, catalogPending = false
 }) {
   // Join the catalog on the exact category ID saved in each listing.
   // Order collections by actual product count, then preserve the admin order.
@@ -40,7 +42,7 @@ function FestiveStorefrontHero({
     if (!categories.length) return SERVICE_LINKS.map((item) => ({ ...item, subtitle: 'Explore service' }));
     return categories.map((category, index) => {
       const ids = [category._id, category.category_uuid].filter(Boolean).map(String);
-      const products = listings.filter((product) => ids.includes(String(product.category?._id || product.category || '')));
+      const products = listings.filter((product) => ids.includes(String(product.category?._id || product.category?.category_uuid || product.category || '')));
       const image = imageOf(products.find((product) => imageOf(product))) || category.imageUrl;
       return {
         id: String(category._id || category.category_uuid || index),
@@ -66,7 +68,7 @@ function FestiveStorefrontHero({
 
   useEffect(() => {
     const track = carouselRef.current;
-    if (!track || collections.length < 2) return undefined;
+    if (!track || !catalogReady || collections.length < 2) return undefined;
     track.scrollLeft = 0;
 
     const reducedMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)');
@@ -104,7 +106,7 @@ function FestiveStorefrontHero({
       window.cancelAnimationFrame(frameId);
       observer?.disconnect();
     };
-  }, [collections.length]);
+  }, [collections.length, catalogReady]);
 
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef(null);
@@ -125,8 +127,12 @@ function FestiveStorefrontHero({
   const dialDigits = String(phoneNumber || '919372333633').replace(/\D/g, '');
   const dialHref = 'tel:' + (dialDigits.length === 10 ? '+91' + dialDigits : '+' + dialDigits);
   const displayPhone = dialDigits === '919372333633' ? '+91 93723 33633' : '+' + dialDigits;
-  const chooseCategory = (item) => onCategorySelect?.(item?.category || null);
-  const chooseTab = (item) => onTabCategorySelect?.(item?.category || null);
+  const chooseCategory = (item) => {
+    if (catalogReady) onCategorySelect?.(item?.category || null);
+  };
+  const chooseTab = (item) => {
+    if (catalogReady) onTabCategorySelect?.(item?.category || null);
+  };
   const themeTitle = selectedCategory?.name || 'Wedding cards, signage and printing';
   const promoMessage = 'Hi Sanju SK Digital, please send me options and a quotation for ' + themeTitle + '.';
   const promoQuoteUrl = 'https://wa.me/' + wa + '?text=' + encodeURIComponent(promoMessage);
@@ -179,8 +185,8 @@ function FestiveStorefrontHero({
             <div className="sk-festive-search sk-festive-header-search" role="search">
               <FaSearch className="sk-festive-search-icon" aria-hidden="true" />
               <input type="search" value={searchTerm} onChange={(event) => onSearchChange?.(event.target.value)}
-                onKeyDown={submitSearch} placeholder="Search products"
-                aria-label="Search SK Digital products" />
+                onKeyDown={submitSearch} placeholder={catalogReady ? 'Search products' : 'Preparing catalog…'}
+                disabled={!catalogReady} aria-label="Search SK Digital products" />
               {searchTerm && <button type="button" onClick={() => onSearchChange?.('')}
                 aria-label="Clear search"><FaTimes /></button>}
             </div>
@@ -196,7 +202,7 @@ function FestiveStorefrontHero({
                   className="sk-header-overflow-menu">
                   {[
                     { to: '/', label: 'Home', Icon: FaHome },
-                    { to: '/allCategories', label: 'Explore categories', Icon: FaThLarge },
+                    ...(catalogReady ? [{ to: '/allCategories', label: 'Explore categories', Icon: FaThLarge }] : []),
                     { to: '/contact', label: 'Contact us', Icon: FaPhoneAlt },
                     { to: '/favorites', label: 'Saved designs', Icon: FaHeart },
                     { to: '/profile', label: 'My profile', Icon: FaUser },
@@ -217,6 +223,15 @@ function FestiveStorefrontHero({
             </a>
           </div>
         </header>
+        {!catalogReady ? (
+          <div className="sk-shopping-tabs sk-shopping-loading-tabs sk-festive-container"
+            aria-label="Preparing categories" aria-busy="true">
+            {Array.from({ length: 5 }, (_, index) =>
+              <span key={index} className="sk-shopping-loading-tab" aria-hidden="true">
+                <i className="sk-shopping-loading-tab-icon"/><i className="sk-shopping-loading-tab-label"/>
+              </span>)}
+          </div>
+        ) : (
         <nav className="sk-shopping-tabs sk-festive-container" aria-label="Shop by category">
           <button type="button" className={'sk-shopping-tab' + (!selectedCategory ? ' is-active' : '')}
             aria-pressed={!selectedCategory} onClick={() => chooseTab(null)}>
@@ -236,6 +251,7 @@ function FestiveStorefrontHero({
                 </button>;
           })}
         </nav>
+        )}
       </div>
       <div className="sk-festive-dark">
         <section className="sk-festive-showcase sk-festive-container" aria-labelledby="sk-festive-title">
@@ -261,7 +277,7 @@ function FestiveStorefrontHero({
             <span className="sk-festive-art-sparkle sk-festive-art-sparkle-a">✧</span>
             <span className="sk-festive-art-sparkle sk-festive-art-sparkle-b">✦</span>
             <div className="sk-festive-art-card">
-              {featured?.image ? <img src={featured.image} alt="" width="240" height="280"
+              {catalogReady && featured?.image ? <img src={featured.image} alt="" width="240" height="280"
                 fetchPriority="high" decoding="async" /> : <FaRegEnvelope />}
             </div>
           </div>
@@ -271,15 +287,17 @@ function FestiveStorefrontHero({
           <div className="sk-festive-picks-heading">
             <h2>Discover our collections</h2><span>Swipe to explore <FaArrowRight aria-hidden="true" /></span>
           </div>
-          <div ref={carouselRef} className="sk-festive-tiles" role="region"
+          {catalogReady ? <div ref={carouselRef} className="sk-festive-tiles" role="region"
             aria-label="Featured collections; swipe left or right to browse"
             onTouchStart={pauseCarousel} onPointerDown={pauseCarousel}
             onWheel={pauseCarousel} onKeyDown={pauseCarousel}
             onFocusCapture={pauseCarousel}>
             {collections.map(item => renderTile(item))}
             {collections.length > 1 && collections.map(item => renderTile(item, true))}
-          </div>
-          <div className="sk-festive-carousel-dots" aria-hidden="true" />
+          </div> : (
+            <CatalogLoadingState compact error={false} />
+          )}
+          {catalogReady && <div className="sk-festive-carousel-dots" aria-hidden="true" />}
         </section>
 
         <div className="sk-festive-scallop" aria-hidden="true" />

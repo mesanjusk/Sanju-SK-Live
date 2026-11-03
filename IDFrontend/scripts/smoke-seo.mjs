@@ -236,6 +236,23 @@ for(const guide of categoryGuideData) {
   const path=guide.existingUrl || '/categories/'+guide.slug+'/';
   assert(index.includes('href="'+path+'"'),guide.slug+' missing homepage crawlable internal link');
 }
+
+const loadingComponentSource=readFileSync(new URL('../src/components/mobile/CatalogLoadingState.jsx',import.meta.url),'utf8');
+assert(homeSource.includes("catalogStatus") && homeSource.includes("catalogReady") && homeSource.includes("catalogPending") && homeSource.includes("catalogFailed"),
+  'Category and listing endpoints must track separate loading outcomes');
+assert(homeSource.includes("loadCatalogPart('listings'") && homeSource.includes("loadCatalogPart('categories'"),
+  'Loading state must wait for the two live catalog resources');
+assert(homeSource.includes("if (!catalogReady) return;"), 'Category actions must be gated until the catalog is ready');
+assert(homeSource.includes('<CatalogLoadingState error={catalogFailed && !catalogPending} onRetry={retryCatalog} />'),
+  'Show printing animation during pending state and manual retry after failure');
+assert(heroSource.includes('disabled={!catalogReady}') && heroSource.includes('sk-shopping-loading-tabs'),
+  'Search and category tabs must be non-interactive while waiting for catalog data');
+assert(heroSource.includes('<CatalogLoadingState compact error={false} />') && heroSource.includes('catalogReady && <div'),
+  'Loading animation must replace the collection carousel while metadata or products are pending');
+assert(loadingComponentSource.includes('sk-print-press') && loadingComponentSource.includes('sk-print-paper') &&
+  loadingComponentSource.includes('Try loading again'), 'Loader must use printing motif and an accessible retry');
+assert(festiveCss.includes('@keyframes sk-paper-print') && festiveCss.includes('@media (prefers-reduced-motion:reduce)'),
+  'CSS-only print animation must respect reduced-motion settings');
 const prevFetch=globalThis.fetch;
 function mockResponse(){
   return {
