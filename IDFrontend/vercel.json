@@ -60,6 +60,14 @@
       "destination": "/api/product-seo?id=:id"
     },
     {
+      "source": "/categories/:slug",
+      "destination": "/categories/:slug/index.html"
+    },
+    {
+      "source": "/categories/:slug/",
+      "destination": "/categories/:slug/index.html"
+    },
+    {
       "source": "/product-view/:id",
       "destination": "/"
     },

@@ -1,8 +1,8 @@
 import { NavLink } from 'react-router-dom';
 import { FaPhoneAlt, FaHeart, FaWhatsapp } from 'react-icons/fa';
 
-// A stable, Myntra-style bottom bar: WhatsApp, Call and Favourites stay accessible
-// while shopping and while expanding the information footer.
+// Compact floating pill, with the existing scroll-aware visibility behaviour.
+ // The footer is no longer occupied by a full-width fixed navigation bar.
 export default function MobileBottomNav({ whatsappNumber = '919372333633', phoneNumber = '+919372333633', visible = true }) {
   const wa = String(whatsappNumber).replace(/\D/g, '') || '919372333633';
   const digits = String(phoneNumber).replace(/\D/g, '') || '919372333633';
@@ -10,7 +10,7 @@ export default function MobileBottomNav({ whatsappNumber = '919372333633', phone
   const chat = 'https://wa.me/' + wa + '?text=' +
     encodeURIComponent('Hi Sanju SK Digital, I would like to enquire about your products.');
   return (
-    <nav className={'sk-mobile-bottom-nav' + (visible ? ' is-visible' : ' is-hidden')}
+    <nav className={'sk-mobile-bottom-nav sk-floating-actions' + (visible ? ' is-visible' : ' is-hidden')}
       aria-label="Contact and saved designs" aria-hidden={!visible}>
       <div className="sk-mobile-bottom-inner">
         <a href={chat} target="_blank" rel="noopener noreferrer"
