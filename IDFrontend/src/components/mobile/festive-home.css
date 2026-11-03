@@ -1164,3 +1164,77 @@
 @media (prefers-reduced-motion:reduce) {
   .sk-festive-home .sk-mobile-bottom-nav.sk-floating-actions { transition:none; }
 }
+
+
+/* Print-themed, CSS-only waiting state. Keep the catalog non-interactive until
+   BOTH products and category metadata have loaded. No external image or JS loop. */
+.sk-catalog-loading {
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:10px;min-height:230px;
+  margin:12px auto;padding:20px 16px;
+  border:1px solid #e4d6ef;border-radius:21px;
+  background:linear-gradient(135deg,#fbf7ff,#eee3f8 65%,#f7edff);
+  color:#5f447d;text-align:center;
+  box-shadow:0 5px 23px #76549a13;
+}
+.sk-catalog-loading--compact { min-height:194px;margin:0;padding:9px; }
+.sk-catalog-loading-copy strong {display:block;font-size:14px;line-height:1.2;color:#51366f;}
+.sk-catalog-loading-copy p {margin:5px auto 0;max-width:285px;font-size:11px;line-height:1.5;color:#7e6796;}
+.sk-printing-scene {position:relative;width:130px;height:112px;flex:0 0 112px;}
+.sk-print-press {
+  position:absolute;top:30px;left:15px;width:100px;height:56px;
+  border:3px solid #785ba3;border-radius:12px 12px 8px 8px;
+  background:linear-gradient(#bda5dc,#9977c3);
+  box-shadow:0 6px 0 #d0bee7,0 10px 15px #6d4b9623;
+}
+.sk-print-press-top {position:absolute;top:5px;left:8px;right:8px;height:18px;
+  border-radius:5px;background:#fdf8ff;box-shadow:inset 0 0 0 1px #dacbe9;
+  display:flex;align-items:center;justify-content:center;}
+.sk-print-press-mark {font-size:12px;font-weight:900;color:#7757a2;letter-spacing:.1em;}
+.sk-print-press-slot {position:absolute;left:13px;right:13px;bottom:7px;height:7px;
+  border-radius:6px;background:#6a4a8c;z-index:3;}
+.sk-print-paper {
+  position:absolute;top:27px;left:27px;width:42px;height:52px;z-index:2;
+  display:flex;flex-direction:column;align-items:center;gap:4px;
+  padding:7px 4px;border:2px solid #c8a7d3;border-radius:3px;background:#fffaf0;
+  box-shadow:0 3px 6px #4b37662c;
+  animation:sk-paper-print 3.1s ease-in-out infinite;
+}
+.sk-print-paper-emblem {font-size:16px;color:#b8924f;}
+.sk-print-paper-line {display:block;width:24px;height:3px;border-radius:4px;background:#d8bfa7;}
+.sk-print-paper-line-short {width:17px;}
+.sk-print-press-foot {position:absolute;bottom:-9px;left:12px;right:12px;height:7px;border-radius:0 0 6px 6px;background:#8064a7;}
+.sk-print-spark {position:absolute;z-index:3;font-size:19px;color:#c4a06a;
+  animation:sk-print-sparkle 2.3s ease-in-out infinite alternate;}
+.sk-print-spark-one {left:3px;top:23px;}
+.sk-print-spark-two {right:2px;top:6px;animation-delay:.7s;}
+.sk-catalog-progress {display:flex;justify-content:center;gap:5px;margin-top:10px;}
+.sk-catalog-progress i {display:block;width:6px;height:6px;border-radius:50%;background:#8b68b5;
+  animation:sk-print-dot 1.2s ease-in-out infinite alternate;}
+.sk-catalog-progress i:nth-child(2){animation-delay:.2s;}
+.sk-catalog-progress i:nth-child(3){animation-delay:.4s;}
+.sk-catalog-retry {
+  margin-top:12px;padding:9px 13px;border-radius:999px;
+  border:1px solid #c7afd9;background:#7653a7;color:white;font-size:12px;font-weight:800;
+}
+.sk-catalog-retry:focus-visible {outline:2px solid #553678;outline-offset:3px;}
+.sk-catalog-loading--compact .sk-printing-scene {transform:scale(.84);margin-bottom:-12px;}
+.sk-catalog-loading--compact .sk-catalog-loading-copy strong {font-size:12px;}
+.sk-catalog-loading--compact .sk-catalog-loading-copy p {font-size:10px;}
+.sk-shopping-loading-tabs {pointer-events:none;overflow:hidden;}
+.sk-shopping-loading-tab {flex:0 0 74px;display:flex;flex-direction:column;align-items:center;
+  justify-content:center;gap:7px;min-height:52px;}
+.sk-shopping-loading-tab-icon {width:19px;height:19px;border-radius:7px;background:#bca9d4;}
+.sk-shopping-loading-tab-label {width:51px;height:7px;border-radius:6px;background:#c7b8dd;}
+.sk-shopping-loading-tab-icon,.sk-shopping-loading-tab-label {
+  animation:sk-loading-ink 1.5s ease-in-out infinite alternate;
+}
+.sk-shopping-loading-tab:nth-child(2n) i {animation-delay:.27s;}
+@keyframes sk-paper-print {0%,18%{transform:translateY(0);opacity:.4}45%,75%{transform:translateY(28px);opacity:1}100%{transform:translateY(0);opacity:.4}}
+@keyframes sk-print-sparkle {from{opacity:.3;transform:scale(.7)}to{opacity:1;transform:scale(1.1)}}
+@keyframes sk-print-dot {from{opacity:.25;transform:scale(.75)}to{opacity:1;transform:scale(1.12)}}
+@keyframes sk-loading-ink {from{opacity:.35}to{opacity:1}}
+@media (prefers-reduced-motion:reduce) {
+  .sk-print-paper,.sk-print-spark,.sk-catalog-progress i,
+  .sk-shopping-loading-tab-icon,.sk-shopping-loading-tab-label {animation:none;opacity:1;}
+}

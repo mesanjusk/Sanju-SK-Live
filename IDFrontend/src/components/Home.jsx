@@ -10,7 +10,7 @@ import CategoryProductCarousel from './mobile/CategoryProductCarousel';
 import CategorySeoBlurb from './mobile/CategorySeoBlurb';
 import VideoFeedCard from './mobile/VideoFeedCard';
 import MobileBottomNav from './mobile/MobileBottomNav';
-import LoadingSkeleton from './common/LoadingSkeleton';
+import CatalogLoadingState from './mobile/CatalogLoadingState';
 import FAQSection from './FAQSection';
 import LocalContactFooter from './LocalContactFooter';
 import ServiceGallery from './ServiceGallery';
@@ -23,7 +23,10 @@ export default function Home() {
   const [subcategories, setSubcategories] = useState([]);
   const [videos, setVideos] = useState([]);
   const [config, setConfig] = useState({});
-  const [loading, setLoading] = useState(true);
+  // Load categories and products independently, but do not expose clickable
+  // category controls until both API responses are ready.
+  const [catalogStatus, setCatalogStatus] = useState({ listings: 'loading', categories: 'loading' });
+  const [catalogRetry, setCatalogRetry] = useState(0);
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [selectedSubcategory, setSelectedSubcategory] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
@@ -46,24 +49,32 @@ export default function Home() {
 
   useEffect(() => {
     let active = true;
-    let retryTimer;
-    const loadProducts = async () => {
-      try {
-        const response = await api.get('/api/listings', { timeout: 12000 });
-        if (!active) return;
-        const rows = Array.isArray(response.data) ? response.data : response.data?.result;
-        if (!Array.isArray(rows)) throw new Error('Unexpected product API format');
-        setListings(rows);
-      } catch {
-        if (active) retryTimer = setTimeout(loadProducts, 20000);
-      } finally {
-        if (active) setLoading(false);
+    const pendingTimers = [];
+    const pause = ms => new Promise(resolve => {
+      const timer = window.setTimeout(resolve, ms);
+      pendingTimers.push(timer);
+    });
+    // Render's cold-start can delay either endpoint. One bounded retry avoids
+    // treating slow backend responses as empty categories or zero products.
+    const loadCatalogPart = async (key, url, setRows) => {
+      for (let attempt = 0; attempt < 2; attempt += 1) {
+        try {
+          const response = await api.get(url, { timeout: 14000 });
+          if (!active) return;
+          const rows = Array.isArray(response.data) ? response.data : response.data?.result;
+          if (!Array.isArray(rows)) throw new Error('Unexpected catalog API response');
+          setRows(rows);
+          setCatalogStatus(previous => ({ ...previous, [key]: 'ready' }));
+          return;
+        } catch {
+          if (!active) return;
+          if (attempt === 0) await pause(1600);
+          else setCatalogStatus(previous => ({ ...previous, [key]: 'error' }));
+        }
       }
     };
-    loadProducts();
-    api.get('/api/categories', { timeout: 12000 })
-      .then(res => { if (active) setCategories(Array.isArray(res.data) ? res.data : res.data?.result || []); })
-      .catch(() => {});
+    loadCatalogPart('listings', '/api/listings', setListings);
+    loadCatalogPart('categories', '/api/categories', setCategories);
     api.get('/api/subcategories', { timeout: 12000 })
       .then(res => { if (active) setSubcategories(Array.isArray(res.data) ? res.data : res.data?.result || []); })
       .catch(() => {});
@@ -73,8 +84,21 @@ export default function Home() {
     api.get('/api/videos', { timeout: 12000 })
       .then(res => { if (active) setVideos(Array.isArray(res.data) ? res.data : res.data?.result || []); })
       .catch(() => {});
-    return () => { active = false; clearTimeout(retryTimer); };
-  }, []);
+    return () => {
+      active = false;
+      pendingTimers.forEach(window.clearTimeout);
+    };
+  }, [catalogRetry]);
+
+  const catalogReady = catalogStatus.listings === 'ready' && catalogStatus.categories === 'ready';
+  const catalogFailed = catalogStatus.listings === 'error' || catalogStatus.categories === 'error';
+  const catalogPending = !catalogReady && !catalogFailed;
+  const retryCatalog = () => {
+    setSelectedCategory(null);
+    setSelectedSubcategory(null);
+    setCatalogStatus({ listings: 'loading', categories: 'loading' });
+    setCatalogRetry(value => value + 1);
+  };
 
   const categoryById = useMemo(() => {
     const index = new Map();
@@ -188,6 +212,7 @@ export default function Home() {
   }, []);
 
   const handleTabCategorySelect = (category) => {
+    if (!catalogReady) return;
     setSearchTerm('');
     setSelectedSubcategory(null);
     setSelectedCategory(category || null);
@@ -199,6 +224,7 @@ export default function Home() {
     }));
   };
   const handleCategorySelect = (category) => {
+    if (!catalogReady) return;
     setSearchTerm('');
     setSelectedSubcategory(null);
     setSelectedCategory(prev => category && prev && idOf(prev) === idOf(category) ? null : category);
@@ -210,6 +236,7 @@ export default function Home() {
     setSelectedSubcategory(null);
   };
   const showCategory = (category) => {
+    if (!catalogReady) return;
     setSearchTerm('');
     setSelectedSubcategory(null);
     setSelectedCategory(category);
@@ -221,6 +248,8 @@ export default function Home() {
       <FestiveStorefrontHero
         listings={listings}
         categories={categories}
+        catalogReady={catalogReady}
+        catalogPending={catalogPending}
         searchTerm={searchTerm}
         onSearchChange={handleSearchChange}
         selectedCategory={selectedCategory}
@@ -263,10 +292,8 @@ export default function Home() {
         )}
 
         <div id="sk-products" className="scroll-mt-4 px-4 pb-6 sm:px-6">
-          {loading && listings.length === 0 ? (
-            <section aria-label="Loading collections" className="mt-4 grid grid-cols-3 gap-2 sm:gap-3">
-              {[0, 1, 2, 3, 4, 5].map(key => <LoadingSkeleton key={key} />)}
-            </section>
+          {!catalogReady ? (
+            <CatalogLoadingState error={catalogFailed && !catalogPending} onRetry={retryCatalog} />
           ) : focused ? (
             <section aria-labelledby="focused-products-heading" className="mt-5">
               <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
