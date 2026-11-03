@@ -32,10 +32,6 @@ export default function Home() {
   const [showBackToTop, setShowBackToTop] = useState(false);
   const deferredSearch = useDeferredValue(searchTerm);
   const loadMoreRef = useRef(null);
-  const footerRef = useRef(null);
-  const lastScrollRef = useRef(0);
-  const [scrollingDown, setScrollingDown] = useState(false);
-  const [footerVisible, setFooterVisible] = useState(false);
   const whatsappNumber = config.whatsappNumber || config.phone || '919372333633';
   const phoneNumber = seo.phone;
   const activeTheme = getCategoryTheme(selectedCategory?.name);
@@ -45,8 +41,6 @@ export default function Home() {
     '--sk-theme-ink': activeTheme.ink,
     '--sk-theme-soft': activeTheme.soft,
   };
-  const bulkQuoteUrl = 'https://wa.me/' + String(whatsappNumber).replace(/\D/g, '') +
-    '?text=' + encodeURIComponent('Hi Sanju SK Digital, please share a bulk order quotation and production timeline.');
 
   useEffect(() => {
     let active = true;
@@ -154,38 +148,11 @@ export default function Home() {
     return () => observer.disconnect();
   }, [focused, visibleCount, filteredProducts.length]);
 
-  // Mimic Myntra's mobile controls: slim down actions on downward browsing,
-  // restore them while scrolling up, and let the real footer own the bottom.
   useEffect(() => {
-    let scheduled = false;
-    const onScroll = () => {
-      if (scheduled) return;
-      scheduled = true;
-      window.requestAnimationFrame(() => {
-        const y = Math.max(0, window.scrollY);
-        setShowBackToTop(y > 620);
-        const delta = y - lastScrollRef.current;
-        if (Math.abs(delta) >= 12) {
-          setScrollingDown(y > 240 && delta > 0);
-          lastScrollRef.current = y;
-        }
-        scheduled = false;
-      });
-    };
-    lastScrollRef.current = window.scrollY;
+    const onScroll = () => setShowBackToTop(window.scrollY > 620);
     onScroll();
     window.addEventListener('scroll', onScroll, { passive: true });
     return () => window.removeEventListener('scroll', onScroll);
-  }, []);
-
-  useEffect(() => {
-    const footer = footerRef.current;
-    if (!footer || typeof IntersectionObserver === 'undefined') return undefined;
-    const observer = new IntersectionObserver(([entry]) => {
-      setFooterVisible(Boolean(entry?.isIntersecting));
-    }, { threshold: 0, rootMargin: '0px 0px -40px 0px' });
-    observer.observe(footer);
-    return () => observer.disconnect();
   }, []);
 
   const handleTabCategorySelect = (category) => {
@@ -218,7 +185,7 @@ export default function Home() {
   };
 
   return (
-    <div className={'sk-storefront sk-festive-home sk-theme-' + activeTheme.key + ' min-h-screen pb-24'} style={merchStyles}>
+    <div className={'sk-storefront sk-festive-home sk-theme-' + activeTheme.key + ' min-h-screen pb-0'} style={merchStyles}>
       <FestiveStorefrontHero
         listings={listings}
         categories={categories}
@@ -327,10 +294,6 @@ export default function Home() {
                     )}
                   </div>
                   <CategoryProductCarousel section={section} whatsappNumber={whatsappNumber} />
-                  {section.products.length >= 3 && (
-                    <a href={bulkQuoteUrl} target="_blank" rel="noopener noreferrer"
-                      className="sk-merch-bulk-link">Need multiple pieces? Request a bulk quote <FaArrowRight aria-hidden="true" /></a>
-                  )}
                 </section>
               ))}
               {groupedProducts.length > 6 && (
@@ -338,7 +301,7 @@ export default function Home() {
                   <button type="button" onClick={() => setShowAllCategories(v => !v)}
                     aria-expanded={showAllCategories} aria-controls="sk-products"
                     className="sk-feed-more-button">
-                    <span>{showAllCategories ? 'Show fewer categories' : 'Explore all ' + groupedProducts.length + ' categories'}</span>
+                    <span>{showAllCategories ? 'Show fewer categories' : 'View all ' + groupedProducts.length + ' categories'}</span>
                     <FaChevronDown aria-hidden="true" className={showAllCategories ? 'rotate-180' : ''} />
                   </button>
                 </div>
@@ -348,7 +311,13 @@ export default function Home() {
         </div>
 
       </main>
-      <footer ref={footerRef} id="sk-store-footer" className="sk-store-footer" aria-label="SANJU SK Digital business information">
+      <footer id="sk-store-footer" className="sk-store-footer" aria-label="SANJU SK Digital business information">
+        <details id="sk-business-information" className="sk-store-footer-details group">
+          <summary className="sk-store-footer-summary">
+            <span>More about SANJU SK Digital</span>
+            <FaChevronDown aria-hidden="true" className="sk-store-footer-chevron" />
+          </summary>
+          <div className="sk-store-footer-expanded">
         <div className="sk-store-footer-heading">
           <div className="sk-store-footer-mark" aria-hidden="true">SK</div>
           <div>
@@ -362,12 +331,6 @@ export default function Home() {
           <a href="/custom-trophies-awards-gondia/">Awards</a>
           <a href="/flex-banner-printing-gondia/">Flex printing</a>
         </nav>
-        <details id="sk-business-information" className="sk-store-footer-details group">
-          <summary className="sk-store-footer-summary">
-            <span>More about SANJU SK Digital</span>
-            <FaChevronDown aria-hidden="true" className="sk-store-footer-chevron" />
-          </summary>
-          <div className="sk-store-footer-expanded">
             <ServiceGallery />
             {videos.length > 0 && (
               <section className="sk-store-footer-video" aria-label="Latest design videos">
@@ -392,23 +355,22 @@ export default function Home() {
             </section>
             <FAQSection />
             <LocalContactFooter />
-          </div>
-        </details>
         <div className="sk-store-footer-bottom">
           <span>Made with care in Gondia · Since 2006</span>
           <button type="button" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
             Back to top <FaArrowUp aria-hidden="true" />
           </button>
         </div>
+          </div>
+        </details>
       </footer>
-      {showBackToTop && !footerVisible && (
+      {showBackToTop && (
         <button type="button" className="sk-back-to-top"
           onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} aria-label="Back to top">
           <FaArrowUp aria-hidden="true" /><span>Top</span>
         </button>
       )}
-      <MobileBottomNav whatsappNumber={whatsappNumber} phoneNumber={phoneNumber}
-        compact={scrollingDown} atFooter={footerVisible} />
+      <MobileBottomNav whatsappNumber={whatsappNumber} phoneNumber={phoneNumber} />
     </div>
   );
 }
