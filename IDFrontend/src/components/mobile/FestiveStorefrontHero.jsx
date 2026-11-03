@@ -2,7 +2,7 @@ import { memo, useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
   FaArrowRight, FaBoxOpen, FaEllipsisV, FaGift, FaHeart, FaHome, FaLightbulb,
-  FaPalette, FaPhoneAlt, FaPrint, FaRegEnvelope, FaSearch, FaThLarge, FaTimes,
+  FaPhoneAlt, FaPrint, FaRegEnvelope, FaSearch, FaThLarge, FaTimes,
   FaTrophy, FaUser, FaWhatsapp
 } from 'react-icons/fa';
 import { optimizedImage } from '../../utils/media';
@@ -125,13 +125,9 @@ function FestiveStorefrontHero({
   const dialDigits = String(phoneNumber || '919372333633').replace(/\D/g, '');
   const dialHref = 'tel:' + (dialDigits.length === 10 ? '+91' + dialDigits : '+' + dialDigits);
   const displayPhone = dialDigits === '919372333633' ? '+91 93723 33633' : '+' + dialDigits;
-  const quoteUrl = 'https://wa.me/' + wa + '?text=' +
-    encodeURIComponent('Hello SANJU SK Digital! I would like a custom printing or gifting quotation.');
-
   const chooseCategory = (item) => onCategorySelect?.(item?.category || null);
   const chooseTab = (item) => onTabCategorySelect?.(item?.category || null);
-  const themeTitle = selectedCategory?.name || 'Custom printing in Gondia';
-  const promotionalText = theme?.promo || 'Custom-made for moments that matter';
+  const themeTitle = selectedCategory?.name || 'Wedding cards, signage and printing';
   const promoMessage = 'Hi Sanju SK Digital, please send me options and a quotation for ' + themeTitle + '.';
   const promoQuoteUrl = 'https://wa.me/' + wa + '?text=' + encodeURIComponent(promoMessage);
   const submitSearch = (event) => {
@@ -256,6 +252,9 @@ function FestiveStorefrontHero({
                 <p>Laser-cut wedding invitations, 3D LED acrylic signs, corporate awards and banners — designed for Gondia and delivered across nearby cities.</p>
               </>
             )}
+            <a className="sk-unified-quote-cta" href={promoQuoteUrl} target="_blank" rel="noopener noreferrer">
+              Get a custom quote <FaArrowRight aria-hidden="true" />
+            </a>
           </div>
           <div className="sk-festive-showcase-art" aria-hidden="true">
             <span className="sk-festive-orb" />
@@ -267,31 +266,6 @@ function FestiveStorefrontHero({
             </div>
           </div>
         </section>
-
-        <section className="sk-merch-feature sk-festive-container" aria-label="Featured custom work">
-          <div className="sk-merch-feature-inner">
-            <div className="sk-merch-feature-copy">
-              <span className="sk-merch-feature-kicker">DESIGNED & MADE IN GONDIA</span>
-              <h2>{promotionalText}</h2>
-              <p>{selectedCategory ? theme?.strapline : 'Wedding invitations, custom signage, awards and printing — tailored to your brief.'}</p>
-              <a href={promoQuoteUrl} target="_blank" rel="noopener noreferrer">
-                Request a custom quote <FaArrowRight aria-hidden="true" />
-              </a>
-            </div>
-            <div className="sk-merch-feature-visual" aria-hidden="true">
-              {featured?.image ? <img src={featured.image} alt="" loading="lazy" decoding="async" width="230" height="250" />
-                : <FaPalette />}
-            </div>
-          </div>
-        </section>
-        <div className="sk-festive-quote sk-festive-container">
-          <a href={quoteUrl} target="_blank" rel="noopener noreferrer"
-            className="sk-festive-quote-bar">
-            <span className="sk-festive-quote-icon"><FaPalette aria-hidden="true" /></span>
-            <span><strong>Have something special in mind?</strong><small>Let's create it together · Get a quote</small></span>
-            <FaArrowRight className="sk-festive-quote-arrow" aria-hidden="true" />
-          </a>
-        </div>
 
         <section className="sk-festive-picks sk-festive-container" aria-label="Shop by category">
           <div className="sk-festive-picks-heading">
