@@ -1,6 +1,6 @@
 import { useDeferredValue, useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { FaArrowRight, FaArrowUp, FaChevronDown, FaPlay, FaThLarge } from 'react-icons/fa';
+import { FaArrowRight, FaChevronDown, FaPlay, FaThLarge } from 'react-icons/fa';
 import api from '../api';
 import seo from '../config/local-seo.json';
 import FestiveStorefrontHero from './mobile/FestiveStorefrontHero';
@@ -29,14 +29,11 @@ export default function Home() {
   const [visibleCount, setVisibleCount] = useState(12);
   const [showAllCategories, setShowAllCategories] = useState(false);
   const [showVideos, setShowVideos] = useState(false);
-  const [showBackToTop, setShowBackToTop] = useState(false);
+  const [showBottomNav, setShowBottomNav] = useState(true);
   const deferredSearch = useDeferredValue(searchTerm);
   const loadMoreRef = useRef(null);
-  const footerRef = useRef(null);
-  const lastScrollRef = useRef(0);
-  const [scrollingDown, setScrollingDown] = useState(false);
-  const [footerVisible, setFooterVisible] = useState(false);
-  const whatsappNumber = config.whatsappNumber || config.phone || '919372333633';
+  // All public enquiry links use the verified Gondia business WhatsApp number.
+  const whatsappNumber = String(seo.phone || '+919372333633').replace(/\D/g, '');
   const phoneNumber = seo.phone;
   const activeTheme = getCategoryTheme(selectedCategory?.name);
   const merchStyles = {
@@ -45,8 +42,6 @@ export default function Home() {
     '--sk-theme-ink': activeTheme.ink,
     '--sk-theme-soft': activeTheme.soft,
   };
-  const bulkQuoteUrl = 'https://wa.me/' + String(whatsappNumber).replace(/\D/g, '') +
-    '?text=' + encodeURIComponent('Hi Sanju SK Digital, please share a bulk order quotation and production timeline.');
 
   useEffect(() => {
     let active = true;
@@ -154,38 +149,41 @@ export default function Home() {
     return () => observer.disconnect();
   }, [focused, visibleCount, filteredProducts.length]);
 
-  // Mimic Myntra's mobile controls: slim down actions on downward browsing,
-  // restore them while scrolling up, and let the real footer own the bottom.
+  // Scroll-aware shopping bar: disappears as customers browse down, reappears
+  // as they scroll up or approach the start/end. No floating More/Top buttons.
   useEffect(() => {
-    let scheduled = false;
-    const onScroll = () => {
-      if (scheduled) return;
-      scheduled = true;
-      window.requestAnimationFrame(() => {
-        const y = Math.max(0, window.scrollY);
-        setShowBackToTop(y > 620);
-        const delta = y - lastScrollRef.current;
-        if (Math.abs(delta) >= 12) {
-          setScrollingDown(y > 240 && delta > 0);
-          lastScrollRef.current = y;
-        }
-        scheduled = false;
-      });
+    let previousY = Math.max(0, window.scrollY);
+    let directionTravel = 0;
+    let animationFrame = 0;
+    const update = () => {
+      animationFrame = 0;
+      const y = Math.max(0, window.scrollY);
+      const delta = y - previousY;
+      previousY = y;
+      if (Math.sign(delta) !== Math.sign(directionTravel)) directionTravel = 0;
+      directionTravel += delta;
+      const bottom = Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
+      if (y < 150 || y >= bottom - 110) {
+        directionTravel = 0;
+        setShowBottomNav(true);
+      } else if (directionTravel > 40) {
+        directionTravel = 0;
+        setShowBottomNav(false);
+      } else if (directionTravel < -24) {
+        directionTravel = 0;
+        setShowBottomNav(true);
+      }
     };
-    lastScrollRef.current = window.scrollY;
-    onScroll();
+    const onScroll = () => {
+      if (!animationFrame) animationFrame = window.requestAnimationFrame(update);
+    };
     window.addEventListener('scroll', onScroll, { passive: true });
-    return () => window.removeEventListener('scroll', onScroll);
-  }, []);
-
-  useEffect(() => {
-    const footer = footerRef.current;
-    if (!footer || typeof IntersectionObserver === 'undefined') return undefined;
-    const observer = new IntersectionObserver(([entry]) => {
-      setFooterVisible(Boolean(entry?.isIntersecting));
-    }, { threshold: 0, rootMargin: '0px 0px -40px 0px' });
-    observer.observe(footer);
-    return () => observer.disconnect();
+    window.addEventListener('resize', onScroll, { passive: true });
+    return () => {
+      if (animationFrame) window.cancelAnimationFrame(animationFrame);
+      window.removeEventListener('scroll', onScroll);
+      window.removeEventListener('resize', onScroll);
+    };
   }, []);
 
   const handleTabCategorySelect = (category) => {
@@ -218,7 +216,7 @@ export default function Home() {
   };
 
   return (
-    <div className={'sk-storefront sk-festive-home sk-theme-' + activeTheme.key + ' min-h-screen pb-24'} style={merchStyles}>
+    <div className={'sk-storefront sk-festive-home sk-theme-' + activeTheme.key + ' min-h-screen pb-0'} style={merchStyles}>
       <FestiveStorefrontHero
         listings={listings}
         categories={categories}
@@ -327,10 +325,6 @@ export default function Home() {
                     )}
                   </div>
                   <CategoryProductCarousel section={section} whatsappNumber={whatsappNumber} />
-                  {section.products.length >= 3 && (
-                    <a href={bulkQuoteUrl} target="_blank" rel="noopener noreferrer"
-                      className="sk-merch-bulk-link">Need multiple pieces? Request a bulk quote <FaArrowRight aria-hidden="true" /></a>
-                  )}
                 </section>
               ))}
               {groupedProducts.length > 6 && (
@@ -338,7 +332,7 @@ export default function Home() {
                   <button type="button" onClick={() => setShowAllCategories(v => !v)}
                     aria-expanded={showAllCategories} aria-controls="sk-products"
                     className="sk-feed-more-button">
-                    <span>{showAllCategories ? 'Show fewer categories' : 'Explore all ' + groupedProducts.length + ' categories'}</span>
+                    <span>{showAllCategories ? 'Show fewer categories' : 'View all ' + groupedProducts.length + ' categories'}</span>
                     <FaChevronDown aria-hidden="true" className={showAllCategories ? 'rotate-180' : ''} />
                   </button>
                 </div>
@@ -348,7 +342,13 @@ export default function Home() {
         </div>
 
       </main>
-      <footer ref={footerRef} id="sk-store-footer" className="sk-store-footer" aria-label="SANJU SK Digital business information">
+      <footer id="sk-store-footer" className="sk-store-footer" aria-label="SANJU SK Digital business information">
+        <details id="sk-business-information" className="sk-store-footer-details group">
+          <summary className="sk-store-footer-summary">
+            <span>More about SANJU SK Digital</span>
+            <FaChevronDown aria-hidden="true" className="sk-store-footer-chevron" />
+          </summary>
+          <div className="sk-store-footer-expanded">
         <div className="sk-store-footer-heading">
           <div className="sk-store-footer-mark" aria-hidden="true">SK</div>
           <div>
@@ -362,12 +362,6 @@ export default function Home() {
           <a href="/custom-trophies-awards-gondia/">Awards</a>
           <a href="/flex-banner-printing-gondia/">Flex printing</a>
         </nav>
-        <details id="sk-business-information" className="sk-store-footer-details group">
-          <summary className="sk-store-footer-summary">
-            <span>More about SANJU SK Digital</span>
-            <FaChevronDown aria-hidden="true" className="sk-store-footer-chevron" />
-          </summary>
-          <div className="sk-store-footer-expanded">
             <ServiceGallery />
             {videos.length > 0 && (
               <section className="sk-store-footer-video" aria-label="Latest design videos">
@@ -392,23 +386,14 @@ export default function Home() {
             </section>
             <FAQSection />
             <LocalContactFooter />
+        <div className="sk-store-footer-bottom">
+          <span>Made with ♥ in Gondia, Maharashtra · Since 2006</span>
+        </div>
           </div>
         </details>
-        <div className="sk-store-footer-bottom">
-          <span>Made with care in Gondia · Since 2006</span>
-          <button type="button" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
-            Back to top <FaArrowUp aria-hidden="true" />
-          </button>
-        </div>
       </footer>
-      {showBackToTop && !footerVisible && (
-        <button type="button" className="sk-back-to-top"
-          onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} aria-label="Back to top">
-          <FaArrowUp aria-hidden="true" /><span>Top</span>
-        </button>
-      )}
       <MobileBottomNav whatsappNumber={whatsappNumber} phoneNumber={phoneNumber}
-        compact={scrollingDown} atFooter={footerVisible} />
+        visible={showBottomNav} />
     </div>
   );
 }

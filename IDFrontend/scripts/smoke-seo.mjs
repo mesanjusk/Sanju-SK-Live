@@ -16,8 +16,8 @@ const appBootSource=readFileSync(new URL('../src/App.jsx',import.meta.url),'utf8
 assert(appBootSource.includes("import Home from './components/Home'"), 'Homepage must render directly instead of flashing the suspense loader');
 assert(!appBootSource.includes("lazy(() => import('./components/Home'))"), 'Do not lazy load homepage behind a second skeleton');
 assert(index.includes('class="sk-boot-header sk-boot-container"') && index.includes('class="sk-boot-hero'), 'Homepage initial HTML must match lavender storefront layout');
-assert(index.includes('class="sk-boot-quote"') && index.includes('class="sk-boot-collections"'), 'Initial HTML must include quote before collections');
-assert(index.indexOf('sk-boot-quote') < index.indexOf('sk-boot-collections'), 'Quote must appear before initial collections');
+assert(index.includes('class="sk-boot-hero-cta"') && index.includes('class="sk-boot-collections"'), 'Initial HTML must include unified quote CTA before collections');
+assert(index.indexOf('sk-boot-hero-cta') < index.indexOf('sk-boot-collections'), 'Hero CTA must appear before initial collections');
 assert(index.includes('<details class="sk-boot-more">') && index.includes('Common questions'), 'Initial SEO information must remain available without JS');
 assert(index.includes('class="sk-boot-card"') && index.includes('images/services/wedding-cards.svg'), 'Initial collection links and images must be present');
 assert(index.includes('sk-initial-seo-style') && index.includes('#f8f3fc'), 'First paint needs lavender background instead of old green fallback');
@@ -140,7 +140,7 @@ const festiveCss=readFileSync(new URL('../src/components/mobile/festive-home.css
 assert(heroSource.includes('sk-festive-tile-top')&&heroSource.includes('sk-festive-tile-media'),'Collection photo and label must have separate layout regions');
 assert(festiveCss.includes('grid-auto-columns:44%'),'Video-style carousel should show about two large cards plus a peek of next');
 assert(festiveCss.includes('.sk-festive-tile-media img')&&festiveCss.includes('position: static'),'Collection photo must stay within its own media region');
-assert(bottomNavSource.includes('fixed right-2')&&bottomNavSource.includes('h-10 w-10'),'Contact dock must stay compact and right-aligned');
+assert(bottomNavSource.includes('sk-mobile-bottom-nav') && bottomNavSource.includes('is-hidden'), 'Contact navigation must be smart and responsive');
 assert(heroSource.includes('Made with <FaHeart')&&heroSource.includes('sk-festive-top-phone'),'One-line heart and phone information missing');
 assert(bottomNavSource.includes('FaWhatsapp')&&bottomNavSource.includes('FaPhoneAlt')&&bottomNavSource.includes('FaHeart'),'Three floating contact icons missing');
 assert(reminderSource.includes('FIRST_REMINDER_DELAY_MS = 15000')&&reminderSource.includes('REPEAT_REMINDER_DELAY_MS = 8000'),'Call reminder timing must be 15 seconds then every 8 seconds');
@@ -168,7 +168,7 @@ assert(heroSource.includes('collections.map(item => renderTile(item, true))'),'C
 assert(heroSource.includes('prefers-reduced-motion: reduce') && heroSource.includes('onPointerDown={pauseCarousel}'),'Autoscroll must respect reduced motion and manual interaction');
 assert(festiveCss.includes('/* Promotional, image-first carousel') && festiveCss.includes('object-fit:cover'),'Carousel must use large photo-led cards');
 
-assert(heroSource.indexOf('sk-festive-quote sk-festive-container') < heroSource.indexOf('sk-festive-picks sk-festive-container'), 'Custom quote banner must appear above the auto-scrolling collections carousel');
+assert(heroSource.indexOf('sk-unified-quote-cta') < heroSource.indexOf('sk-festive-picks sk-festive-container'), 'Single quote CTA must be in hero before collections');
 assert(cardSource.includes('sk-gallery-product-caption') && cardSource.includes('sk-gallery-product-photo'), 'Product gallery must share collection-card photo and lavender caption structure');
 assert(cardSource.includes('saveEnquiryLead') && cardSource.includes('toggleFavorite(product)') && cardSource.includes('Enquire'), 'Product enquiries and favourites must remain functional');
 assert(festiveCss.includes('/* Image-led product cards match') && festiveCss.includes('.sk-gallery-product-photo img'), 'Image-led gallery styling must be present');
@@ -176,19 +176,25 @@ const themeSource=readFileSync(new URL('../src/components/mobile/categoryThemes.
 assert(themeSource.includes('getCategoryTheme') && themeSource.includes("key:'signage'") && themeSource.includes("key:'wedding'"), 'Category themes must support wedding, signage and service categories');
 assert(heroSource.includes('sk-festive-sticky-shell') && heroSource.includes('sk-shopping-tabs'), 'Sticky category navigation must be present');
 assert(heroSource.includes('onTabCategorySelect') && heroSource.includes('aria-pressed={active}'), 'Category tabs must switch the active theme and filter state');
-assert(heroSource.includes('sk-merch-feature') && heroSource.includes('Request a custom quote'), 'Category-specific hero promotion required');
+assert(heroSource.includes('sk-unified-quote-cta') && heroSource.includes('promoQuoteUrl'), 'Category-specific hero quotation must be available');
 assert(homeSource.includes('sk-subcategory-rail') && homeSource.includes('selectedSubcategory'), 'Image-led subcategories must stay functional');
-assert(homeSource.includes('sk-back-to-top') && homeSource.includes('window.scrollTo({ top: 0'), 'Back-to-top action required');
-assert(homeSource.includes('bulkQuoteUrl') && homeSource.includes('CategoryProductCarousel'), 'Bulk quote and three-across product carousels required');
+assert(!homeSource.includes('sk-back-to-top') && !homeSource.includes('window.scrollTo({ top: 0'), 'No floating Back-to-top control should interrupt browsing');
+assert(homeSource.includes('CategoryProductCarousel') && homeSource.includes('whatsappNumber'), 'Three-across product and contact controls required');
 assert(festiveCss.includes('position:sticky') && festiveCss.includes('var(--sk-theme-bg)'), 'Category navigation and theme colours required');
 assert(index.includes('sk-boot-category-tabs'), 'Pre-React loading layout should reflect the new category navigation');
 const footerNavSource=readFileSync(new URL('../src/components/mobile/MobileBottomNav.jsx',import.meta.url),'utf8');
-assert(homeSource.includes('sk-store-footer') && homeSource.includes('footerRef') && homeSource.includes('IntersectionObserver'), 'Footer must detect when it enters the viewport');
-assert(homeSource.includes('scrollingDown') && homeSource.includes('setScrollingDown') && homeSource.includes('lastScrollRef'), 'Scroll direction must control quick actions');
-assert(homeSource.includes('More about SANJU SK Digital') && homeSource.includes('Back to top'), 'Myntra-style compact footer and return action required');
+assert(homeSource.includes('sk-store-footer') && homeSource.includes('sk-store-footer-summary'), 'Minimal business footer required');
+assert(homeSource.includes('directionTravel') && homeSource.includes('setShowBottomNav'), 'Scroll direction must automatically show and hide the nav');
+assert(homeSource.includes('More about SANJU SK Digital') && !homeSource.includes('Back to top'), 'Only the footer info disclosure should remain, with no extra top button');
 assert(homeSource.includes('<ServiceGallery />') && homeSource.includes('<FAQSection />') && homeSource.includes('<LocalContactFooter />'), 'SEO services, FAQ and contact must survive inside disclosure');
-assert(footerNavSource.includes('compact = false') && footerNavSource.includes('atFooter = false') && footerNavSource.includes('sk-quick-more'), 'Dock must collapse while scrolling and hide near footer');
+assert(footerNavSource.includes('visible = true') && footerNavSource.includes('is-hidden') && !footerNavSource.includes('sk-quick-more'), 'Bottom actions must auto-hide without a More button');
 assert(festiveCss.includes('/* Myntra-inspired tidy footer') && festiveCss.includes('.sk-store-footer-summary'), 'New mobile footer styles missing');
+assert(!heroSource.includes('sk-merch-feature') && !heroSource.includes('Have something special in mind?'), 'Remove duplicate hero promotions');
+assert((heroSource.match(/Get a custom quote/g)||[]).length === 1, 'One generic quote link in homepage hero');
+assert(!homeSource.includes('Need multiple pieces? Request a bulk quote'), 'No repeated bulk quote CTA under every category');
+assert(!homeSource.includes('pb-24') && !homeSource.includes('sk-back-to-top'), 'No excessive whitespace or floating Top button');
+assert(homeSource.indexOf('sk-store-footer-heading') > homeSource.indexOf('sk-store-footer-expanded'), 'Business links must be hidden until the footer is expanded');
+assert(festiveCss.includes('/* PR #60: one hero quote CTA') && festiveCss.includes('.sk-mobile-bottom-nav.is-hidden'), 'Smart navigation stylesheet required');
 const prevFetch=globalThis.fetch;
 function mockResponse(){
   return {
