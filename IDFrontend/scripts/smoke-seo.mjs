@@ -253,6 +253,24 @@ assert(loadingComponentSource.includes('sk-print-press') && loadingComponentSour
   loadingComponentSource.includes('Try loading again'), 'Loader must use printing motif and an accessible retry');
 assert(festiveCss.includes('@keyframes sk-paper-print') && festiveCss.includes('@media (prefers-reduced-motion:reduce)'),
   'CSS-only print animation must respect reduced-motion settings');
+
+const routeMetaSource=readFileSync(new URL('../src/config/routeMeta.js',import.meta.url),'utf8');
+const sitemapXmlRoutes=(siteMap.match(/<loc>([^<]+)<\\/loc>/g)||[]).join(' ');
+assert(!sitemapXmlRoutes.includes('https://www.sanjusk.in/home1') &&
+       !sitemapXmlRoutes.includes('https://www.sanjusk.in/allListing'),
+  'Legacy duplicate browse routes must not appear in the canonical sitemap');
+assert(routeMetaSource.includes("'/home1': {") && routeMetaSource.includes("'/allListing': {") &&
+  routeMetaSource.includes('Legacy product listings; see the current product gallery instead.') &&
+  routeMetaSource.includes('Legacy wedding collection page; see current wedding services.') &&
+  (routeMetaSource.match(/noIndex: true/g) || []).length >= 2,
+  'Legacy duplicated routes should be non-indexable but remain functional');
+assert(vercelRules.rewrites.some(r=>r.source==='/sitemap-products.xml' && r.destination==='/api/sitemap-products'),
+  'Product XML sitemap must be a rewrite returning XML without a temporary redirect');
+assert(!vercelRules.redirects.some(r=>r.source==='/sitemap-products.xml'),
+  'Do not redirect the product sitemap to a different crawl URL');
+const robotsContent=readFileSync(new URL('../public/robots.txt',import.meta.url),'utf8');
+assert(robotsContent.includes('Sitemap: https://www.sanjusk.in/sitemap-products.xml'),
+  'Robots should advertise the canonical product XML sitemap path');
 const prevFetch=globalThis.fetch;
 function mockResponse(){
   return {

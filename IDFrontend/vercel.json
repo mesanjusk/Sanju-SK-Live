@@ -12,11 +12,6 @@
       "statusCode": 301
     },
     {
-      "source": "/sitemap-products.xml",
-      "destination": "/api/sitemap-products",
-      "permanent": false
-    },
-    {
       "source": "/home",
       "destination": "/",
       "permanent": true
@@ -55,6 +50,10 @@
     }
   ],
   "rewrites": [
+    {
+      "source": "/sitemap-products.xml",
+      "destination": "/api/sitemap-products"
+    },
     {
       "source": "/products/:id",
       "destination": "/api/product-seo?id=:id"
