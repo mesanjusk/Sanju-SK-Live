@@ -255,7 +255,7 @@ assert(festiveCss.includes('@keyframes sk-paper-print') && festiveCss.includes('
   'CSS-only print animation must respect reduced-motion settings');
 
 const routeMetaSource=readFileSync(new URL('../src/config/routeMeta.js',import.meta.url),'utf8');
-const sitemapXmlRoutes=(siteMap.match(/<loc>([^<]+)<\\/loc>/g)||[]).join(' ');
+const sitemapXmlRoutes=siteMap;
 assert(!sitemapXmlRoutes.includes('https://www.sanjusk.in/home1') &&
        !sitemapXmlRoutes.includes('https://www.sanjusk.in/allListing'),
   'Legacy duplicate browse routes must not appear in the canonical sitemap');
