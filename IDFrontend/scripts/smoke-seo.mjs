@@ -154,14 +154,14 @@ assert(pinCss.includes('prefers-reduced-motion:reduce'), 'Motion accessibility m
 const endlessSource=readFileSync(new URL('../src/components/mobile/EndlessPinterestFeed.jsx',import.meta.url),'utf8');
 const loadingSource=readFileSync(new URL('../src/components/mobile/CatalogLoadingState.jsx',import.meta.url),'utf8');
 assert(endlessSource.includes('uniqueDesigns') && endlessSource.includes('IntersectionObserver') &&
-  endlessSource.includes('uniqueProducts.slice(0, visibleCount)') &&
+  endlessSource.includes('orderedProducts.slice(0, visibleCount)') &&
   endlessSource.includes('BATCH_SIZE = 18'),
   'Pinterest feed must show unique designs in progressive, finite batches');
 assert(!endlessSource.includes('shuffleNextCycle') && !endlessSource.includes('cursor.cycle'),
   'Do not reintroduce repeated shuffled design cycles');
-assert(endlessSource.includes("You've seen all") &&
-  endlessSource.includes('Explore another category'),
-  'Once every design is shown, end the feed instead of looping');
+assert(!endlessSource.includes("You've seen all") &&
+  !endlessSource.includes('Explore another category'),
+  'End the design feed quietly, without repetitive end-of-gallery copy');
 const duplicates=[
   {_id:'A',images:['https://res.cloudinary.com/demo/image/upload/v1/card.jpg']},
   {_id:'B',images:['https://res.cloudinary.com/demo/image/upload/v1/card.jpg?width=400']},
@@ -230,6 +230,64 @@ assert(reminderSource.includes('FIRST_REMINDER_DELAY_MS = 15000') &&
   reminderSource.includes('sessionStorage.setItem(DISMISSED_KEY'),
   'Dismissible call reminder must remain available');
 assert(appSource.includes('<CallReminder />'), 'Call reminders must work on public routes');
+
+
+const recommendationSource=readFileSync(new URL('../src/components/mobile/recommendations.mjs',import.meta.url),'utf8');
+const geminiEndpointSource=readFileSync(new URL('../api/recommend-designs.js',import.meta.url),'utf8');
+const favoritesSource=readFileSync(new URL('../src/components/Favorites.jsx',import.meta.url),'utf8');
+const sharedHeaderSource=readFileSync(new URL('../src/components/mobile/MobileHeader.jsx',import.meta.url),'utf8');
+const sharedPublicCss=readFileSync(new URL('../src/styles/public-theme.css',import.meta.url),'utf8');
+const serviceSource=readFileSync(new URL('../src/components/ServiceGallery.jsx',import.meta.url),'utf8');
+const listingSource=readFileSync(new URL('../src/pages/ProductListing.jsx',import.meta.url),'utf8');
+const contactSource=readFileSync(new URL('../src/components/Contact.jsx',import.meta.url),'utf8');
+const categoriesSource=readFileSync(new URL('../src/components/allCategory.jsx',import.meta.url),'utf8');
+assert(!endlessSource.includes('You\'ve seen all') &&
+  endlessSource.includes('orderDesigns(uniqueProducts, interests, seed, geminiIds)'),
+  'Feed must randomise order and prioritise clicked/saved design interests');
+assert(recommendationSource.includes('crypto.getRandomValues') &&
+  recommendationSource.includes('recordDesignInterest') &&
+  recommendationSource.includes('localStorage.setItem') &&
+  recommendationSource.includes('shuffleWithSeed'),
+  'Each visit must shuffle order and safely remember on-device design interests');
+assert(pinCardSource.includes('onClick={openDesign}') &&
+  pinCardSource.includes('recordDesignInterest(product') &&
+  detailSource.includes('recordDesignInterest(product'),
+  'Viewing or saving designs must influence later recommendations');
+assert(geminiEndpointSource.includes('process.env.GEMINI_API_KEY') &&
+  geminiEndpointSource.includes('gemini-3.5-flash-lite') &&
+  geminiEndpointSource.includes('responseMimeType') &&
+  geminiEndpointSource.includes('mode: \'fallback\''),
+  'Gemini ranking must be server-side, configurable and safe without a key');
+assert(!recommendationSource.includes('GEMINI_API_KEY'),
+  'Gemini secret must never be included in browser source');
+assert(endlessSource.includes('geminiDesignIds') &&
+  detailSource.includes('geminiDesignIds'),
+  'Both home feed and related design view should support Gemini ranking');
+assert(favoritesSource.includes('<PinterestPinCard') &&
+  favoritesSource.includes('sk-activity-tabs') &&
+  favoritesSource.includes('sk-pin-masonry') &&
+  !favoritesSource.includes('bg-[#edf2e8]'),
+  'Saved and Liked must use the same Pinterest masonry cards and theme');
+assert(sharedHeaderSource.includes('sk-pin-brand-final-logo') &&
+  sharedHeaderSource.includes('sk-public-header'),
+  'Public headers must consistently show finalized SK logo and styling');
+assert(sharedPublicCss.includes('sk-activity-page') ||
+  sharedPublicCss.includes('sk-activity-tabs'), 'Saved/Liked unified theme missing');
+assert(sharedPublicCss.includes('sk-pin-bottom-nav') &&
+  sharedPublicCss.includes('[aria-current="page"]') &&
+  pinNavSource.includes('NavLink to="/" end'),
+  'Bottom navigation must highlight the correct active route');
+assert(pinNavSource.includes("variant = 'pinterest'") &&
+  pinNavSource.includes('navigate(\'/?search=1\')'),
+  'Every public route must use Pinterest Home Search Saved navigation');
+assert(listingSource.includes('<PinterestPinCard') &&
+  listingSource.includes('sk-public-theme') &&
+  contactSource.includes('sk-public-theme') &&
+  categoriesSource.includes('sk-public-theme'),
+  'All public product, contact and category pages must use unified design');
+assert(serviceSource.includes('#202020') &&
+  !serviceSource.includes('#8064ad'),
+  'Service gallery must no longer display old purple buttons');
 
 const categoryGuideData=JSON.parse(readFileSync(new URL('../src/config/category-seo.json',import.meta.url),'utf8'));
 const guideSource=readFileSync(new URL('../src/components/mobile/CategorySeoBlurb.jsx',import.meta.url),'utf8');

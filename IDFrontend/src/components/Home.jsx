@@ -7,7 +7,6 @@ import EndlessPinterestFeed from './mobile/EndlessPinterestFeed';
 import { uniqueDesigns } from './mobile/uniqueDesigns.mjs';
 import './mobile/festive-home.css';
 import './mobile/pinterest-storefront.css';
-import { getCategoryTheme } from './mobile/categoryThemes';
 import CategorySeoBlurb from './mobile/CategorySeoBlurb';
 import VideoFeedCard from './mobile/VideoFeedCard';
 import MobileBottomNav from './mobile/MobileBottomNav';
@@ -39,13 +38,6 @@ export default function Home() {
   // All public enquiry links use the verified Gondia business WhatsApp number.
   const whatsappNumber = String(seo.phone || '+919372333633').replace(/\D/g, '');
   const phoneNumber = seo.phone;
-  const activeTheme = getCategoryTheme(selectedCategory?.name);
-  const merchStyles = {
-    '--sk-theme-bg': activeTheme.background,
-    '--sk-theme-accent': activeTheme.accent,
-    '--sk-theme-ink': activeTheme.ink,
-    '--sk-theme-soft': activeTheme.soft,
-  };
 
   useEffect(() => {
     let active = true;
@@ -233,7 +225,7 @@ export default function Home() {
   };
 
   return (
-    <div className="sk-storefront sk-festive-home sk-pinterest-home" style={merchStyles}>
+    <div className="sk-storefront sk-festive-home sk-pinterest-home sk-public-theme">
       <PinterestStorefrontHeader
         categories={categories}
         selectedCategory={selectedCategory}

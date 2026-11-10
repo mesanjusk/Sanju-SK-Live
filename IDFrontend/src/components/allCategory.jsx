@@ -60,7 +60,7 @@ export default function AllCategory() {
               );
 
               return (
-                <div key={cat._id} className="overflow-hidden rounded-[24px] border border-[#e7e8db] bg-white shadow-[0_12px_30px_-24px_#173c2a]">
+                <div key={cat._id} className="overflow-hidden rounded-[24px] border border-[#e7e3dc] bg-white shadow-[0_12px_30px_-24px_#3a3a3a]">
                   {/* Category row */}
                   <button
                     onClick={() => handleCategoryClick(cat)}

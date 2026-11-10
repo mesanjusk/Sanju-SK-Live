@@ -35,29 +35,29 @@ export default function ServiceGallery() {
   return (
     <section aria-labelledby="sk-core-services" className="mx-auto w-full max-w-6xl px-3 pb-5 pt-5 sm:px-6 sm:pt-8">
       <div className="mb-3 text-center">
-        <p className="text-[11px] font-extrabold uppercase tracking-[.24em] text-[#9574b3]">Designed and made in Gondia</p>
-        <h2 id="sk-core-services" className="mt-1 text-xl font-extrabold tracking-tight text-[#513969] sm:text-3xl">Our Signature Services</h2>
-        <p className="mx-auto mt-1 max-w-xl text-xs leading-5 text-[#8a7b95] sm:text-sm">Explore custom printing, signage, awards and wedding invitations for Gondia, Nagpur and Balaghat.</p>
+        <p className="text-[11px] font-extrabold uppercase tracking-[.24em] text-[#9c742f]">Designed and made in Gondia</p>
+        <h2 id="sk-core-services" className="mt-1 text-xl font-extrabold tracking-tight text-[#202020] sm:text-3xl">Our Signature Services</h2>
+        <p className="mx-auto mt-1 max-w-xl text-xs leading-5 text-[#737373] sm:text-sm">Explore custom printing, signage, awards and wedding invitations for Gondia, Nagpur and Balaghat.</p>
       </div>
       <div className="grid grid-cols-2 gap-2.5 sm:gap-4 lg:gap-5">
         {SERVICES.map((service) => (
-          <article key={service.url} className="group flex flex-col overflow-hidden rounded-2xl border border-[#e7ddf1] bg-[#fffbff] shadow-[0_8px_28px_-23px_rgba(25,65,45,.4)]">
-            <a href={service.url} className="block overflow-hidden bg-gradient-to-br from-[#f1eafb] to-[#e1d7f1]" aria-label={'Read about ' + service.title}>
+          <article key={service.url} className="group flex flex-col overflow-hidden rounded-2xl border border-[#e7e3dc] bg-[#ffffff] shadow-[0_8px_28px_-23px_rgba(25,65,45,.4)]">
+            <a href={service.url} className="block overflow-hidden bg-gradient-to-br from-[#f7f5ef] to-[#f0ede5]" aria-label={'Read about ' + service.title}>
               <img src={service.image} alt={service.alt} loading="lazy" decoding="async"
                 width="800" height="520" className="h-28 w-full object-cover transition-transform duration-300 group-hover:scale-[1.025] sm:h-48" />
             </a>
             <div className="flex flex-1 flex-col p-2.5 sm:p-5">
-              <h3 className="min-h-[42px] text-[12px] font-extrabold leading-snug text-[#47335e] line-clamp-3 sm:min-h-[48px] sm:text-[16px]">{service.title}</h3>
-              <p className="mt-1 min-h-[45px] text-[10px] leading-4 text-[#81718f] line-clamp-3 sm:mt-2 sm:min-h-[60px] sm:text-[13px] sm:leading-5">{service.description}</p>
+              <h3 className="min-h-[42px] text-[12px] font-extrabold leading-snug text-[#202020] line-clamp-3 sm:min-h-[48px] sm:text-[16px]">{service.title}</h3>
+              <p className="mt-1 min-h-[45px] text-[10px] leading-4 text-[#6f6f6f] line-clamp-3 sm:mt-2 sm:min-h-[60px] sm:text-[13px] sm:leading-5">{service.description}</p>
               <div className="mt-auto flex flex-wrap gap-1.5 pt-3 sm:gap-2">
                 <a href={service.url}
-                  className="inline-flex min-w-0 flex-1 items-center justify-center gap-1 rounded-lg bg-[#8064ad] px-1 py-2 text-[10px] font-bold text-white transition-colors hover:bg-[#695092] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#8064ad] sm:px-3 sm:py-2.5 sm:text-xs">
+                  className="inline-flex min-w-0 flex-1 items-center justify-center gap-1 rounded-lg bg-[#202020] px-1 py-2 text-[10px] font-bold text-white transition-colors hover:bg-[#111111] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#202020] sm:px-3 sm:py-2.5 sm:text-xs">
                   View Details <FaArrowRight aria-hidden="true" />
                 </a>
                 <a href={'https://wa.me/919372333633?text=' + encodeURIComponent('Hi Sanju SK Digital, I am inquiring about ' + service.title)}
                   target="_blank" rel="noopener noreferrer"
                   aria-label={'Enquire on WhatsApp about ' + service.title}
-                  className="inline-flex min-w-0 flex-1 items-center justify-center gap-1 rounded-lg border border-[#d6c5eb] bg-[#f4eefa] px-1 py-2 text-[10px] font-bold text-[#715396] transition-colors hover:bg-[#e8dff4] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#715396] sm:px-3 sm:py-2.5 sm:text-xs">
+                  className="inline-flex min-w-0 flex-1 items-center justify-center gap-1 rounded-lg border border-[#e7e3dc] bg-[#f8f6f0] px-1 py-2 text-[10px] font-bold text-[#202020] transition-colors hover:bg-[#eeeae0] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#202020] sm:px-3 sm:py-2.5 sm:text-xs">
                   <FaWhatsapp aria-hidden="true" /> WhatsApp
                 </a>
               </div>

@@ -15,8 +15,9 @@ export default function MobileBottomNav({ whatsappNumber = '919372333633', phone
         (visible ? ' is-visible' : ' is-hidden')}
         aria-label="Home, search and saved designs" aria-hidden={!visible}>
         <div className="sk-mobile-bottom-inner">
-          <Link to="/" className="sk-mobile-bottom-link" tabIndex={visible ? 0 : -1}
-            aria-label="Explore home"><FaHome aria-hidden="true"/></Link>
+          <NavLink to="/" end tabIndex={visible ? 0 : -1}
+            className={({isActive}) => 'sk-mobile-bottom-link' + (isActive ? ' is-active' : '')}
+            aria-label="Explore home"><FaHome aria-hidden="true"/></NavLink>
           <button type="button" className="sk-mobile-bottom-link" tabIndex={visible ? 0 : -1}
             aria-label="Search designs" onClick={onSearchClick}>
             <FaSearch aria-hidden="true"/>

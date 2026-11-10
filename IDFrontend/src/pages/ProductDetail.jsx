@@ -95,7 +95,7 @@ export default function ProductDetail() {
   }, [productCategory, id]);
 
   if (loading && !product) return (
-    <div className="sk-pinterest-home sk-pin-detail-page">
+    <div className="sk-pinterest-home sk-public-theme sk-pin-detail-page">
       <div className="sk-pin-detail-head"><button type="button" className="sk-pin-round-action"
         onClick={()=>navigate(-1)} aria-label="Go back"><FaArrowLeft/></button></div>
       <div className="sk-pin-detail-loading" role="status">Opening your design…</div>

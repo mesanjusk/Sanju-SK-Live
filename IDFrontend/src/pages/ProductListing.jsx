@@ -277,7 +277,7 @@ export default function ProductListing() {
             onClick={() => setFilter('category', '')}
             className={`w-full rounded-xl px-3 py-2 text-left text-sm transition-all ${
               !filters.category
-                ? 'bg-[#25D366]/10 font-semibold text-[#128C7E]'
+                ? 'bg-[#b16a0e]/10 font-semibold text-[#202020]'
                 : 'text-gray-600 hover:bg-gray-100'
             }`}
           >
@@ -300,7 +300,7 @@ export default function ProductListing() {
               className={`w-full rounded-xl px-3 py-2 text-left text-sm transition-all ${
                 filters.category ===
                 (cat.category_uuid || cat._id)
-                  ? 'bg-[#25D366]/10 font-semibold text-[#128C7E]'
+                  ? 'bg-[#b16a0e]/10 font-semibold text-[#202020]'
                   : 'text-gray-600 hover:bg-gray-100'
               }`}
             >
@@ -324,7 +324,7 @@ export default function ProductListing() {
               }
               className={`w-full rounded-xl px-3 py-2 text-left text-sm transition-all ${
                 !filters.subcategory
-                  ? 'bg-[#25D366]/10 font-semibold text-[#128C7E]'
+                  ? 'bg-[#b16a0e]/10 font-semibold text-[#202020]'
                   : 'text-gray-600 hover:bg-gray-100'
               }`}
             >
@@ -343,7 +343,7 @@ export default function ProductListing() {
                 className={`w-full rounded-xl px-3 py-2 text-left text-sm transition-all ${
                   filters.subcategory ===
                   (s.subcategory_uuid || s._id)
-                    ? 'bg-[#25D366]/10 font-semibold text-[#128C7E]'
+                    ? 'bg-[#b16a0e]/10 font-semibold text-[#202020]'
                     : 'text-gray-600 hover:bg-gray-100'
                 }`}
               >
@@ -366,7 +366,7 @@ export default function ProductListing() {
               onClick={() => setFilter('religion', '')}
               className={`w-full rounded-xl px-3 py-2 text-left text-sm transition-all ${
                 !filters.religion
-                  ? 'bg-[#25D366]/10 font-semibold text-[#128C7E]'
+                  ? 'bg-[#b16a0e]/10 font-semibold text-[#202020]'
                   : 'text-gray-600 hover:bg-gray-100'
               }`}
             >
@@ -385,7 +385,7 @@ export default function ProductListing() {
                 className={`w-full rounded-xl px-3 py-2 text-left text-sm transition-all ${
                   filters.religion ===
                   (r.religion_uuid || r._id)
-                    ? 'bg-[#25D366]/10 font-semibold text-[#128C7E]'
+                    ? 'bg-[#b16a0e]/10 font-semibold text-[#202020]'
                     : 'text-gray-600 hover:bg-gray-100'
                 }`}
               >
@@ -423,7 +423,7 @@ export default function ProductListing() {
 
       <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
         {/* Sticky Top Bar */}
-        <div className="sticky top-16 z-20 mb-6 rounded-2xl border border-[#e9e9df] bg-white/90 p-4 shadow-[0_10px_27px_-20px_#294d39] backdrop-blur-xl">
+        <div className="sticky top-16 z-20 mb-6 rounded-2xl border border-[#e7e3dc] bg-white/90 p-4 shadow-[0_10px_27px_-20px_#202020] backdrop-blur-xl">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
             {/* Search */}
             <div className="relative flex-1">
@@ -467,14 +467,14 @@ export default function ProductListing() {
               onClick={() =>
                 setSidebarOpen(true)
               }
-              className="flex items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm font-medium text-gray-700 transition-all hover:border-[#25D366] hover:text-[#128C7E] lg:hidden"
+              className="flex items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm font-medium text-gray-700 transition-all hover:border-[#b16a0e] hover:text-[#202020] lg:hidden"
             >
               <FaFilter className="text-xs" />
 
               Filters
 
               {activeCount > 0 && (
-                <span className="rounded-full bg-[#25D366] px-2 py-0.5 text-xs font-bold text-white">
+                <span className="rounded-full bg-[#b16a0e] px-2 py-0.5 text-xs font-bold text-white">
                   {activeCount}
                 </span>
               )}
@@ -503,7 +503,7 @@ export default function ProductListing() {
                 </h2>
 
                 {activeCount > 0 && (
-                  <span className="rounded-full bg-[#25D366] px-2 py-1 text-xs font-bold text-white">
+                  <span className="rounded-full bg-[#b16a0e] px-2 py-1 text-xs font-bold text-white">
                     {activeCount}
                   </span>
                 )}
@@ -516,13 +516,13 @@ export default function ProductListing() {
           {/* Mobile Drawer */}
           {sidebarOpen && (
             <div
-              className="fixed inset-0 z-50 bg-[#1a2f27]/60 lg:hidden"
+              className="fixed inset-0 z-50 bg-[#202020]/60 lg:hidden"
               onClick={() =>
                 setSidebarOpen(false)
               }
             >
               <aside
-                className="absolute right-0 top-0 h-full w-[min(90vw,360px)] overflow-y-auto bg-[#fafaf4] p-5 shadow-2xl"
+                className="absolute right-0 top-0 h-full w-[min(90vw,360px)] overflow-y-auto bg-[#fff] p-5 shadow-2xl"
                 onClick={(e) =>
                   e.stopPropagation()
                 }
@@ -608,7 +608,7 @@ export default function ProductListing() {
                           (p) => p - 1
                         )
                       }
-                      className="flex h-11 w-11 items-center justify-center rounded-xl border border-gray-200 bg-white text-gray-600 transition-all hover:border-[#25D366] hover:text-[#128C7E] disabled:cursor-not-allowed disabled:opacity-50"
+                      className="flex h-11 w-11 items-center justify-center rounded-xl border border-gray-200 bg-white text-gray-600 transition-all hover:border-[#b16a0e] hover:text-[#202020] disabled:cursor-not-allowed disabled:opacity-50"
                     >
                       <FaChevronLeft />
                     </button>
@@ -623,8 +623,8 @@ export default function ProductListing() {
                           }
                           className={`flex h-11 w-11 items-center justify-center rounded-xl text-sm font-semibold transition-all ${
                             currentPage === i + 1
-                              ? 'bg-[#25D366] text-white shadow-md'
-                              : 'border border-gray-200 bg-white text-gray-700 hover:border-[#25D366] hover:text-[#128C7E]'
+                              ? 'bg-[#b16a0e] text-white shadow-md'
+                              : 'border border-gray-200 bg-white text-gray-700 hover:border-[#b16a0e] hover:text-[#202020]'
                           }`}
                         >
                           {i + 1}
@@ -642,7 +642,7 @@ export default function ProductListing() {
                           (p) => p + 1
                         )
                       }
-                      className="flex h-11 w-11 items-center justify-center rounded-xl border border-gray-200 bg-white text-gray-600 transition-all hover:border-[#25D366] hover:text-[#128C7E] disabled:cursor-not-allowed disabled:opacity-50"
+                      className="flex h-11 w-11 items-center justify-center rounded-xl border border-gray-200 bg-white text-gray-600 transition-all hover:border-[#b16a0e] hover:text-[#202020] disabled:cursor-not-allowed disabled:opacity-50"
                     >
                       <FaChevronRight />
                     </button>
