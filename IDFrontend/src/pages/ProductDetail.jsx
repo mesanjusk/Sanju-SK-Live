@@ -51,7 +51,7 @@ export default function ProductDetail() {
     setLoadError(false);
     setImgIdx(0);
     setRelated([]);
-    window.scrollTo({top:0,behavior:'instant'});
+    window.scrollTo({top:0,behavior:'auto'});
     if (preview?.quantityPricing?.length) setQuantity(Number(preview.quantityPricing[0].minQty) || 25);
     const fetchProduct = async () => {
       for (let attempt = 0; attempt < 3; attempt += 1) {

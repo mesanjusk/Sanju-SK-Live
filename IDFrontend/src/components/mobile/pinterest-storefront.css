@@ -141,3 +141,29 @@
 @media(min-width:1000px){.sk-pin-masonry{columns:5;}.sk-pin-detail-related .sk-pin-masonry{columns:4;}}
 @keyframes sk-pin-shimmer{from{opacity:.35}to{opacity:1}}
 @media(prefers-reduced-motion:reduce){.sk-pin-tab-loading,.sk-pin-cover img{animation:none;transition:none;}}
+
+/* Complete detail interactions and mobile flow styling. */
+.sk-pin-detail-price{padding:8px 0;font-size:13px;color:#606060;}
+.sk-pin-detail-price b{font-size:23px;color:#1a1a1a;font-weight:850;}
+.sk-pin-detail-qty-input{display:flex;align-items:center;gap:10px;margin:12px 0 7px;font-size:12px;font-weight:750;}
+.sk-pin-detail-qty-input input{width:86px;border:1px solid #dedede;border-radius:11px;padding:8px;color:#222;}
+.sk-pin-detail-video-btn{display:flex;align-items:center;gap:8px;margin-top:12px;font-size:13px;font-weight:700;}
+.sk-pin-detail-model{margin-top:16px;border-top:1px solid #eee;padding-top:12px;}
+.sk-pin-detail-model summary{font-size:12px;font-weight:800;cursor:pointer;}
+.sk-pin-detail-modal{position:fixed;inset:0;z-index:90;display:grid;place-items:center;background:#000c;padding:15px;}
+.sk-pin-detail-modal>div{width:min(100%,700px);display:flex;flex-direction:column;gap:8px;}
+.sk-pin-detail-modal button{align-self:flex-end;padding:9px 14px;background:#fff;border-radius:20px;font-size:12px;font-weight:800;}
+.sk-pin-detail-modal iframe{width:100%;aspect-ratio:16/9;border:0;border-radius:12px;}
+.sk-pin-detail-loading{min-height:55vh;display:grid;place-items:center;font-size:14px;font-weight:800;color:#777;}
+.sk-pin-detail-error{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:13px;
+  min-height:50vh;padding:25px;text-align:center;}
+.sk-pin-detail-error h1{font-size:21px;font-weight:850;}
+.sk-pin-detail-error p{color:#777;font-size:13px;}
+.sk-pin-detail-error button,.sk-pin-detail-error a{padding:11px 18px;border-radius:30px;background:#222;color:white;font-size:12px;text-decoration:none;}
+#sk-pin-feed{scroll-margin-top:119px;}
+.sk-pinterest-home .sk-category-seo-blurb{padding:0 7px;margin-bottom:12px;}
+.sk-pinterest-home .sk-category-seo-blurb p{font-size:11px;color:#777;}
+.sk-pinterest-home .sk-pin-feed-sentinel{padding:12px 0 20px;}
+.sk-pin-top-shell .sk-pin-category-tab:focus-visible,
+.sk-pin-card button:focus-visible,.sk-pin-card a:focus-visible,
+.sk-pin-detail-page button:focus-visible,.sk-pin-detail-page a:focus-visible{outline:2px solid #7d56a2;outline-offset:2px;}

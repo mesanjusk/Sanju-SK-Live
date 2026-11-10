@@ -31,7 +31,8 @@ export default function Home() {
   const [selectedSubcategory, setSelectedSubcategory] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [visibleCount, setVisibleCount] = useState(18);
-  const [searchOpen, setSearchOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(() =>
+    typeof window !== 'undefined' && new URLSearchParams(window.location.search).has('search'));
   const [showVideos, setShowVideos] = useState(false);
   const [showBottomNav, setShowBottomNav] = useState(true);
   const deferredSearch = useDeferredValue(searchTerm);
