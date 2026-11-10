@@ -152,9 +152,6 @@ assert(homeSource.indexOf('sk-pinterest-seo-intro') > homeSource.indexOf('sk-sto
 assert(homeSource.includes('<FAQSection />') && homeSource.includes('<LocalContactFooter />') && homeSource.includes('<ServiceGallery />'), 'Services, FAQ and local contact preserved');
 assert(index.includes('sk-pre-pin-bottom') && index.includes('sk-pre-pin-tabs'), 'Static first paint must match Pinterest-style layout');
 const festiveCss=readFileSync(new URL('../src/components/mobile/festive-home.css',import.meta.url),'utf8');
-const heroSource=readFileSync(new URL('../src/components/mobile/FestiveStorefrontHero.jsx',import.meta.url),'utf8');
-const reminderSource=readFileSync(new URL('../src/components/mobile/CallReminder.jsx',import.meta.url),'utf8');
-const appSource=readFileSync(new URL('../src/App.jsx',import.meta.url),'utf8');
 assert(appSource.includes('<CallReminder />'),'Public contact reminder must remain available');
 assert(reminderSource.includes('sessionStorage.setItem(DISMISSED_KEY'),'Call reminder must remain dismissible');
 assert(homeSource.includes('<CatalogLoadingState error={catalogFailed && !catalogPending} onRetry={retryCatalog} />'), 'Load/retry animation must remain in gallery');
