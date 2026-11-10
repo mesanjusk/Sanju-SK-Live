@@ -1,5 +1,5 @@
 import React, { Suspense, lazy, useEffect, useState } from 'react';
-import { BrowserRouter as Router, Navigate, Route, Routes, useLocation } from 'react-router-dom';
+import { BrowserRouter as Router, Navigate, Route, Routes, useLocation, useParams } from 'react-router-dom';
 import api from './api';
 import SEO from './components/SEO';
 import LoadingSkeleton from './components/common/LoadingSkeleton';
@@ -16,7 +16,6 @@ checkAndApplyAccessToken();
 
 // Load the storefront with the initial app bundle to avoid a second loading-screen flash.
 const AllListing     = lazy(() => import('./components/allLisiting'));
-const Home1          = lazy(() => import('./pages/Home1'));
 const StoryGallery   = lazy(() => import('./components/StoryGallery'));
 const Upload         = lazy(() => import('./components/Upload'));
 const Insta          = lazy(() => import('./components/Insta'));
@@ -39,7 +38,6 @@ const AddSEOK        = lazy(() => import('./pages/addSEOK'));
 const UploadBanner   = lazy(() => import('./pages/UploadBanner'));
 const AddConfi       = lazy(() => import('./pages/addConfi'));
 const List           = lazy(() => import('./components/list'));
-const FilterSubcategory = lazy(() => import('./components/filterSubcategory'));
 const SocialMedia    = lazy(() => import('./components/SocialMedia'));
 const AdminDashboard = lazy(() => import('./components/AdminDashboard'));
 const Contact        = lazy(() => import('./components/Contact'));
@@ -86,10 +84,15 @@ const PageWithSeo = ({ children }) => {
   );
 };
 
+function LegacyCategoryRedirect() {
+  const { id } = useParams();
+  return <Navigate to={'/products?category=' + encodeURIComponent(id || '')} replace />;
+}
+
 function AppRoutes() {
   useAnalytics();
   const { pathname } = useLocation();
-  const isPrivateRoute = /^\/(?:admin|login|profile|upload|add|listing|list\/|SocialMedia)/i.test(pathname);
+  const isPrivateRoute = /^\/(?:admin|login|profile|upload|add|listing|list\/|allListing|SocialMedia)/i.test(pathname);
   return (
     <PageWithSeo>
       <div className={isPrivateRoute ? undefined : 'sk-public-site'}>
@@ -103,7 +106,7 @@ function AppRoutes() {
           <Route path="/product-view/:id" element={<ProductDetail />} />
           <Route path="/allCategories" element={<AllCategory />} />
           <Route path="/allListing"    element={<AllListing />} />
-          <Route path="/subcategory/:id" element={<FilterSubcategory />} />
+          <Route path="/subcategory/:id" element={<LegacyCategoryRedirect />} />
           <Route path="/favorites"     element={<Favorites />} />
           <Route path="/contact"       element={<Contact />} />
 
@@ -134,7 +137,7 @@ function AppRoutes() {
           <Route path="/addConfi"     element={<AddConfi />} />
 
           {/* Other */}
-          <Route path="/home1"         element={<Home1 />} />
+          <Route path="/home1"         element={<Navigate to="/" replace />} />
           <Route path="/story"         element={<StoryGallery />} />
           <Route path="/upload"        element={<Upload />} />
           <Route path="/instagram"     element={<Insta />} />
