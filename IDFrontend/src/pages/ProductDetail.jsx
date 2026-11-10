@@ -7,6 +7,7 @@ import ProductStructuredData from '../components/ProductStructuredData';
 import MobileBottomNav from '../components/mobile/MobileBottomNav';
 import PinterestPinCard from '../components/mobile/PinterestPinCard';
 import { uniqueDesigns } from '../components/mobile/uniqueDesigns.mjs';
+import {recordDesignInterest,rankDesigns,getDesignInterests,freshFeedSeed} from '../components/mobile/interestRank.mjs';
 import ProductStage from '../components/experience/ProductStage';
 import { useFavorites } from '../context/FavoritesContext';
 import { trackWhatsAppClick } from '../hooks/useAnalytics';
@@ -48,6 +49,7 @@ export default function ProductDetail() {
     let active = true;
     const preview = idOf(location.state?.product) === String(id) ? location.state.product : null;
     setProduct(preview);
+    if(preview)recordDesignInterest(preview);
     setLoading(!preview);
     setLoadError(false);
     setImgIdx(0);
@@ -61,6 +63,7 @@ export default function ProductDetail() {
           if (!active) return;
           if (!response.data?._id) throw new Error('Incomplete product details');
           setProduct(response.data);
+          recordDesignInterest(response.data);
           setLoading(false);
           setLoadError(false);
           if (response.data.quantityPricing?.length) {
@@ -88,21 +91,22 @@ export default function ProductDetail() {
       .then(response=>{
         if (!active) return;
         const products = Array.isArray(response.data) ? response.data : response.data?.result;
-        if (Array.isArray(products)) setRelated(uniqueDesigns(products.filter(item =>
-          String(item?._id) !== String(id) && idOf(item.category) === productCategory)).slice(0,18));
+        if (Array.isArray(products)) setRelated(rankDesigns(
+          uniqueDesigns(products.filter(item => String(item?._id) !== String(id))),
+          {seed:freshFeedSeed(),interests:getDesignInterests()}).slice(0,18));
       }).catch(()=>{});
     return () => {active=false;};
   }, [productCategory, id]);
 
   if (loading && !product) return (
-    <div className="sk-pinterest-home sk-pin-detail-page">
+    <div className="sk-pinterest-home sk-pin-detail-page sk-public-site">
       <div className="sk-pin-detail-head"><button type="button" className="sk-pin-round-action"
         onClick={()=>navigate(-1)} aria-label="Go back"><FaArrowLeft/></button></div>
       <div className="sk-pin-detail-loading" role="status">Opening your design…</div>
     </div>
   );
   if (!product) return (
-    <div className="sk-pinterest-home sk-pin-detail-page">
+    <div className="sk-pinterest-home sk-pin-detail-page sk-public-site">
       <div className="sk-pin-detail-head"><button type="button" className="sk-pin-round-action"
         onClick={()=>navigate('/')} aria-label="Back to gallery"><FaArrowLeft/></button></div>
       <div className="sk-pin-detail-error">
@@ -151,7 +155,7 @@ export default function ProductDetail() {
         image={images[0]} pathname={'/products/' + id}
         noIndex={location.pathname.startsWith('/product-view/')} />
       <ProductStructuredData product={product} />
-      <div className="sk-pinterest-home sk-pin-detail-page">
+      <div className="sk-pinterest-home sk-pin-detail-page sk-public-site">
         <header className="sk-pin-detail-head">
           <button type="button" className="sk-pin-round-action" aria-label="Back to designs"
             onClick={back}><FaArrowLeft/></button>
