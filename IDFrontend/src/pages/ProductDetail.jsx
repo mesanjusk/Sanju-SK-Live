@@ -6,6 +6,7 @@ import SEO from '../components/SEO';
 import ProductStructuredData from '../components/ProductStructuredData';
 import MobileBottomNav from '../components/mobile/MobileBottomNav';
 import PinterestPinCard from '../components/mobile/PinterestPinCard';
+import { uniqueDesigns } from '../components/mobile/uniqueDesigns.mjs';
 import ProductStage from '../components/experience/ProductStage';
 import { useFavorites } from '../context/FavoritesContext';
 import { trackWhatsAppClick } from '../hooks/useAnalytics';
@@ -87,8 +88,8 @@ export default function ProductDetail() {
       .then(response=>{
         if (!active) return;
         const products = Array.isArray(response.data) ? response.data : response.data?.result;
-        if (Array.isArray(products)) setRelated(products.filter(item =>
-          String(item?._id) !== String(id) && idOf(item.category) === productCategory).slice(0,18));
+        if (Array.isArray(products)) setRelated(uniqueDesigns(products.filter(item =>
+          String(item?._id) !== String(id) && idOf(item.category) === productCategory)).slice(0,18));
       }).catch(()=>{});
     return () => {active=false;};
   }, [productCategory, id]);

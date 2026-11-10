@@ -202,3 +202,89 @@
  color:#333;font-size:12px;font-weight:700;padding:10px 16px;}
 .sk-pin-feed-sentinel .sk-pin-show-more span {font-size:15px;margin-left:5px;}
 .sk-pin-feed-sentinel .sk-pin-show-more:focus-visible{outline:2px solid #7653a7;outline-offset:3px;}
+
+
+/* Shared SK Digital theme: white/charcoal/gold, using the actual finalized logo.
+   CSS animations only. Avoid legacy purple appearing during catalog hydration. */
+:root {
+  --sk-brand-canvas:#ffffff;
+  --sk-brand-ink:#202020;
+  --sk-brand-muted:#777777;
+  --sk-brand-accent:#b16a0e;
+  --sk-brand-line:#e7e3dc;
+}
+.sk-pinterest-home .sk-catalog-loading {
+  background:linear-gradient(140deg,#ffffff 0%,#f8f7f4 64%,#fdfaf4 100%);
+  border:1px solid var(--sk-brand-line);
+  box-shadow:0 5px 20px #231a0b0d;
+  color:var(--sk-brand-ink);
+}
+.sk-pinterest-home .sk-catalog-loading-copy strong { color:var(--sk-brand-ink); }
+.sk-pinterest-home .sk-catalog-loading-copy p { color:var(--sk-brand-muted); }
+.sk-pinterest-home .sk-print-press {
+  border-color:#3c3c3c;
+  background:linear-gradient(160deg,#606060,#2c2c2c);
+  box-shadow:0 6px 0 #d9d6d0,0 10px 15px #11111116;
+}
+.sk-pinterest-home .sk-print-press-top {
+  background:#fff;
+  box-shadow:inset 0 0 0 1px #d4d0c9;
+}
+.sk-print-press-logo {display:block;width:44px;height:24px;object-fit:contain;}
+.sk-pinterest-home .sk-print-press-slot {background:#171717;}
+.sk-pinterest-home .sk-print-press-foot {background:#474747;}
+.sk-pinterest-home .sk-print-paper {
+  border-color:#c8ae82;background:#fffdf8;box-shadow:0 3px 6px #241b1330;
+}
+.sk-pinterest-home .sk-print-paper-emblem,
+.sk-pinterest-home .sk-print-spark {color:var(--sk-brand-accent);}
+.sk-pinterest-home .sk-print-paper-line {background:#ddc6a3;}
+.sk-pinterest-home .sk-catalog-progress i {background:var(--sk-brand-accent);}
+.sk-pinterest-home .sk-catalog-retry {
+  border:1px solid #222;background:#222;color:#fff;
+}
+.sk-pin-call-reminder {
+  position:fixed;top:50%;right:10px;z-index:70;
+  transform:translateY(-50%);
+  width:min(225px,calc(100vw - 24px));
+  padding:14px;
+  background:#ffffffed;
+  border:1px solid var(--sk-brand-line);
+  border-radius:20px;
+  color:var(--sk-brand-ink);
+  box-shadow:0 12px 33px #00000024;
+  backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+}
+.sk-pin-call-dismiss {
+  display:grid;place-items:center;
+  position:absolute;top:9px;right:9px;
+  width:27px;height:27px;border-radius:50%;
+  color:#555;background:#f3f3f3;
+}
+.sk-pin-call-brand {
+  display:flex;align-items:center;gap:7px;
+  padding-right:20px;margin:0 0 13px;
+  color:var(--sk-brand-ink);
+  font-size:11px;font-weight:850;
+}
+.sk-pin-call-brand img {display:block;width:42px;height:30px;object-fit:contain;}
+.sk-pin-call-heading {margin:0 0 5px;font-size:13px;font-weight:850;line-height:1.3;}
+.sk-pin-call-subtitle {margin:0;color:#676767;font-size:11px;line-height:1.4;}
+.sk-pin-call-cta {
+  display:flex;align-items:center;justify-content:center;gap:7px;
+  width:100%;margin:12px 0 0;
+  padding:10px 8px;
+  border-radius:999px;background:#222;color:#fff;
+  text-decoration:none;font-size:11px;font-weight:800;
+}
+.sk-pin-call-cta svg {color:#e7bd78;}
+.sk-pin-call-cta:hover {background:#101010;}
+.sk-pin-call-dismiss:focus-visible,.sk-pin-call-cta:focus-visible {
+  outline:2px solid var(--sk-brand-accent);outline-offset:3px;
+}
+@media(max-width:420px) {.sk-pin-call-reminder{right:9px;width:190px;padding:12px;}}
+@media(prefers-reduced-motion:reduce) {
+  .sk-pinterest-home .sk-print-paper,
+  .sk-pinterest-home .sk-print-spark,
+  .sk-pinterest-home .sk-catalog-progress i {animation:none;}
+}

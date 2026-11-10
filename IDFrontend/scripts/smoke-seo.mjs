@@ -3,7 +3,7 @@ import fs from 'node:fs';
 import { readFileSync } from 'node:fs';
 import productHandler from '../api/product-seo.js';
 import sitemapHandler from '../api/sitemap-products.js';
-import { shuffleNextCycle, itemKey } from '../src/components/mobile/endlessOrder.mjs';
+import { uniqueDesigns, designId } from '../src/components/mobile/uniqueDesigns.mjs';
 const id='67b78c2180d7a4d5e21c9af0';
 const product={
   _id:id,title:'Premium Laser Cut Wedding Invitation',description:'Custom printed laser-cut wedding invitation with envelopes.',
@@ -152,21 +152,45 @@ assert(pinCss.includes('columns:2') && pinCss.includes('break-inside:avoid') &&
   'Two-column mobile masonry and related designs styling must exist');
 assert(pinCss.includes('prefers-reduced-motion:reduce'), 'Motion accessibility must be retained');
 const endlessSource=readFileSync(new URL('../src/components/mobile/EndlessPinterestFeed.jsx',import.meta.url),'utf8');
-assert(endlessSource.includes('shuffleNextCycle') && endlessSource.includes('IntersectionObserver') &&
-  endlessSource.includes('pins.map') && endlessSource.includes('BATCH_SIZE = 18'),
-  'Pinterest feed must extend in progressive batches and reshuffle after full cycles');
-assert(!homeSource.includes('End of collection'), 'The design collection must not stop at a finite end');
-const samplePins=['alpha','beta','gamma','delta','epsilon'].map(_id=>({_id}));
-let previousPins=samplePins;
-for(let cycle=0;cycle<8;cycle+=1) {
-  const nextPins=shuffleNextCycle(previousPins,()=>0.34);
-  assert.equal(nextPins.length,previousPins.length,'Full cycles must contain every design');
-  assert.equal(new Set(nextPins.map(itemKey)).size,samplePins.length,'No repeats within a shuffled cycle');
-  assert.notDeepEqual(nextPins.map(itemKey),previousPins.map(itemKey),'Each new cycle must be in a new order');
-  assert.notEqual(itemKey(nextPins[0]),itemKey(previousPins[previousPins.length-1]),
-    'Avoid immediate repeats at the boundary between two design cycles');
-  previousPins=nextPins;
-}
+const loadingSource=readFileSync(new URL('../src/components/mobile/CatalogLoadingState.jsx',import.meta.url),'utf8');
+assert(endlessSource.includes('uniqueDesigns') && endlessSource.includes('IntersectionObserver') &&
+  endlessSource.includes('uniqueProducts.slice(0, visibleCount)') &&
+  endlessSource.includes('BATCH_SIZE = 18'),
+  'Pinterest feed must show unique designs in progressive, finite batches');
+assert(!endlessSource.includes('shuffleNextCycle') && !endlessSource.includes('cursor.cycle'),
+  'Do not reintroduce repeated shuffled design cycles');
+assert(endlessSource.includes("You've seen all") &&
+  endlessSource.includes('Explore another category'),
+  'Once every design is shown, end the feed instead of looping');
+const duplicates=[
+  {_id:'A',images:['https://res.cloudinary.com/demo/image/upload/v1/card.jpg']},
+  {_id:'B',images:['https://res.cloudinary.com/demo/image/upload/v1/card.jpg?width=400']},
+  {_id:'A',images:['https://res.cloudinary.com/demo/image/upload/v1/other.jpg']},
+  {_id:'C',images:['https://res.cloudinary.com/demo/image/upload/v2/third.jpg']},
+  {_id:'D',images:['https://res.cloudinary.com/demo/image/upload/v2/third.jpg#frag']},
+  {_id:'E',images:[]},
+  {_id:'F',images:[]},
+  {_id:'',images:['https://res.cloudinary.com/demo/image/upload/v3/missing.jpg']},
+];
+const unique=uniqueDesigns(duplicates);
+assert.deepEqual(unique.map(designId),['A','C','E','F'],
+  'Remove repeated IDs and duplicate cover artwork, preserving designs without pictures');
+assert.equal(new Set(unique.map(designId)).size,unique.length,
+  'No design ID should repeat in the gallery');
+assert(homeSource.includes('distinctProducts.length') && homeSource.includes('products={distinctProducts}'),
+  'The visible design count and feed must use deduplicated products');
+assert(detailSource.includes('uniqueDesigns(products.filter('),
+  'Related designs must not repeat identical catalog artwork');
+assert(loadingSource.includes('/images/sk-digital-final.svg') &&
+  !loadingSource.includes('sk-print-press-mark'),
+  'Loading animation must show the finalized SK logo, not placeholder letters');
+assert(reminderSource.includes('sk-pin-call-reminder') &&
+  reminderSource.includes('/images/sk-digital-final.svg'),
+  'Call popup must use the same real SK monogram and unified layout');
+assert(pinCss.includes('--sk-brand-accent:#b16a0e') &&
+  pinCss.includes('.sk-pinterest-home .sk-catalog-loading') &&
+  pinCss.includes('.sk-pin-call-reminder'),
+  'Loading, logo and call popup must share charcoal/white/gold theme');
 assert(pinHeaderSource.includes('<FaWhatsapp aria-hidden="true"/>') && !pinHeaderSource.includes('<FaPlus'),
   'Header custom design action must show WhatsApp, not a plus');
 assert(pinHeaderSource.includes('sk-pin-brand-final-logo') &&
@@ -214,7 +238,7 @@ const vercelRules=JSON.parse(readFileSync(new URL('../vercel.json',import.meta.u
 assert(categoryGuideData.length>=9,'Require authored category content for observed catalog categories');
 assert(new Set(categoryGuideData.map(g=>g.slug)).size===categoryGuideData.length,'Category SEO guide slugs must be unique');
 assert(homeSource.includes('<CategorySeoBlurb name={selectedCategory.name} />') &&
-  endlessSource.includes('categoryById.get(itemKey(item.product.category))'),
+  endlessSource.includes('categoryById.get(itemKey(product.category))'),
   'SEO summary and category resolution must work for selected catalog categories');
 assert(guideSource.includes('getCategoryGuide') && guideSource.includes('Browse ' + "' + name + '"),
   'Every unknown live category needs a relevant no-fabrication fallback description');
