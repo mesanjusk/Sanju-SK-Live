@@ -126,7 +126,7 @@ const pinHeaderSource=readFileSync(new URL('../src/components/mobile/PinterestSt
 const pinCardSource=readFileSync(new URL('../src/components/mobile/PinterestPinCard.jsx',import.meta.url),'utf8');
 const pinCss=readFileSync(new URL('../src/components/mobile/pinterest-storefront.css',import.meta.url),'utf8');
 const detailSource=readFileSync(new URL('../src/pages/ProductDetail.jsx',import.meta.url),'utf8');
-const navSource=readFileSync(new URL('../src/components/mobile/MobileBottomNav.jsx',import.meta.url),'utf8');
+const pinNavSource=readFileSync(new URL('../src/components/mobile/MobileBottomNav.jsx',import.meta.url),'utf8');
 const reminderSource=readFileSync(new URL('../src/components/mobile/CallReminder.jsx',import.meta.url),'utf8');
 const appSource=readFileSync(new URL('../src/App.jsx',import.meta.url),'utf8');
 const festiveCss=readFileSync(new URL('../src/components/mobile/festive-home.css',import.meta.url),'utf8');
@@ -158,11 +158,11 @@ assert(homeSource.indexOf('sk-pin-about-intro') > homeSource.indexOf('sk-store-f
   'Gondia SEO heading and descriptive text must move into expandable footer');
 assert(homeSource.includes('<ServiceGallery />') && homeSource.includes('<FAQSection />') &&
   homeSource.includes('<LocalContactFooter />'), 'Service links, FAQs and contact must survive redesign');
-assert(navSource.includes("variant === 'pinterest'") && navSource.includes('FaHome') &&
-  navSource.includes('FaSearch') && navSource.includes('FaHeart') &&
-  navSource.includes('sk-pin-bottom-nav'), 'Floating dock must offer Home Search and Saved');
-assert(navSource.includes('FaWhatsapp') && navSource.includes('FaPhoneAlt') &&
-  navSource.includes('is-hidden'), 'Existing contact mode and auto-hide support must remain intact');
+assert(pinNavSource.includes("variant === 'pinterest'") && pinNavSource.includes('FaHome') &&
+  pinNavSource.includes('FaSearch') && pinNavSource.includes('FaHeart') &&
+  pinNavSource.includes('sk-pin-bottom-nav'), 'Floating dock must offer Home Search and Saved');
+assert(pinNavSource.includes('FaWhatsapp') && pinNavSource.includes('FaPhoneAlt') &&
+  pinNavSource.includes('is-hidden'), 'Existing contact mode and auto-hide support must remain intact');
 assert(detailSource.includes('sk-pin-detail-visual') && detailSource.includes('sk-pin-detail-thumbs') &&
   detailSource.includes('More ideas like this') && detailSource.includes('sk-pin-detail-related'),
   'Product click should show immersive photo gallery and related designs');
