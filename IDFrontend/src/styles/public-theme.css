@@ -234,3 +234,17 @@
 .sk-public-site .sk-category-view-all {
   background:#222;color:#fff;border-radius:999px;padding:7px 11px;font-weight:750;font-size:11px;
 }
+
+/* Same gold WhatsApp accent and compact action spacing on every public route. */
+.sk-public-site .sk-pin-header-actions .sk-pin-top-action:first-child {
+  color:var(--sk-ui-gold);
+}
+.sk-public-site .sk-pin-header-actions .sk-pin-top-action:first-child:hover {
+  background:#f8f5f0;
+}
+.sk-public-site .sk-pin-detail-head .sk-pin-detail-seller {
+  flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+}
+.sk-public-site .sk-pin-detail-head .sk-pin-detail-actions {
+  flex:none;gap:5px;
+}
