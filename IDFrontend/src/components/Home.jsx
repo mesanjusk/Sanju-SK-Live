@@ -1,12 +1,11 @@
 import { useDeferredValue, useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { FaArrowRight, FaChevronDown, FaPlay, FaThLarge } from 'react-icons/fa';
+import { FaArrowRight, FaChevronDown, FaPlay } from 'react-icons/fa';
 import api from '../api';
 import seo from '../config/local-seo.json';
-import FestiveStorefrontHero from './mobile/FestiveStorefrontHero';
-import { getCategoryTheme } from './mobile/categoryThemes';
-import CompactProductCard from './mobile/CompactProductCard';
-import CategoryProductCarousel from './mobile/CategoryProductCarousel';
+import PinterestHeader from './mobile/PinterestHeader';
+import PinterestPin from './mobile/PinterestPin';
+import './mobile/pinterest-home.css';
 import CategorySeoBlurb from './mobile/CategorySeoBlurb';
 import VideoFeedCard from './mobile/VideoFeedCard';
 import MobileBottomNav from './mobile/MobileBottomNav';
@@ -31,7 +30,6 @@ export default function Home() {
   const [selectedSubcategory, setSelectedSubcategory] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [visibleCount, setVisibleCount] = useState(12);
-  const [showAllCategories, setShowAllCategories] = useState(false);
   const [showVideos, setShowVideos] = useState(false);
   const [showBottomNav, setShowBottomNav] = useState(true);
   const deferredSearch = useDeferredValue(searchTerm);
@@ -39,13 +37,6 @@ export default function Home() {
   // All public enquiry links use the verified Gondia business WhatsApp number.
   const whatsappNumber = String(seo.phone || '+919372333633').replace(/\D/g, '');
   const phoneNumber = seo.phone;
-  const activeTheme = getCategoryTheme(selectedCategory?.name);
-  const merchStyles = {
-    '--sk-theme-bg': activeTheme.background,
-    '--sk-theme-accent': activeTheme.accent,
-    '--sk-theme-ink': activeTheme.ink,
-    '--sk-theme-soft': activeTheme.soft,
-  };
 
   useEffect(() => {
     let active = true;
@@ -161,18 +152,18 @@ export default function Home() {
   }, [listings, deferredSearch, selectedCategory, selectedSubcategory, categoryById]);
 
   const focused = Boolean(selectedCategory || deferredSearch.trim());
-  const visibleSections = showAllCategories ? groupedProducts : groupedProducts.slice(0, 6);
+  const feedProducts = focused ? filteredProducts : listings;
 
-  useEffect(() => { setVisibleCount(12); }, [selectedCategory, selectedSubcategory, deferredSearch]);
+  useEffect(() => { setVisibleCount(16); }, [selectedCategory, selectedSubcategory, deferredSearch]);
   useEffect(() => {
-    if (!focused || visibleCount >= filteredProducts.length || !loadMoreRef.current) return undefined;
+    if (visibleCount >= feedProducts.length || !loadMoreRef.current) return undefined;
     if (!('IntersectionObserver' in window)) return undefined;
     const observer = new IntersectionObserver(([entry]) => {
-      if (entry.isIntersecting) setVisibleCount(count => Math.min(count + 12, filteredProducts.length));
+      if (entry.isIntersecting) setVisibleCount(count => Math.min(count + 16, feedProducts.length));
     }, { rootMargin: '350px 0px', threshold: 0 });
     observer.observe(loadMoreRef.current);
     return () => observer.disconnect();
-  }, [focused, visibleCount, filteredProducts.length]);
+  }, [visibleCount, feedProducts.length]);
 
   // Scroll-aware shopping bar: disappears as customers browse down, reappears
   // as they scroll up or approach the start/end. No floating More/Top buttons.
@@ -216,6 +207,7 @@ export default function Home() {
     setSearchTerm('');
     setSelectedSubcategory(null);
     setSelectedCategory(category || null);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const scrollToProducts = () => {
@@ -244,133 +236,56 @@ export default function Home() {
   };
 
   return (
-    <div className={'sk-storefront sk-festive-home sk-theme-' + activeTheme.key + ' min-h-screen pb-0'} style={merchStyles}>
-      <FestiveStorefrontHero
-        listings={listings}
+    <div className="sk-pinterest-site sk-storefront min-h-screen">
+      <PinterestHeader
         categories={categories}
+        selectedCategory={selectedCategory}
         catalogReady={catalogReady}
-        catalogPending={catalogPending}
         searchTerm={searchTerm}
         onSearchChange={handleSearchChange}
-        selectedCategory={selectedCategory}
-        theme={activeTheme}
-        onCategorySelect={handleCategorySelect}
-        onTabCategorySelect={handleTabCategorySelect}
+        onCategorySelect={handleTabCategorySelect}
         whatsappNumber={whatsappNumber}
         phoneNumber={phoneNumber}
       />
-      <main className="mx-auto w-full max-w-6xl py-1">
-        {visibleSubcategories.length > 0 && (
-          <section className="sk-subcategory-section px-4 py-3 sm:px-6" aria-label="Browse subcategories">
-            <div className="sk-subcategory-title">
-              <h2>Explore {selectedCategory?.name} styles</h2>
-              <span>Pick your favourite</span>
-            </div>
-            <div className="sk-subcategory-rail">
-              <button type="button" onClick={() => setSelectedSubcategory(null)}
-                aria-pressed={!selectedSubcategory}
-                className={'sk-subcategory-card' + (!selectedSubcategory ? ' is-active' : '')}>
-                <span className="sk-subcategory-image"><FaThLarge aria-hidden="true" /></span>
-                <span>All styles</span>
-              </button>
-              {visibleSubcategories.map((sub) => {
-                const pic = sub.imageUrl || sub.image || (Array.isArray(sub.images) ? sub.images[0] : null);
-                const active = idOf(sub) === idOf(selectedSubcategory);
-                return (
-                  <button type="button" key={idOf(sub)} onClick={() => setSelectedSubcategory(sub)}
-                    aria-pressed={active} className={'sk-subcategory-card' + (active ? ' is-active' : '')}>
-                    <span className="sk-subcategory-image">
-                      {pic ? <img src={pic} alt={sub.name + ' design category'} loading="lazy" decoding="async" />
-                        : <FaThLarge aria-hidden="true" />}
-                    </span>
-                    <span>{sub.name}</span>
-                  </button>
-                );
-              })}
-            </div>
-          </section>
-        )}
-
-        <div id="sk-products" className="scroll-mt-4 px-4 pb-6 sm:px-6">
-          {!catalogReady ? (
-            <CatalogLoadingState error={catalogFailed && !catalogPending} onRetry={retryCatalog} />
-          ) : focused ? (
-            <section aria-labelledby="focused-products-heading" className="mt-5">
-              <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-                <div>
-                  <p className="text-[10px] font-bold uppercase tracking-[.16em] text-[#9877b6]">YOUR SELECTION</p>
-                  <h2 id="focused-products-heading" className="mt-1 text-xl font-extrabold text-[#49315f]">
-                    {selectedCategory?.name || 'Search results'}
-                  </h2>
-                  <p className="text-xs text-[#8a7996]">{filteredProducts.length} designs {deferredSearch.trim() ? 'matching your search' : 'available'}</p>
-                </div>
-                <button type="button" onClick={() => { setSelectedCategory(null); setSelectedSubcategory(null); setSearchTerm(''); }}
-                  className="rounded-full border border-[#ded2eb] bg-white px-4 py-2 text-xs font-bold text-[#715496]">
-                  ← All categories
-                </button>
+      <main id="sk-products" className="sk-pinterest-main" aria-label="Design inspiration gallery">
+        {!catalogReady ? (
+          <CatalogLoadingState error={catalogFailed && !catalogPending} onRetry={retryCatalog} />
+        ) : (
+          <>
+            {focused && (
+              <div className="sk-pinterest-filter-meta">
+                <h1>{selectedCategory?.name || 'Search designs'}</h1>
+                <span>{feedProducts.length} designs</span>
+                <button type="button" onClick={() => {
+                  setSelectedCategory(null);setSelectedSubcategory(null);setSearchTerm('');
+                }}>Clear</button>
               </div>
-              {selectedCategory && <CategorySeoBlurb name={selectedCategory.name} />}
-              {filteredProducts.length ? (
-                <>
-                  <div className="grid grid-cols-3 gap-2 sm:gap-3">
-                    {filteredProducts.slice(0, visibleCount).map((product) => (
-                      <CompactProductCard key={product._id} product={product}
-                        categoryName={categoryById.get(idOf(product.category))?.name || ''}
-                        whatsappNumber={whatsappNumber} />
-                    ))}
-                  </div>
-                  {filteredProducts.length > visibleCount && (
-                    <div ref={loadMoreRef} className="mt-5 text-center">
-                      <button type="button" onClick={() => setVisibleCount(n => Math.min(n + 12, filteredProducts.length))}
-                        className="rounded-full border border-[#d8c8ec] bg-[#f0e8fc] px-6 py-2.5 text-sm font-extrabold text-[#74559f]">
-                        Load more designs ({filteredProducts.length - visibleCount} remaining)
-                      </button>
-                    </div>
-                  )}
-                </>
-              ) : (
-                <div className="rounded-2xl border border-[#e5dcef] bg-white p-7 text-center text-sm text-[#567462]">
-                  No designs matched. Try a different category or search.
+            )}
+            {selectedCategory && <CategorySeoBlurb name={selectedCategory.name} />}
+            {feedProducts.length ? (
+              <>
+                <div className="sk-pinterest-masonry" aria-label="Browse designs">
+                  {feedProducts.slice(0, visibleCount).map((product, index) => (
+                    <PinterestPin key={product._id} product={product}
+                      index={index} whatsappNumber={whatsappNumber}
+                      categoryName={categoryById.get(idOf(product.category))?.name || product.category?.name || ''} />
+                  ))}
                 </div>
-              )}
-            </section>
-          ) : groupedProducts.length ? (
-            <div className="space-y-5 pt-3">
-              {visibleSections.map(section => (
-                <section key={section.id} aria-labelledby={'category-' + section.id}>
-                  <div className="mb-3 flex items-end justify-between gap-3">
-                    <div>
-                      <p className="text-[10px] font-extrabold uppercase tracking-[.17em] text-[#9779b3]">HANDPICKED FOR YOU</p>
-                      <h2 id={'category-' + section.id} className="mt-1 text-lg font-extrabold text-[#463359] sm:text-xl">{section.name}</h2>
-                      <p className="text-[11px] text-[#857491]">{section.products.length} designs</p>
-                    </div>
-                    {section.category ? (
-                      <button type="button" onClick={() => showCategory(section.category)}
-                        className="inline-flex shrink-0 items-center gap-1 text-xs font-extrabold text-[#74559f]">
-                        View all <FaArrowRight aria-hidden="true" className="text-[10px]" />
-                      </button>
-                    ) : (
-                      <Link to="/products" className="text-xs font-extrabold text-[#74559f]">View all →</Link>
-                    )}
+                {visibleCount < feedProducts.length && (
+                  <div ref={loadMoreRef} className="sk-pinterest-load-more">
+                    <button type="button" onClick={() => setVisibleCount(value => Math.min(value + 16, feedProducts.length))}>
+                      See more designs
+                    </button>
                   </div>
-                  <CategorySeoBlurb name={section.name} />
-                  <CategoryProductCarousel section={section} whatsappNumber={whatsappNumber} />
-                </section>
-              ))}
-              {groupedProducts.length > 6 && (
-                <div className="sk-feed-more-categories">
-                  <button type="button" onClick={() => setShowAllCategories(v => !v)}
-                    aria-expanded={showAllCategories} aria-controls="sk-products"
-                    className="sk-feed-more-button">
-                    <span>{showAllCategories ? 'Show fewer categories' : 'View all ' + groupedProducts.length + ' categories'}</span>
-                    <FaChevronDown aria-hidden="true" className={showAllCategories ? 'rotate-180' : ''} />
-                  </button>
-                </div>
-              )}
-            </div>
-          ) : null}
-        </div>
-
+                )}
+              </>
+            ) : (
+              <div className="sk-pinterest-empty">
+                No designs matched your selection. Try another search or category.
+              </div>
+            )}
+          </>
+        )}
       </main>
       <footer id="sk-store-footer" className="sk-store-footer" aria-label="SANJU SK Digital business information">
         <details id="sk-business-information" className="sk-store-footer-details group">
@@ -379,6 +294,11 @@ export default function Home() {
             <FaChevronDown aria-hidden="true" className="sk-store-footer-chevron" />
           </summary>
           <div className="sk-store-footer-expanded">
+            <section className="sk-pinterest-seo-intro" aria-labelledby="sk-studio-heading">
+              <p className="sk-pinterest-studio-kicker">GONDIA DESIGN STUDIO · SINCE 2006</p>
+              <h2 id="sk-studio-heading">Wedding cards, signage &amp; <em>flex printing in Gondia.</em></h2>
+              <p>Laser-cut wedding invitations, 3D LED acrylic signs, corporate awards and banners — designed for Gondia and delivered across nearby cities.</p>
+            </section>
         <div className="sk-store-footer-heading">
           <div className="sk-store-footer-mark" aria-hidden="true">SK</div>
           <div>
@@ -422,8 +342,7 @@ export default function Home() {
           </div>
         </details>
       </footer>
-      <MobileBottomNav whatsappNumber={whatsappNumber} phoneNumber={phoneNumber}
-        visible={showBottomNav} />
+      <MobileBottomNav visible={showBottomNav} />
     </div>
   );
 }

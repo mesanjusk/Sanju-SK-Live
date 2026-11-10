@@ -1,31 +1,26 @@
 import { NavLink } from 'react-router-dom';
-import { FaPhoneAlt, FaHeart, FaWhatsapp } from 'react-icons/fa';
+import { FaHome, FaSearch, FaUserCircle } from 'react-icons/fa';
 
-// Compact floating pill, with the existing scroll-aware visibility behaviour.
- // The footer is no longer occupied by a full-width fixed navigation bar.
-export default function MobileBottomNav({ whatsappNumber = '919372333633', phoneNumber = '+919372333633', visible = true }) {
-  const wa = String(whatsappNumber).replace(/\D/g, '') || '919372333633';
-  const digits = String(phoneNumber).replace(/\D/g, '') || '919372333633';
-  const dial = 'tel:' + (digits.length === 10 ? '+91' + digits : '+' + digits);
-  const chat = 'https://wa.me/' + wa + '?text=' +
-    encodeURIComponent('Hi Sanju SK Digital, I would like to enquire about your products.');
+export default function MobileBottomNav({ visible = true }) {
+  const goToSearch = () => {
+    document.getElementById('sk-pinterest-search')?.focus();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
   return (
-    <nav className={'sk-mobile-bottom-nav sk-floating-actions' + (visible ? ' is-visible' : ' is-hidden')}
-      aria-label="Contact and saved designs" aria-hidden={!visible}>
-      <div className="sk-mobile-bottom-inner">
-        <a href={chat} target="_blank" rel="noopener noreferrer"
-          className="sk-mobile-bottom-link" tabIndex={visible ? 0 : -1} aria-label="WhatsApp SANJU SK Digital">
-          <FaWhatsapp aria-hidden="true" />
-        </a>
-        <a href={dial} className="sk-mobile-bottom-link" tabIndex={visible ? 0 : -1}
-          aria-label="Call SANJU SK Digital">
-          <FaPhoneAlt aria-hidden="true" />
-        </a>
-        <NavLink to="/favorites" aria-label="Saved designs" tabIndex={visible ? 0 : -1}
-          className={({isActive}) => 'sk-mobile-bottom-link' + (isActive ? ' is-active' : '')}>
-          <FaHeart aria-hidden="true" />
-        </NavLink>
-      </div>
+    <nav aria-label="Pinterest-style mobile navigation"
+      aria-hidden={!visible} className={'sk-pin-bottom-dock'+(visible?' is-visible':' is-hidden')}>
+      <NavLink to="/" end aria-label="Home" tabIndex={visible ? 0 : -1}
+        className={({isActive}) => 'sk-pin-bottom-icon'+(isActive?' is-active':'')}>
+        <FaHome aria-hidden="true" />
+      </NavLink>
+      <button type="button" onClick={goToSearch} aria-label="Search designs"
+        tabIndex={visible ? 0 : -1} className="sk-pin-bottom-icon">
+        <FaSearch aria-hidden="true" />
+      </button>
+      <NavLink to="/favorites" aria-label="Saved designs" tabIndex={visible ? 0 : -1}
+        className={({isActive}) => 'sk-pin-bottom-icon'+(isActive?' is-active':'')}>
+        <FaUserCircle aria-hidden="true" />
+      </NavLink>
     </nav>
   );
 }
