@@ -2,6 +2,8 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
 import './index.css';
+import './components/mobile/pinterest-storefront.css';
+import './styles/public-storefront.css';
 import { FavoritesProvider } from './context/FavoritesContext';
 import { CartProvider } from './context/CartContext';
 import ErrorBoundary from './components/common/ErrorBoundary';
