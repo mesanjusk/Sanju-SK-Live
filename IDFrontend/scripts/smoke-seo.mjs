@@ -246,7 +246,7 @@ assert(guideSource.includes('getCategoryGuide') && guideSource.includes('Browse 
   'Every unknown live category needs a relevant no-fabrication fallback description');
 assert(festiveCss.includes('Floating three-icon dock') && pinCss.includes('.sk-pin-bottom-nav'),
   'Keep a floating quick dock, updated to Home Search Saved for Pinterest view');
-assert(navSource.includes('sk-floating-actions') && navSource.includes('visible = true'),
+assert(navSource.includes('sk-floating-actions') && navSource.includes('visible=true'),
   'Floating actions must keep scroll-aware show/hide state');
 const newPages=categoryGuideData.filter(g=>!g.existingUrl);
 assert(newPages.length>=7,'Require new helpful indexable pages in addition to existing service pages');
