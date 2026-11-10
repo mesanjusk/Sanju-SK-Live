@@ -340,6 +340,7 @@ assert(robotsContent.includes('Sitemap: https://www.sanjusk.in/sitemap-products.
 const sharedTheme=readFileSync(new URL('../src/styles/public-theme.css',import.meta.url),'utf8');
 const innerHeader=readFileSync(new URL('../src/components/mobile/MobileHeader.jsx',import.meta.url),'utf8');
 const savedMasonryPage=readFileSync(new URL('../src/components/Favorites.jsx',import.meta.url),'utf8');
+const savedPage=savedMasonryPage;
 const favoritesContext=readFileSync(new URL('../src/context/FavoritesContext.jsx',import.meta.url),'utf8');
 const catalogPage=readFileSync(new URL('../src/pages/ProductListing.jsx',import.meta.url),'utf8');
 const categoryListPage=readFileSync(new URL('../src/components/allCategory.jsx',import.meta.url),'utf8');
