@@ -4,6 +4,7 @@ import { readFileSync } from 'node:fs';
 import productHandler from '../api/product-seo.js';
 import sitemapHandler from '../api/sitemap-products.js';
 import { uniqueDesigns, designId } from '../src/components/mobile/uniqueDesigns.mjs';
+import {rankDesigns,similarityScore} from '../src/components/mobile/interestRank.mjs';
 const id='67b78c2180d7a4d5e21c9af0';
 const product={
   _id:id,title:'Premium Laser Cut Wedding Invitation',description:'Custom printed laser-cut wedding invitation with envelopes.',
@@ -159,9 +160,10 @@ assert(endlessSource.includes('uniqueDesigns') && endlessSource.includes('Inters
   'Pinterest feed must show unique designs in progressive, finite batches');
 assert(!endlessSource.includes('shuffleNextCycle') && !endlessSource.includes('cursor.cycle'),
   'Do not reintroduce repeated shuffled design cycles');
-assert(endlessSource.includes("You've seen all") &&
-  endlessSource.includes('Explore another category'),
-  'Once every design is shown, end the feed instead of looping');
+assert(!endlessSource.includes("You've seen all") &&
+  !endlessSource.includes('Explore another category') &&
+  endlessSource.includes(') : null}'),
+  'End the feed silently without repeating designs or showing a count banner');
 const duplicates=[
   {_id:'A',images:['https://res.cloudinary.com/demo/image/upload/v1/card.jpg']},
   {_id:'B',images:['https://res.cloudinary.com/demo/image/upload/v1/card.jpg?width=400']},
@@ -177,7 +179,7 @@ assert.deepEqual(unique.map(designId),['A','C','E','F'],
   'Remove repeated IDs and duplicate cover artwork, preserving designs without pictures');
 assert.equal(new Set(unique.map(designId)).size,unique.length,
   'No design ID should repeat in the gallery');
-assert(homeSource.includes('distinctProducts.length') && homeSource.includes('products={distinctProducts}'),
+assert(homeSource.includes('distinctProducts.length') && homeSource.includes('products={orderedProducts}'),
   'The visible design count and feed must use deduplicated products');
 assert(detailSource.includes('uniqueDesigns(products.filter('),
   'Related designs must not repeat identical catalog artwork');
@@ -290,6 +292,43 @@ assert(loadingComponentSource.includes('sk-print-press') && loadingComponentSour
 assert(festiveCss.includes('@keyframes sk-paper-print') && festiveCss.includes('@media (prefers-reduced-motion:reduce)'),
   'CSS-only print animation must respect reduced-motion settings');
 
+
+const rankedSample=[
+  {_id:'a',category:'wedding',title:'Rose wedding invitation',description:'laser cut'},
+  {_id:'b',category:'wedding',title:'Traditional floral invite',description:'laser cut'},
+  {_id:'c',category:'signage',title:'Gold acrylic sign',description:'outdoor'},
+  {_id:'d',category:'trophies',title:'School trophy',description:'awards'},
+  {_id:'e',category:'birthday',title:'Birthday invitation',description:'balloons'},
+  {_id:'f',category:'gifts',title:'Gift box',description:'hamper'},
+];
+const selected=[{id:'a',category:'wedding',title:'Rose wedding invitation',description:'laser cut',weight:1}];
+assert(similarityScore(rankedSample[1],selected)>similarityScore(rankedSample[3],selected),
+  'Similar wedding designs should outrank unrelated products after selection');
+const shuffleA=rankDesigns(rankedSample,{seed:'a1'}).map(p=>p._id);
+const shuffleB=rankDesigns(rankedSample,{seed:'b2'}).map(p=>p._id);
+assert.notDeepEqual(shuffleA,shuffleB,'Different visitor seeds should change the initial product order');
+assert.deepEqual(rankDesigns(rankedSample,{seed:'a1'}).map(p=>p._id),shuffleA,
+  'Within a page visit, product positions must remain stable until interactions change');
+assert(homeSource.includes('freshFeedSeed')&&homeSource.includes('getDesignInterests')&&
+  homeSource.includes("fetch('/api/recommendations'"),
+  'Use per-refresh shuffling and optional Gemini reranking, retaining local fallback');
+assert(pinCardSource.includes('recordDesignInterest')&&detailSource.includes('recordDesignInterest'),
+  'Clicked, saved and opened designs must inform future recommendations');
+const geminiEndpoint=readFileSync(new URL('../api/recommendations.js',import.meta.url),'utf8');
+assert(geminiEndpoint.includes('process.env.GEMINI_API_KEY') &&
+  geminiEndpoint.includes("mode:'local'") && geminiEndpoint.includes('x-goog-api-key') &&
+  geminiEndpoint.includes('allowed.has(id)'),
+  'Gemini must run server-side, limit results to real catalog IDs, and fall back without an API key');
+const sharedTheme=readFileSync(new URL('../src/styles/public-storefront.css',import.meta.url),'utf8');
+const savedPage=readFileSync(new URL('../src/components/Favorites.jsx',import.meta.url),'utf8');
+assert(sharedTheme.includes('.sk-public-site') && sharedTheme.includes('#202020') &&
+  savedPage.includes('sk-public-site') && savedPage.includes('sk-pin-masonry'),
+  'All public routes and saved/liked pages must use one Pinterest theme');
+assert(!savedPage.includes("text-red-500") && !savedPage.includes('bg-[#edf2e8]'),
+  'Saved/liked route must not show legacy red/green tiles');
+assert(pinNavSource.includes("variant='pinterest'") &&
+  pinNavSource.includes('is-active') && pinNavSource.includes('useLocation'),
+  'Use the same floating Home Search Saved controls and active state on all routes');
 const routeMetaSource=readFileSync(new URL('../src/config/routeMeta.js',import.meta.url),'utf8');
 const sitemapXmlRoutes=siteMap;
 assert(!sitemapXmlRoutes.includes('https://www.sanjusk.in/home1') &&
