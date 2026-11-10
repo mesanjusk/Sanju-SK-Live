@@ -167,3 +167,17 @@
 .sk-pin-top-shell .sk-pin-category-tab:focus-visible,
 .sk-pin-card button:focus-visible,.sk-pin-card a:focus-visible,
 .sk-pin-detail-page button:focus-visible,.sk-pin-detail-page a:focus-visible{outline:2px solid #7d56a2;outline-offset:2px;}
+
+.sk-pin-detail-page .sk-mobile-bottom-nav.sk-floating-actions.sk-pin-bottom-nav {
+  left:50%;right:auto;bottom:calc(env(safe-area-inset-bottom,0px) + 16px);
+  width:auto;transform:translateX(-50%);padding:6px;border:0;border-radius:26px;background:#fff;
+  box-shadow:0 6px 25px #0002;
+}
+.sk-pin-detail-page .sk-pin-bottom-nav .sk-mobile-bottom-inner{gap:4px;}
+.sk-pin-detail-page .sk-pin-bottom-nav .sk-mobile-bottom-link{
+  width:59px;height:52px;min-height:52px;border-radius:18px;background:#fff;color:#171717;font-size:21px;
+}
+.sk-pin-detail-page .sk-pin-bottom-nav .sk-mobile-bottom-link:first-child{background:#191919;color:#fff;}
+.sk-pin-detail-page .sk-mobile-bottom-nav.sk-floating-actions.sk-pin-bottom-nav.is-hidden {
+  transform:translate(-50%,calc(100% + 28px));
+}
