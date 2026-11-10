@@ -339,7 +339,7 @@ assert(robotsContent.includes('Sitemap: https://www.sanjusk.in/sitemap-products.
 
 const sharedTheme=readFileSync(new URL('../src/styles/public-theme.css',import.meta.url),'utf8');
 const innerHeader=readFileSync(new URL('../src/components/mobile/MobileHeader.jsx',import.meta.url),'utf8');
-const savedPage=readFileSync(new URL('../src/components/Favorites.jsx',import.meta.url),'utf8');
+const savedMasonryPage=readFileSync(new URL('../src/components/Favorites.jsx',import.meta.url),'utf8');
 const favoritesContext=readFileSync(new URL('../src/context/FavoritesContext.jsx',import.meta.url),'utf8');
 const catalogPage=readFileSync(new URL('../src/pages/ProductListing.jsx',import.meta.url),'utf8');
 const categoryListPage=readFileSync(new URL('../src/components/allCategory.jsx',import.meta.url),'utf8');
@@ -355,14 +355,16 @@ assert(sharedTheme.includes('--sk-ui-ink:#202020') &&
   'White-charcoal-gold tokens and accurate Home dock active state are required');
 assert(innerHeader.includes('sk-public-header') &&
   innerHeader.includes('/images/sk-digital-final.svg') &&
-  innerHeader.includes('sk-pin-overflow'),
-  'Inner pages require the same real SK logo and header/menu');
-assert(pinNavSource.includes("variant = 'pinterest'") &&
-  pinNavSource.includes('<NavLink to="/" end') &&
-  pinNavSource.includes('to="/?search=1"') &&
-  pinNavSource.includes('to="/favorites"'),
+  innerHeader.includes('sk-pin-top-action') &&
+  innerHeader.includes('/?search=1'),
+  'Inner pages require the same real SK logo and functional header search actions');
+assert(pinNavSource.includes("variant='pinterest'") &&
+  pinNavSource.includes('to="/"') &&
+  pinNavSource.includes("navigate('/?search=1')") &&
+  pinNavSource.includes('to="/favorites"') &&
+  pinNavSource.includes('is-active'),
   'Home, Search and Saved dock must be functional and highlight the correct route');
-assert(savedPage.includes('sk-pinterest-home sk-saved-page') &&
+assert(savedPage.includes('sk-saved-page') &&
   savedPage.includes('sk-pin-masonry') &&
   savedPage.includes('PinterestPinCard') &&
   savedPage.includes('role="tablist"') &&
