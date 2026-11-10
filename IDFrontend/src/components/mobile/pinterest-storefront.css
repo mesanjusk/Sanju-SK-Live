@@ -181,3 +181,16 @@
 .sk-pin-detail-page .sk-mobile-bottom-nav.sk-floating-actions.sk-pin-bottom-nav.is-hidden {
   transform:translate(-50%,calc(100% + 28px));
 }
+
+/* Final SK Digital monogram: the preserved gold vector replaces placeholder letters. */
+.sk-pin-brand .sk-pin-brand-final-logo {display:block;flex:0 0 59px;width:59px;height:43px;object-fit:contain;}
+.sk-pin-brand .sk-pin-brand-name {min-width:0;display:block;font-size:17px;letter-spacing:-.045em;}
+.sk-pin-brand .sk-pin-brand-name small {font-size:7px;letter-spacing:.13em;font-weight:750;}
+.sk-pin-header-actions .sk-pin-top-action:first-child {color:#168c59;}
+.sk-pin-header-actions .sk-pin-top-action:first-child:hover {background:#ecf9f1;}
+.sk-store-footer-final-logo {width:65px;height:47px;object-fit:contain;flex:none;}
+@media(max-width:360px) {
+ .sk-pin-brand .sk-pin-brand-final-logo {flex-basis:52px;width:52px;height:39px;}
+ .sk-pin-brand .sk-pin-brand-name {font-size:15px;}
+ .sk-pin-brand .sk-pin-brand-name small {font-size:6px;}
+}

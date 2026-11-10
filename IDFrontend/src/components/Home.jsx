@@ -326,7 +326,8 @@ export default function Home() {
               </a>
             </section>
         <div className="sk-store-footer-heading">
-          <div className="sk-store-footer-mark" aria-hidden="true">SK</div>
+          <img className="sk-store-footer-final-logo" src="/images/sk-digital-final.svg"
+            alt="SK Digital logo" width="65" height="47" loading="lazy" />
           <div>
             <p className="sk-store-footer-brand">SANJU SK Digital <span>· Mahi Creation</span></p>
             <p className="sk-store-footer-caption">Personalised printing & gifting from Gondia, Maharashtra</p>
