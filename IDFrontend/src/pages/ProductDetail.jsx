@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate, useLocation, Link } from 'react-router-dom';
-import { FaArrowLeft, FaChevronLeft, FaChevronRight, FaHeart, FaRegHeart, FaShare, FaWhatsapp, FaYoutube } from 'react-icons/fa';
+import { FaArrowLeft, FaChevronLeft, FaChevronRight, FaHeart, FaRegHeart, FaRegThumbsUp, FaThumbsUp, FaShare, FaWhatsapp, FaYoutube } from 'react-icons/fa';
 import api from '../api';
 import SEO from '../components/SEO';
 import ProductStructuredData from '../components/ProductStructuredData';
@@ -42,7 +42,7 @@ export default function ProductDetail() {
   const [categoryName, setCategoryName] = useState('');
   const [related, setRelated] = useState([]);
   const [showVideo, setShowVideo] = useState(false);
-  const { favorites, toggleFavorite } = useFavorites();
+  const { favorites, liked, toggleFavorite, toggleLiked } = useFavorites();
 
   useEffect(() => {
     let active = true;
@@ -120,6 +120,7 @@ export default function ProductDetail() {
   const activeIndex = Math.min(imgIdx,Math.max(0,images.length-1));
   const image = images[activeIndex] || null;
   const isSaved = favorites.some(item=>String(item._id)===String(product._id));
+  const isLiked = liked.some(item=>String(item._id)===String(product._id));
   const price = getPriceForQty(product,quantity);
   const total = price !== null ? price*quantity : null;
   const tiers = Array.isArray(product.quantityPricing) ? product.quantityPricing : [];
@@ -158,6 +159,11 @@ export default function ProductDetail() {
           <div className="sk-pin-detail-actions">
             <button type="button" className="sk-pin-round-action" aria-label="Share this design"
               onClick={share}><FaShare/></button>
+            <button type="button" className={'sk-pin-round-action' + (isLiked?' sk-pin-detail-fav':'')}
+              aria-pressed={isLiked} aria-label={isLiked?'Unlike this design':'Like this design'}
+              onClick={()=>toggleLiked(product)}>
+              {isLiked?<FaThumbsUp/>:<FaRegThumbsUp/>}
+            </button>
             <button type="button" className={'sk-pin-round-action' + (isSaved?' sk-pin-detail-fav':'')}
               aria-pressed={isSaved} aria-label={isSaved?'Remove from saved':'Save this design'}
               onClick={()=>toggleFavorite(product)}>

@@ -9,6 +9,7 @@ import { useAnalytics } from './hooks/useAnalytics';
 import { checkAndApplyAccessToken } from './components/ScrollGatePopup';
 import CallReminder from './components/mobile/CallReminder';
 import Home from './components/Home';
+import './styles/public-theme.css';
 
 // Apply ?access=TOKEN from URL before anything renders
 checkAndApplyAccessToken();
@@ -91,7 +92,8 @@ function AppRoutes() {
   const isPrivateRoute = /^\/(?:admin|login|profile|upload|add|listing|list\/|SocialMedia)/i.test(pathname);
   return (
     <PageWithSeo>
-      <Suspense fallback={<div className="p-8"><LoadingSkeleton count={3} /></div>}>
+      <div className={isPrivateRoute ? undefined : 'sk-public-site'}>
+        <Suspense fallback={<div className="p-8"><LoadingSkeleton count={3} /></div>}>
         <Routes>
           {/* Main pages */}
           <Route path="/"              element={<Home />} />
@@ -149,6 +151,7 @@ function AppRoutes() {
         </Routes>
       </Suspense>
       {!isPrivateRoute && <CallReminder />}
+      </div>
     </PageWithSeo>
   );
 }

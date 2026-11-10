@@ -26,8 +26,15 @@ export const FavoritesProvider = ({ children }) => {
     });
   };
 
+  const toggleLiked = (item) => {
+    if (!item?._id) return;
+    setLiked((prev) => prev.some((f) => String(f._id) === String(item._id))
+      ? prev.filter((f) => String(f._id) !== String(item._id))
+      : [item, ...prev]);
+  };
   const addLiked = (item) => {
-    setLiked((prev) => prev.some((f) => f._id === item._id) ? prev : [item, ...prev]);
+    if (!item?._id) return;
+    setLiked((prev) => prev.some((f) => String(f._id) === String(item._id)) ? prev : [item, ...prev]);
   };
 
   // backward-compat
@@ -35,7 +42,7 @@ export const FavoritesProvider = ({ children }) => {
   const removeFavorite = (id) => setFavorites((prev) => prev.filter((f) => f._id !== id && f.id !== id));
 
   return (
-    <FavoritesContext.Provider value={{ favorites, liked, toggleFavorite, addFavorite, removeFavorite, addLiked }}>
+    <FavoritesContext.Provider value={{ favorites, liked, toggleFavorite, toggleLiked, addFavorite, removeFavorite, addLiked }}>
       {children}
     </FavoritesContext.Provider>
   );
