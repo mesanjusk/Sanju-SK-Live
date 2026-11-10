@@ -1,4 +1,6 @@
 import { useEffect, useState, useRef } from "react";
+import { Link } from 'react-router-dom';
+import { FaArrowLeft } from 'react-icons/fa';
 import api from '../api';
 
 export default function StoryGallery() {
@@ -62,6 +64,13 @@ export default function StoryGallery() {
       onTouchEnd={handleTouchEnd}
       onClick={() => setAutoPlay((prev) => !prev)} // Tap to pause/play
     >
+      <Link to="/" aria-label="Return to design gallery"
+        className="fixed left-3 top-3 z-50 flex items-center gap-2 rounded-full bg-white/95 px-3 py-2 text-sm font-semibold text-[#222]"
+        onClick={event => event.stopPropagation()}>
+        <FaArrowLeft aria-hidden="true"/>
+        <img src="/images/sk-digital-final.svg" alt="SK Digital" width="33" height="24"
+          className="h-6 w-8 object-contain" />
+      </Link>
       {currentImage && (
         <>
           <img

@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { FaArrowLeft, FaWhatsapp, FaInstagram, FaPhone, FaMapMarkerAlt, FaPaperPlane, FaEnvelope } from 'react-icons/fa';
+import { FaWhatsapp, FaInstagram, FaPhone, FaMapMarkerAlt, FaPaperPlane, FaEnvelope } from 'react-icons/fa';
+import MobileHeader from './mobile/MobileHeader';
 import MobileBottomNav from './mobile/MobileBottomNav';
 import localSeo from '../config/local-seo.json';
 
@@ -20,17 +20,14 @@ export default function Contact() {
 
   return (
     <div className="sk-storefront min-h-screen pb-32">
-      <header className="sk-detail-back">
-        <Link to="/" className="sk-glass-button !h-9 !w-9" aria-label="Back to home"><FaArrowLeft /></Link>
-        <div><h1 className="font-extrabold tracking-tight text-[#294238]">Let's create something remarkable</h1><p className="text-[10px] text-[#789080]">SANJU SK Digital · Mahi Creation</p></div>
-      </header>
+      <MobileHeader title="Contact our Gondia studio" />
       <main className="mx-auto max-w-5xl px-4 py-6">
         <section className="sk-catalog-hero">
           <span>MADE PERSONAL, MADE TO LAST</span>
           <h2 className="max-w-md !text-3xl">Your vision.<br />Our craft.</h2>
           <p>Premium printing, dimensional signage, invitations and keepsakes, all from Gondia. Tell us what you imagine.</p>
           <div className="mt-5 flex flex-wrap gap-2">
-            <a href={`https://wa.me/${WA}`} target="_blank" rel="noopener noreferrer" className="sk-order-button !bg-[#f0d1a0] !text-[#1a372b]">
+            <a href={`https://wa.me/${WA}`} target="_blank" rel="noopener noreferrer" className="sk-order-button !bg-[#eac991] !text-[#252525]">
               <FaWhatsapp /> Chat on WhatsApp
             </a>
             <a href="tel:+919372333633" className="inline-flex items-center gap-2 rounded-xl border border-[#e9e3d155] px-4 py-3 text-xs font-bold text-white"><FaPhone /> Call the studio</a>
@@ -39,13 +36,13 @@ export default function Contact() {
         <div className="grid gap-5 lg:grid-cols-2">
           <section className="sk-detail-panel" aria-labelledby="enquire-heading">
             <span className="sk-brand-subline">PERSONAL QUOTATION</span>
-            <h2 id="enquire-heading" className="mt-2 text-2xl font-extrabold tracking-tight text-[#263e32]">Start your project</h2>
-            <p className="mt-2 text-sm leading-6 text-[#708174]">Share a few details. We'll open WhatsApp with your message ready for review and sending.</p>
+            <h2 id="enquire-heading" className="mt-2 text-2xl font-extrabold tracking-tight text-[#252525]">Start your project</h2>
+            <p className="mt-2 text-sm leading-6 text-[#777777]">Share a few details. We'll open WhatsApp with your message ready for review and sending.</p>
             <form className="mt-6 space-y-4" onSubmit={handleSubmit}>
-              <div><label htmlFor="sk-contact-name" className="mb-1 block text-xs font-bold text-[#314e3c]">Your name</label>
+              <div><label htmlFor="sk-contact-name" className="mb-1 block text-xs font-bold text-[#252525]">Your name</label>
                 <input id="sk-contact-name" className="lux-input !bg-white" value={form.name} required
                   onChange={e => onChange('name',e.target.value)} placeholder="Your name" /></div>
-              <div><label htmlFor="sk-contact-service" className="mb-1 block text-xs font-bold text-[#314e3c]">Service</label>
+              <div><label htmlFor="sk-contact-service" className="mb-1 block text-xs font-bold text-[#252525]">Service</label>
                 <select id="sk-contact-service" className="lux-input !bg-white" value={form.service} onChange={e => onChange('service',e.target.value)}>
                   <option>Wedding cards & invitations</option>
                   <option>3D LED & acrylic signage</option>
@@ -54,7 +51,7 @@ export default function Contact() {
                   <option>Visiting cards, labels & branding</option>
                   <option>Other custom printing</option>
                 </select></div>
-              <div><label htmlFor="sk-contact-details" className="mb-1 block text-xs font-bold text-[#314e3c]">Project details</label>
+              <div><label htmlFor="sk-contact-details" className="mb-1 block text-xs font-bold text-[#252525]">Project details</label>
                 <textarea id="sk-contact-details" className="lux-input min-h-[112px] !bg-white" required
                   value={form.message} onChange={e => onChange('message',e.target.value)}
                   placeholder="What do you need, quantity, size and deadline?" /></div>
@@ -63,17 +60,17 @@ export default function Contact() {
           </section>
           <section className="sk-detail-panel" aria-labelledby="visit-heading">
             <span className="sk-brand-subline">VISIT OUR STUDIO</span>
-            <h2 id="visit-heading" className="mt-2 text-2xl font-extrabold tracking-tight text-[#263e32]">Find us in Gondia</h2>
-            <address className="mt-4 not-italic text-sm leading-7 text-[#586e5e]">
-              <strong className="text-[#2e4c37]">{localSeo.businessName}</strong><br />
+            <h2 id="visit-heading" className="mt-2 text-2xl font-extrabold tracking-tight text-[#252525]">Find us in Gondia</h2>
+            <address className="mt-4 not-italic text-sm leading-7 text-[#666666]">
+              <strong className="text-[#252525]">{localSeo.businessName}</strong><br />
               {localSeo.address.streetAddress}<br />
               Gondia, Maharashtra 441601
             </address>
             <div className="mt-5 grid grid-cols-2 gap-3">
-              <div className="rounded-xl bg-[#f2f5ed] p-4"><p className="sk-brand-subline">OPEN HOURS</p><p className="mt-2 text-sm font-bold text-[#304e3d]">Mon–Sat</p><p className="text-xs text-[#65746a]">10 AM – 8 PM</p></div>
-              <div className="rounded-xl bg-[#f2f5ed] p-4"><p className="sk-brand-subline">SUNDAY</p><p className="mt-2 text-sm font-bold text-[#304e3d]">Closed</p><p className="text-xs text-[#65746a]">Send us a message</p></div>
+              <div className="rounded-xl bg-[#f7f6f4] p-4"><p className="sk-brand-subline">OPEN HOURS</p><p className="mt-2 text-sm font-bold text-[#292929]">Mon–Sat</p><p className="text-xs text-[#777777]">10 AM – 8 PM</p></div>
+              <div className="rounded-xl bg-[#f7f6f4] p-4"><p className="sk-brand-subline">SUNDAY</p><p className="mt-2 text-sm font-bold text-[#292929]">Closed</p><p className="text-xs text-[#777777]">Send us a message</p></div>
             </div>
-            <div className="mt-6 flex flex-col gap-3 text-sm font-bold text-[#365b45]">
+            <div className="mt-6 flex flex-col gap-3 text-sm font-bold text-[#795015]">
               <a href={mapUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3"><FaMapMarkerAlt className="text-[#c3975d]" /> Google Maps directions →</a>
               <a href="tel:+919372333633" className="flex items-center gap-3"><FaPhone className="text-[#c3975d]" /> +91 93723 33633</a>
               <a href="mailto:skgondia@gmail.com" className="flex items-center gap-3"><FaEnvelope className="text-[#c3975d]" /> skgondia@gmail.com</a>
@@ -82,7 +79,7 @@ export default function Contact() {
           </section>
         </div>
       </main>
-      <MobileBottomNav />
+      <MobileBottomNav variant="pinterest" />
     </div>
   );
 }

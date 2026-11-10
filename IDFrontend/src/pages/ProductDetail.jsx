@@ -1,12 +1,13 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate, useLocation, Link } from 'react-router-dom';
-import { FaArrowLeft, FaChevronLeft, FaChevronRight, FaHeart, FaRegHeart, FaShare, FaWhatsapp, FaYoutube } from 'react-icons/fa';
+import { FaArrowLeft, FaChevronLeft, FaChevronRight, FaHeart, FaRegHeart, FaRegThumbsUp, FaThumbsUp, FaShare, FaWhatsapp, FaYoutube } from 'react-icons/fa';
 import api from '../api';
 import SEO from '../components/SEO';
 import ProductStructuredData from '../components/ProductStructuredData';
 import MobileBottomNav from '../components/mobile/MobileBottomNav';
 import PinterestPinCard from '../components/mobile/PinterestPinCard';
 import { uniqueDesigns } from '../components/mobile/uniqueDesigns.mjs';
+import {recordDesignInterest,rankDesigns,getDesignInterests,freshFeedSeed} from '../components/mobile/interestRank.mjs';
 import ProductStage from '../components/experience/ProductStage';
 import { useFavorites } from '../context/FavoritesContext';
 import { trackWhatsAppClick } from '../hooks/useAnalytics';
@@ -42,12 +43,13 @@ export default function ProductDetail() {
   const [categoryName, setCategoryName] = useState('');
   const [related, setRelated] = useState([]);
   const [showVideo, setShowVideo] = useState(false);
-  const { favorites, toggleFavorite } = useFavorites();
+  const { favorites, liked, toggleFavorite, toggleLiked } = useFavorites();
 
   useEffect(() => {
     let active = true;
     const preview = idOf(location.state?.product) === String(id) ? location.state.product : null;
     setProduct(preview);
+    if(preview)recordDesignInterest(preview);
     setLoading(!preview);
     setLoadError(false);
     setImgIdx(0);
@@ -61,6 +63,7 @@ export default function ProductDetail() {
           if (!active) return;
           if (!response.data?._id) throw new Error('Incomplete product details');
           setProduct(response.data);
+          recordDesignInterest(response.data);
           setLoading(false);
           setLoadError(false);
           if (response.data.quantityPricing?.length) {
@@ -88,21 +91,22 @@ export default function ProductDetail() {
       .then(response=>{
         if (!active) return;
         const products = Array.isArray(response.data) ? response.data : response.data?.result;
-        if (Array.isArray(products)) setRelated(uniqueDesigns(products.filter(item =>
-          String(item?._id) !== String(id) && idOf(item.category) === productCategory)).slice(0,18));
+        if (Array.isArray(products)) setRelated(rankDesigns(
+          uniqueDesigns(products.filter(item => String(item?._id) !== String(id))),
+          {seed:freshFeedSeed(),interests:getDesignInterests()}).slice(0,18));
       }).catch(()=>{});
     return () => {active=false;};
   }, [productCategory, id]);
 
   if (loading && !product) return (
-    <div className="sk-pinterest-home sk-pin-detail-page">
+    <div className="sk-pinterest-home sk-pin-detail-page sk-public-site">
       <div className="sk-pin-detail-head"><button type="button" className="sk-pin-round-action"
         onClick={()=>navigate(-1)} aria-label="Go back"><FaArrowLeft/></button></div>
       <div className="sk-pin-detail-loading" role="status">Opening your design…</div>
     </div>
   );
   if (!product) return (
-    <div className="sk-pinterest-home sk-pin-detail-page">
+    <div className="sk-pinterest-home sk-pin-detail-page sk-public-site">
       <div className="sk-pin-detail-head"><button type="button" className="sk-pin-round-action"
         onClick={()=>navigate('/')} aria-label="Back to gallery"><FaArrowLeft/></button></div>
       <div className="sk-pin-detail-error">
@@ -120,6 +124,7 @@ export default function ProductDetail() {
   const activeIndex = Math.min(imgIdx,Math.max(0,images.length-1));
   const image = images[activeIndex] || null;
   const isSaved = favorites.some(item=>String(item._id)===String(product._id));
+  const isLiked = liked.some(item=>String(item._id)===String(product._id));
   const price = getPriceForQty(product,quantity);
   const total = price !== null ? price*quantity : null;
   const tiers = Array.isArray(product.quantityPricing) ? product.quantityPricing : [];
@@ -150,7 +155,7 @@ export default function ProductDetail() {
         image={images[0]} pathname={'/products/' + id}
         noIndex={location.pathname.startsWith('/product-view/')} />
       <ProductStructuredData product={product} />
-      <div className="sk-pinterest-home sk-pin-detail-page">
+      <div className="sk-pinterest-home sk-pin-detail-page sk-public-site">
         <header className="sk-pin-detail-head">
           <button type="button" className="sk-pin-round-action" aria-label="Back to designs"
             onClick={back}><FaArrowLeft/></button>
@@ -158,6 +163,11 @@ export default function ProductDetail() {
           <div className="sk-pin-detail-actions">
             <button type="button" className="sk-pin-round-action" aria-label="Share this design"
               onClick={share}><FaShare/></button>
+            <button type="button" className={'sk-pin-round-action' + (isLiked?' sk-pin-detail-fav':'')}
+              aria-pressed={isLiked} aria-label={isLiked?'Unlike this design':'Like this design'}
+              onClick={()=>toggleLiked(product)}>
+              {isLiked?<FaThumbsUp/>:<FaRegThumbsUp/>}
+            </button>
             <button type="button" className={'sk-pin-round-action' + (isSaved?' sk-pin-detail-fav':'')}
               aria-pressed={isSaved} aria-label={isSaved?'Remove from saved':'Save this design'}
               onClick={()=>toggleFavorite(product)}>

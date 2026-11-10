@@ -50,12 +50,7 @@ export default function EndlessPinterestFeed({ products = [], categoryById, what
             Show more designs <span aria-hidden="true">↓</span>
           </button>
         </div>
-      ) : (
-        <p className="sk-pin-end-note" role="status">
-          You've seen all {uniqueProducts.length} unique designs.
-          Explore another category for more ideas.
-        </p>
-      )}
+      ) : null}
     </>
   );
 }

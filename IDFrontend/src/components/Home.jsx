@@ -5,6 +5,7 @@ import seo from '../config/local-seo.json';
 import PinterestStorefrontHeader from './mobile/PinterestStorefrontHeader';
 import EndlessPinterestFeed from './mobile/EndlessPinterestFeed';
 import { uniqueDesigns } from './mobile/uniqueDesigns.mjs';
+import {freshFeedSeed,getDesignInterests,rankDesigns,productId,categoryId} from './mobile/interestRank.mjs';
 import './mobile/festive-home.css';
 import './mobile/pinterest-storefront.css';
 import { getCategoryTheme } from './mobile/categoryThemes';
@@ -28,6 +29,9 @@ export default function Home() {
   // category controls until both API responses are ready.
   const [catalogStatus, setCatalogStatus] = useState({ listings: 'loading', categories: 'loading' });
   const [catalogRetry, setCatalogRetry] = useState(0);
+  const [feedSeed] = useState(freshFeedSeed);
+  const [interests,setInterests] = useState(getDesignInterests);
+  const [aiIds,setAiIds] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [selectedSubcategory, setSelectedSubcategory] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
@@ -161,6 +165,41 @@ export default function Home() {
   }, [listings, deferredSearch, selectedCategory, selectedSubcategory, categoryById]);
 
   const distinctProducts = useMemo(() => uniqueDesigns(filteredProducts), [filteredProducts]);
+  // Each visitor's page load starts with a new shuffled order; selections
+  // promote real related designs without introducing duplicate records.
+  const orderedProducts = useMemo(()=>rankDesigns(distinctProducts,{seed:feedSeed,interests,aiIds}),
+    [distinctProducts,feedSeed,interests,aiIds]);
+  useEffect(()=>{
+    const onInterest=()=>{setInterests(getDesignInterests());setAiIds([]);};
+    window.addEventListener('sk-design-interest',onInterest);
+    window.addEventListener('pageshow',onInterest);
+    return ()=>{window.removeEventListener('sk-design-interest',onInterest);
+      window.removeEventListener('pageshow',onInterest);};
+  },[]);
+  useEffect(()=>{
+    if(!catalogReady||!interests.length||distinctProducts.length<2)return undefined;
+    const controller=new AbortController();
+    const timer=window.setTimeout(async()=>{
+      try{
+        const candidates=rankDesigns(distinctProducts,{seed:feedSeed,interests}).slice(0,48);
+        const response=await fetch('/api/recommendations',{
+          method:'POST',signal:controller.signal,headers:{'Content-Type':'application/json'},
+          body:JSON.stringify({interests:interests.slice(0,4),
+            candidates:candidates.map(p=>({id:productId(p),
+              title:String(p.title||'').slice(0,130),
+              category:categoryById.get(categoryId(p))?.name||String(p.category?.name||''),
+              description:String(p.description||'').slice(0,120)}))})
+        });
+        if(!response.ok)return;
+        const json=await response.json();
+        if(!controller.signal.aborted&&json.mode==='gemini'&&Array.isArray(json.ids)){
+          setAiIds(json.ids.map(String).slice(0,16));
+        }
+      }catch{/* Local similarity ranking remains in use. */}
+    },350);
+    return ()=>{window.clearTimeout(timer);controller.abort();};
+  },[catalogReady,distinctProducts,feedSeed,interests,categoryById]);
+
 
   // Scroll-aware shopping bar: disappears as customers browse down, reappears
   // as they scroll up or approach the start/end. No floating More/Top buttons.
@@ -233,7 +272,7 @@ export default function Home() {
   };
 
   return (
-    <div className="sk-storefront sk-festive-home sk-pinterest-home" style={merchStyles}>
+    <div className="sk-storefront sk-festive-home sk-pinterest-home sk-public-site" style={merchStyles}>
       <PinterestStorefrontHeader
         categories={categories}
         selectedCategory={selectedCategory}
@@ -263,7 +302,7 @@ export default function Home() {
         )}
         {catalogReady && (
           <div className="sk-pin-feed-heading">
-            <h2>{selectedCategory ? selectedCategory.name : deferredSearch.trim() ? 'Search results' : 'Discover designs'}</h2>
+            <h2>{selectedCategory ? selectedCategory.name : deferredSearch.trim() ? 'Search results' : interests.length ? 'Inspired by your selections' : 'Discover designs'}</h2>
             <span>{distinctProducts.length} designs</span>
           </div>
         )}
@@ -275,7 +314,7 @@ export default function Home() {
             key={(selectedCategory ? idOf(selectedCategory) : 'all') + '|' +
               (selectedSubcategory ? idOf(selectedSubcategory) : 'all') + '|' +
               deferredSearch.trim().toLowerCase() + '|' + catalogRetry}
-            products={distinctProducts} categoryById={categoryById}
+            products={orderedProducts} categoryById={categoryById}
             whatsappNumber={whatsappNumber} />
         ) : (
           <div className="sk-pin-end-note">

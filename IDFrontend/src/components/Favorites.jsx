@@ -1,103 +1,50 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { FaHeart, FaRegHeart, FaRegBookmark } from 'react-icons/fa';
-import { BsGrid3X3, BsHeart } from 'react-icons/bs';
 import { useFavorites } from '../context/FavoritesContext';
+import { uniqueDesigns } from './mobile/uniqueDesigns.mjs';
+import PinterestPinCard from './mobile/PinterestPinCard';
 import MobileHeader from './mobile/MobileHeader';
 import MobileBottomNav from './mobile/MobileBottomNav';
 
-function PostGrid({ items, emptyMsg }) {
-  if (items.length === 0) {
-    return (
-      <div className="flex flex-col items-center justify-center py-24 text-center">
-        <div className="mb-3 flex h-20 w-20 items-center justify-center rounded-full border-2 border-gray-300">
-          <FaRegHeart className="text-3xl text-gray-400" />
-        </div>
-        <p className="text-base font-semibold text-gray-700">Nothing here yet</p>
-        <p className="mt-1 text-sm text-gray-400">{emptyMsg}</p>
-        <Link to="/" className="sk-order-button mt-5">
-          Browse Feed
-        </Link>
-      </div>
-    );
-  }
-
-  return (
-    <div className="grid grid-cols-3 gap-2 p-3">
-      {items.map((p) => {
-        const img = Array.isArray(p.images) ? p.images[0] : p.images;
-        return (
-          <Link key={p._id} to={`/products/${p._id}`} className="block">
-            <div className="aspect-square overflow-hidden rounded-xl border border-white bg-[#edf2e8] shadow-[0_9px_20px_-12px_#1536245a]">
-              {img ? (
-                <img
-                  src={img}
-                  alt={p.title}
-                  className="h-full w-full object-cover"
-                  loading="lazy"
-                />
-              ) : (
-                <div className="h-full w-full bg-gray-200" />
-              )}
-            </div>
-          </Link>
-        );
-      })}
-    </div>
+function DesignCollection({items,kind}){
+  const designs=uniqueDesigns(items);
+  if(!designs.length)return (
+    <section className="sk-public-empty" aria-label="No designs in this collection">
+      {kind==='liked'?<FaHeart size={31}/>:<FaRegHeart size={31}/>}
+      <h2 className="text-lg font-extrabold">No {kind} designs yet</h2>
+      <p className="sk-public-muted text-xs">{kind==='liked'?
+        'Like designs using the three-dot menu on a design card.':
+        'Save designs by tapping the heart on any design.'}</p>
+      <Link to="/">Explore designs</Link>
+    </section>
   );
+  return <div className="sk-pin-feed-wrap"><div className="sk-pin-masonry">
+    {designs.map((product,index)=><PinterestPinCard key={product._id} product={product} index={index}/>)}
+  </div></div>;
 }
 
-export default function Favorites() {
-  const { favorites, liked, toggleFavorite } = useFavorites();
-  const [tab, setTab] = useState('saved');
-
+export default function Favorites(){
+  const {favorites,liked}=useFavorites();
+  const [tab,setTab]=useState('saved');
   return (
-    <div className="sk-storefront min-h-screen pb-24">
-      <MobileHeader />
-
-      {/* Header */}
-      <div className="px-4 py-3">
-        <h1 className="text-base font-bold text-gray-900">Activity</h1>
-      </div>
-
-      {/* Tabs */}
-      <div className="flex border-b border-gray-100">
-        <button
-          onClick={() => setTab('saved')}
-          className={`flex flex-1 items-center justify-center gap-2 py-3 text-sm font-semibold transition-colors ${
-            tab === 'saved' ? 'border-b-2 border-gray-900 text-gray-900' : 'text-gray-400'
-          }`}
-        >
-          <FaRegBookmark className="text-base" /> Saved
-          {favorites.length > 0 && (
-            <span className="rounded-full bg-gray-900 px-1.5 py-0.5 text-[10px] text-white">
-              {favorites.length}
-            </span>
-          )}
-        </button>
-        <button
-          onClick={() => setTab('liked')}
-          className={`flex flex-1 items-center justify-center gap-2 py-3 text-sm font-semibold transition-colors ${
-            tab === 'liked' ? 'border-b-2 border-gray-900 text-gray-900' : 'text-gray-400'
-          }`}
-        >
-          <FaHeart className={`text-base ${tab === 'liked' ? 'text-red-500' : ''}`} /> Liked
-          {liked.length > 0 && (
-            <span className="rounded-full bg-red-500 px-1.5 py-0.5 text-[10px] text-white">
-              {liked.length}
-            </span>
-          )}
-        </button>
-      </div>
-
-      {tab === 'saved' && (
-        <PostGrid items={favorites} emptyMsg="Save posts by tapping the ♡ icon" />
-      )}
-      {tab === 'liked' && (
-        <PostGrid items={liked} emptyMsg="Double-tap any post to like it" />
-      )}
-
-      <MobileBottomNav />
+    <div className="sk-storefront sk-public-site sk-pinterest-home sk-saved-page min-h-screen pb-24">
+      <MobileHeader/>
+      <main>
+        <h1 className="sk-public-section-title">Your designs</h1>
+        <nav className="sk-public-tabs" role="tablist" aria-label="Saved and liked designs">
+          <button className={'sk-public-tab'+(tab==='saved'?' is-active':'')} type="button"
+            role="tab" aria-selected={tab==='saved'} onClick={()=>setTab('saved')}>
+            <FaRegBookmark/> Saved <span className="sk-public-count">{uniqueDesigns(favorites).length}</span>
+          </button>
+          <button className={'sk-public-tab'+(tab==='liked'?' is-active':'')} type="button"
+            role="tab" aria-selected={tab==='liked'} onClick={()=>setTab('liked')}>
+            <FaHeart/> Liked <span className="sk-public-count">{uniqueDesigns(liked).length}</span>
+          </button>
+        </nav>
+        <DesignCollection items={tab==='saved'?favorites:liked} kind={tab}/>
+      </main>
+      <MobileBottomNav variant="pinterest"/>
     </div>
   );
 }

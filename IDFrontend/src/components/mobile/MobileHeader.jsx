@@ -1,22 +1,23 @@
 import { memo } from 'react';
 import { Link } from 'react-router-dom';
 import { FaHeart, FaSearch, FaWhatsapp } from 'react-icons/fa';
+import './pinterest-storefront.css';
 
-function MobileHeader() {
+// Same SK mark, brand typography and quick actions as the discovery home.
+function MobileHeader(){
   return (
-    <header className="sk-storefront-header sticky top-0 z-40 px-3 pb-2 pt-[max(env(safe-area-inset-top),0.5rem)]">
-      <div className="sk-shell flex items-center justify-between gap-2">
-        <Link to="/products" aria-label="Search products" className="sk-glass-button"><FaSearch /></Link>
-        <Link to="/" className="min-w-0 text-center">
-          <span className="sk-brand-wordmark block">SANJU SK <span className="font-normal">Digital</span></span>
-          <span className="sk-brand-subline block">Mahi Creation · Gondia</span>
-        </Link>
-        <div className="flex items-center gap-1.5">
-          <Link to="/favorites" aria-label="Saved products" className="sk-glass-button"><FaHeart /></Link>
-          <a href="https://wa.me/919372333633" target="_blank" rel="noopener noreferrer"
-            aria-label="Chat on WhatsApp" className="sk-glass-button"><FaWhatsapp className="text-[#199c57]" /></a>
-        </div>
-      </div>
+    <header className="sk-pin-header sk-public-header">
+      <Link to="/" className="sk-pin-brand" aria-label="SANJU SK Digital home">
+        <img className="sk-pin-brand-final-logo" src="/images/sk-digital-final.svg"
+          width="59" height="43" alt="SK Digital logo"/>
+        <span className="sk-pin-brand-name">SANJU <b>SK</b><small>DIGITAL · MAHI CREATION</small></span>
+      </Link>
+      <nav className="sk-pin-header-actions" aria-label="Quick actions">
+        <Link className="sk-pin-top-action" to="/?search=1" aria-label="Search designs"><FaSearch/></Link>
+        <Link className="sk-pin-top-action" to="/favorites" aria-label="Saved and liked designs"><FaHeart/></Link>
+        <a className="sk-pin-top-action" href="https://wa.me/919372333633" target="_blank"
+          rel="noopener noreferrer" aria-label="Chat on WhatsApp"><FaWhatsapp/></a>
+      </nav>
     </header>
   );
 }

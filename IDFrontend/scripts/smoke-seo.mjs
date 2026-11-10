@@ -4,6 +4,7 @@ import { readFileSync } from 'node:fs';
 import productHandler from '../api/product-seo.js';
 import sitemapHandler from '../api/sitemap-products.js';
 import { uniqueDesigns, designId } from '../src/components/mobile/uniqueDesigns.mjs';
+import {rankDesigns,similarityScore} from '../src/components/mobile/interestRank.mjs';
 const id='67b78c2180d7a4d5e21c9af0';
 const product={
   _id:id,title:'Premium Laser Cut Wedding Invitation',description:'Custom printed laser-cut wedding invitation with envelopes.',
@@ -159,9 +160,10 @@ assert(endlessSource.includes('uniqueDesigns') && endlessSource.includes('Inters
   'Pinterest feed must show unique designs in progressive, finite batches');
 assert(!endlessSource.includes('shuffleNextCycle') && !endlessSource.includes('cursor.cycle'),
   'Do not reintroduce repeated shuffled design cycles');
-assert(endlessSource.includes("You've seen all") &&
-  endlessSource.includes('Explore another category'),
-  'Once every design is shown, end the feed instead of looping');
+assert(!endlessSource.includes("You've seen all") &&
+  !endlessSource.includes('Explore another category') &&
+  endlessSource.includes(') : null}'),
+  'End the feed silently without repeating designs or showing a count banner');
 const duplicates=[
   {_id:'A',images:['https://res.cloudinary.com/demo/image/upload/v1/card.jpg']},
   {_id:'B',images:['https://res.cloudinary.com/demo/image/upload/v1/card.jpg?width=400']},
@@ -177,7 +179,7 @@ assert.deepEqual(unique.map(designId),['A','C','E','F'],
   'Remove repeated IDs and duplicate cover artwork, preserving designs without pictures');
 assert.equal(new Set(unique.map(designId)).size,unique.length,
   'No design ID should repeat in the gallery');
-assert(homeSource.includes('distinctProducts.length') && homeSource.includes('products={distinctProducts}'),
+assert(homeSource.includes('distinctProducts.length') && homeSource.includes('products={orderedProducts}'),
   'The visible design count and feed must use deduplicated products');
 assert(detailSource.includes('uniqueDesigns(products.filter('),
   'Related designs must not repeat identical catalog artwork');
@@ -244,7 +246,7 @@ assert(guideSource.includes('getCategoryGuide') && guideSource.includes('Browse 
   'Every unknown live category needs a relevant no-fabrication fallback description');
 assert(festiveCss.includes('Floating three-icon dock') && pinCss.includes('.sk-pin-bottom-nav'),
   'Keep a floating quick dock, updated to Home Search Saved for Pinterest view');
-assert(navSource.includes('sk-floating-actions') && navSource.includes('visible = true'),
+assert(navSource.includes('sk-floating-actions') && navSource.includes('visible=true'),
   'Floating actions must keep scroll-aware show/hide state');
 const newPages=categoryGuideData.filter(g=>!g.existingUrl);
 assert(newPages.length>=7,'Require new helpful indexable pages in addition to existing service pages');
@@ -290,6 +292,33 @@ assert(loadingComponentSource.includes('sk-print-press') && loadingComponentSour
 assert(festiveCss.includes('@keyframes sk-paper-print') && festiveCss.includes('@media (prefers-reduced-motion:reduce)'),
   'CSS-only print animation must respect reduced-motion settings');
 
+
+const rankedSample=[
+  {_id:'a',category:'wedding',title:'Rose wedding invitation',description:'laser cut'},
+  {_id:'b',category:'wedding',title:'Traditional floral invite',description:'laser cut'},
+  {_id:'c',category:'signage',title:'Gold acrylic sign',description:'outdoor'},
+  {_id:'d',category:'trophies',title:'School trophy',description:'awards'},
+  {_id:'e',category:'birthday',title:'Birthday invitation',description:'balloons'},
+  {_id:'f',category:'gifts',title:'Gift box',description:'hamper'},
+];
+const selected=[{id:'a',category:'wedding',title:'Rose wedding invitation',description:'laser cut',weight:1}];
+assert(similarityScore(rankedSample[1],selected)>similarityScore(rankedSample[3],selected),
+  'Similar wedding designs should outrank unrelated products after selection');
+const shuffleA=rankDesigns(rankedSample,{seed:'a1'}).map(p=>p._id);
+const shuffleB=rankDesigns(rankedSample,{seed:'b2'}).map(p=>p._id);
+assert.notDeepEqual(shuffleA,shuffleB,'Different visitor seeds should change the initial product order');
+assert.deepEqual(rankDesigns(rankedSample,{seed:'a1'}).map(p=>p._id),shuffleA,
+  'Within a page visit, product positions must remain stable until interactions change');
+assert(homeSource.includes('freshFeedSeed')&&homeSource.includes('getDesignInterests')&&
+  homeSource.includes("fetch('/api/recommendations'"),
+  'Use per-refresh shuffling and optional Gemini reranking, retaining local fallback');
+assert(pinCardSource.includes('recordDesignInterest')&&detailSource.includes('recordDesignInterest'),
+  'Clicked, saved and opened designs must inform future recommendations');
+const geminiEndpoint=readFileSync(new URL('../api/recommendations.js',import.meta.url),'utf8');
+assert(geminiEndpoint.includes('process.env.GEMINI_API_KEY') &&
+  geminiEndpoint.includes("mode:'local'") && geminiEndpoint.includes('x-goog-api-key') &&
+  geminiEndpoint.includes('allowed.has(id)'),
+  'Gemini must run server-side, limit results to real catalog IDs, and fall back without an API key');
 const routeMetaSource=readFileSync(new URL('../src/config/routeMeta.js',import.meta.url),'utf8');
 const sitemapXmlRoutes=siteMap;
 assert(!sitemapXmlRoutes.includes('https://www.sanjusk.in/home1') &&
@@ -307,6 +336,103 @@ assert(!vercelRules.redirects.some(r=>r.source==='/sitemap-products.xml'),
 const robotsContent=readFileSync(new URL('../public/robots.txt',import.meta.url),'utf8');
 assert(robotsContent.includes('Sitemap: https://www.sanjusk.in/sitemap-products.xml'),
   'Robots should advertise the canonical product XML sitemap path');
+
+const sharedTheme=readFileSync(new URL('../src/styles/public-theme.css',import.meta.url),'utf8');
+const innerHeader=readFileSync(new URL('../src/components/mobile/MobileHeader.jsx',import.meta.url),'utf8');
+const savedMasonryPage=readFileSync(new URL('../src/components/Favorites.jsx',import.meta.url),'utf8');
+const savedPage=savedMasonryPage;
+const favoritesContext=readFileSync(new URL('../src/context/FavoritesContext.jsx',import.meta.url),'utf8');
+const catalogPage=readFileSync(new URL('../src/pages/ProductListing.jsx',import.meta.url),'utf8');
+const categoryListPage=readFileSync(new URL('../src/components/allCategory.jsx',import.meta.url),'utf8');
+const contactPage=readFileSync(new URL('../src/components/Contact.jsx',import.meta.url),'utf8');
+const galleryPage=readFileSync(new URL('../src/components/ServiceGallery.jsx',import.meta.url),'utf8');
+const standaloneTheme=readFileSync(new URL('../public/styles/brand-unified.css',import.meta.url),'utf8');
+assert(appSource.includes("import './styles/public-theme.css'") &&
+  appSource.includes("isPrivateRoute ? undefined : 'sk-public-site'"),
+  'Scope uniform theme to all public routes without recolouring admin workflows');
+assert(sharedTheme.includes('--sk-ui-ink:#202020') &&
+  sharedTheme.includes('--sk-ui-gold:#b16a0e') &&
+  sharedTheme.includes(':first-child:not(.is-active)'),
+  'White-charcoal-gold tokens and accurate Home dock active state are required');
+assert(innerHeader.includes('sk-public-header') &&
+  innerHeader.includes('/images/sk-digital-final.svg') &&
+  innerHeader.includes('sk-pin-top-action') &&
+  innerHeader.includes('/?search=1'),
+  'Inner pages require the same real SK logo and functional header search actions');
+assert(pinNavSource.includes("variant='pinterest'") &&
+  pinNavSource.includes('to="/"') &&
+  pinNavSource.includes("navigate('/?search=1')") &&
+  pinNavSource.includes('to="/favorites"') &&
+  pinNavSource.includes('is-active'),
+  'Home, Search and Saved dock must be functional and highlight the correct route');
+assert(savedPage.includes('sk-saved-page') &&
+  savedPage.includes('sk-pin-masonry') &&
+  savedPage.includes('PinterestPinCard') &&
+  savedPage.includes('role="tablist"') &&
+  savedPage.includes('<MobileHeader'),
+  'Saved and Liked must use the Pinterest visual design, not the old green grid');
+assert(favoritesContext.includes('toggleLiked') &&
+  pinCardSource.includes('toggleLiked(product)') &&
+  detailSource.includes('toggleLiked(product)'),
+  'Like / Unlike must actually update the Liked collection');
+assert(catalogPage.includes('<MobileHeader title="Find your design"') &&
+  catalogPage.includes('<MobileBottomNav variant="pinterest"') &&
+  categoryListPage.includes('<MobileHeader title="Browse all categories"') &&
+  categoryListPage.includes('<MobileBottomNav variant="pinterest"') &&
+  !categoryListPage.includes('e.stopPropagation()'),
+  'Products and categories must use uniform public header/dock and valid buttons');
+assert(contactPage.includes('<MobileHeader title="Contact our Gondia studio"') &&
+  contactPage.includes('<MobileBottomNav variant="pinterest"') &&
+  galleryPage.includes('sk-public-service-gallery'),
+  'Contact and service sections must follow the same storefront theme');
+assert(standaloneTheme.includes('.sk-static-bottom-nav') &&
+  standaloneTheme.includes('--gold:#b16a0e'),
+  'Standalone SEO landing pages need the same dock and logo colours');
+for (const slug of [
+ 'wedding-card-printing-gondia','digital-wedding-invitations',
+ 'corporate-gifting-gondia','3d-led-sign-boards-gondia',
+ 'custom-trophies-awards-gondia','flex-banner-printing-gondia'
+]) {
+  const page=readFileSync(new URL('../public/'+slug+'/index.html',import.meta.url),'utf8');
+  assert(page.includes('/styles/brand-unified.css') &&
+    page.includes('/images/sk-digital-final.svg') &&
+    page.includes('sk-static-bottom-nav'),
+    'SEO service page '+slug+' must inherit the public theme');
+}
+for (const guide of categoryGuideData) {
+  if (guide.existingUrl) continue;
+  const page=readFileSync(new URL('../public/categories/'+guide.slug+'/index.html',import.meta.url),'utf8');
+  assert(page.includes('/styles/brand-unified.css') &&
+    page.includes('sk-static-bottom-nav'),
+    'Category guide '+guide.slug+' must use the shared public theme');
+}
+
+const inspirationPage=readFileSync(new URL('../src/components/Insta.jsx',import.meta.url),'utf8');
+const notFoundPage=readFileSync(new URL('../src/pages/NotFound.jsx',import.meta.url),'utf8');
+const storyPage=readFileSync(new URL('../src/components/StoryGallery.jsx',import.meta.url),'utf8');
+assert(inspirationPage.includes('sk-pinterest-home') &&
+  inspirationPage.includes('<MobileHeader') &&
+  inspirationPage.includes('<MobileBottomNav variant="pinterest"') &&
+  !inspirationPage.includes('from-pink-100'),
+  'Legacy image gallery must match the main Pinterest-themed storefront');
+assert(notFoundPage.includes('<MobileHeader') &&
+  notFoundPage.includes('<MobileBottomNav variant="pinterest"') &&
+  !notFoundPage.includes('bg-red-600'),
+  '404 page must use the matching brand colours and navigation');
+assert(storyPage.includes('/images/sk-digital-final.svg') &&
+  storyPage.includes('Return to design gallery'),
+  'Immersive story route needs the genuine branded back action');
+assert(appSource.includes('LegacyCategoryRedirect') &&
+  appSource.includes("<Navigate to={'/products?category='") &&
+  appSource.includes('<Route path="/home1"') &&
+  appSource.includes('<Navigate to="/" replace />'),
+  'Legacy category and homepage routes should open the current shopping experience');
+for (const guide of categoryGuideData) {
+  if (guide.existingUrl) continue;
+  const page=readFileSync(new URL('../public/categories/'+guide.slug+'/index.html',import.meta.url),'utf8');
+  assert(page.includes('/images/sk-digital-final.svg'),
+    'Category guide '+guide.slug+' should use the finalized SK logo');
+}
 const prevFetch=globalThis.fetch;
 function mockResponse(){
   return {

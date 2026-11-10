@@ -33,7 +33,7 @@ const SERVICES = [
 
 export default function ServiceGallery() {
   return (
-    <section aria-labelledby="sk-core-services" className="mx-auto w-full max-w-6xl px-3 pb-5 pt-5 sm:px-6 sm:pt-8">
+    <section aria-labelledby="sk-core-services" className="sk-public-service-gallery mx-auto w-full max-w-6xl px-3 pb-5 pt-5 sm:px-6 sm:pt-8">
       <div className="mb-3 text-center">
         <p className="text-[11px] font-extrabold uppercase tracking-[.24em] text-[#9574b3]">Designed and made in Gondia</p>
         <h2 id="sk-core-services" className="mt-1 text-xl font-extrabold tracking-tight text-[#513969] sm:text-3xl">Our Signature Services</h2>

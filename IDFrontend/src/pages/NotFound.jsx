@@ -1,14 +1,21 @@
 import { Link } from 'react-router-dom';
+import MobileHeader from '../components/mobile/MobileHeader';
+import MobileBottomNav from '../components/mobile/MobileBottomNav';
+import '../components/mobile/pinterest-storefront.css';
 
-const NotFound = () => (
-  <main className="flex min-h-[70vh] flex-col items-center justify-center px-4 text-center">
-    <p className="text-sm font-semibold uppercase tracking-wider text-red-600">404</p>
-    <h1 className="mt-2 text-4xl font-bold text-gray-900">Page not found</h1>
-    <p className="mt-4 text-gray-600">The page you are looking for does not exist or has been moved.</p>
-    <Link to="/" className="mt-6 rounded bg-red-600 px-4 py-2 text-white hover:bg-red-700">
-      Go home
-    </Link>
-  </main>
-);
-
-export default NotFound;
+export default function NotFound() {
+  return (
+    <div className="sk-storefront sk-pinterest-home min-h-screen pb-28">
+      <MobileHeader title="Page unavailable"/>
+      <main className="mx-auto flex min-h-[65vh] max-w-lg flex-col items-center justify-center gap-3 px-5 text-center">
+        <p className="sk-public-eyebrow">404 · PAGE NOT FOUND</p>
+        <h1 className="text-2xl font-extrabold">We couldn't find this design.</h1>
+        <p className="max-w-sm text-sm leading-6 text-gray-500">
+          This page may have moved. Explore the latest designs in our gallery instead.
+        </p>
+        <Link to="/" className="sk-public-button mt-4">Explore designs</Link>
+      </main>
+      <MobileBottomNav variant="pinterest"/>
+    </div>
+  );
+}
