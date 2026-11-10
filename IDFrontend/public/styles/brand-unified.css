@@ -1,0 +1,56 @@
+/* Unified white, charcoal and authentic SK gold for crawlable HTML service pages.
+   Loaded after each landing page's historical styling, without changing SEO content. */
+:root{--ink:#202020;--teal:#222;--deep:#202020;--gold:#b16a0e;--cream:#fff;--line:#e7e5e1;color-scheme:light}
+html{background:#fff}
+body{background:#fff;color:#202020;padding-bottom:80px}
+a{color:#80550e}
+a:focus-visible,button:focus-visible,summary:focus-visible{outline:2px solid #b16a0e;outline-offset:3px}
+.site-header,header{background:#fff;color:#222;border-color:#e7e5e1}
+header nav,.site-header .nav{background:#fff}
+.brand,header nav a,nav strong,.logo{color:#222}
+.brand small{color:#777}
+.brand-mark{width:46px;height:42px;border-radius:0;background:transparent;color:#222}
+.brand-mark img,.sk-static-logo{display:inline-block;vertical-align:middle;object-fit:contain;max-width:52px;height:39px}
+header nav a[aria-label="SK Digital home"]{display:flex;align-items:center;gap:7px}
+.navlinks a,.breadcrumb a{color:#444}
+.nav-call{background:#f5efe4;color:#68501f}
+.breadcrumb{color:#777}
+.hero{background:linear-gradient(130deg,#1e1e1e,#36332f);color:#fff}
+.hero h1{color:#fff}
+.hero .lead{color:#eee}
+.hero-art{background:#ffffff17;border-color:#ffffff30}
+.eyebrow,.section-kicker,.feature .number{color:#af7925}
+.hero .eyebrow{color:#f0c986}
+h1,h2,h3,h4{color:#222}
+.hero h1{color:#fff}
+.lead,.section-lead,.why-copy,.feature p,.contact-card p{color:#686868}
+.btn-primary,.actions .button:first-child,.button:not(.alt),.hero .btn-primary{
+  background:#252525;color:#fff;border-color:#252525;box-shadow:none;
+}
+.hero .btn-primary{background:#f0c987;color:#252525}
+.btn-outline{background:transparent;color:#fff;border-color:#ffffff96}
+.btn-green,.button.alt,.btn.alt{background:#fff;color:#6b4b19;border:1px solid #e0d3bd}
+.feature,.card,.box,.contact-card,.service-area,.faq details{background:#fff;border-color:#e7e5e1;box-shadow:0 8px 25px #0000000b}
+.feature h3,.why-list strong,.trust strong,.faq summary,.contact-card strong{color:#222}
+.feature p,.why-list li,.faq details p{color:#666}
+.why{background:#f8f7f5;border-color:#e7e5e1}
+.why-list li{background:#fff;color:#5b5b5b;border-color:#e7e5e1}
+.trust{border-color:#e7e5e1}
+.trust span{color:#777}
+.section-lead{color:#666}
+.links a{background:#f8f6f2;color:#74511c}
+footer{background:#fff;border-color:#e7e5e1;color:#777}
+.sk-static-bottom-nav{
+  position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 16px);
+  transform:translateX(-50%);z-index:70;
+  display:flex;align-items:center;gap:4px;padding:6px;
+  width:max-content;background:#fff;border:1px solid #e7e5e1;
+  border-radius:26px;box-shadow:0 6px 25px #00000021;
+}
+.sk-static-bottom-nav a{
+  display:grid;place-items:center;flex:0 0 59px;width:59px;height:52px;
+  border-radius:18px;background:#fff;color:#222;text-decoration:none;
+}
+.sk-static-bottom-nav a:hover{background:#f5f4f2}
+.sk-static-bottom-nav svg{display:block;width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;animation:none!important;transition:none!important}}

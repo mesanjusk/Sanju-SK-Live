@@ -268,7 +268,7 @@ const categoryPage = guide => {
     '</style>';
   return '<!doctype html><html lang="en-IN"><head><meta charset="UTF-8">' +
     '<meta name="viewport" content="width=device-width, initial-scale=1.0">' +
-    '<meta name="theme-color" content="#EFE6FB">' +
+    '<meta name="theme-color" content="#FFFFFF">' +
     '<title>' + esc(guide.title) + '</title>' +
     '<meta name="description" content="' + esc(guide.description) + '">' +
     '<meta name="robots" content="index, follow">' +
@@ -279,7 +279,8 @@ const categoryPage = guide => {
     '<meta property="og:url" content="' + canonical + '">' +
     '<meta property="og:image" content="' + img(seo.ogImagePath) + '">' +
     '<meta name="twitter:card" content="summary_large_image">' +
-    '<script type="application/ld+json">' + json + '</script>' + style + '</head><body>' +
+    '<script type="application/ld+json">' + json + '</script>' + style +
+    '<link rel="stylesheet" href="/styles/brand-unified.css"></head><body>' +
     '<header><a href="/" class="logo">SK · SANJU SK DIGITAL</a><a href="/contact">Contact Gondia Studio</a></header>' +
     '<main><nav aria-label="Breadcrumb"><a href="/">Home</a> / ' + esc(guide.name) + '</nav>' +
     '<section class="hero"><p class="eyebrow">CUSTOM DESIGN & PRINTING · GONDIA</p>' +
@@ -305,7 +306,7 @@ const categoryPage = guide => {
     esc(seo.address.streetAddress) + ', Gondia, Maharashtra 441601 · ' +
     '<a href="tel:' + seo.phone + '">' + esc(seo.displayPhone) + '</a>' +
     '<p>Open Monday–Saturday, 10:00 AM–8:00 PM · Closed Sunday. Serving enquiries from Gondia, Nagpur, Balaghat and Bhandara.</p>' +
-    '</footer></body></html>';
+    '</footer>' + "<nav class=\"sk-static-bottom-nav\" aria-label=\"Explore designs, search and saved products\">\n  <a href=\"/\" aria-label=\"Home\"><svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"m3 10 9-7 9 7v10H4V10Z\"/><path d=\"M9 20v-7h6v7\"/></svg></a>\n  <a href=\"/?search=1\" aria-label=\"Search designs\"><svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><circle cx=\"10.5\" cy=\"10.5\" r=\"6.5\"/><path d=\"m15.5 15.5 5 5\"/></svg></a>\n  <a href=\"/favorites\" aria-label=\"Saved and liked designs\"><svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M20.8 8.2c0 4.4-8.8 11-8.8 11s-8.8-6.6-8.8-11a5 5 0 0 1 8.8-3.2 5 5 0 0 1 8.8 3.2Z\"/></svg></a>\n</nav>" + '</body></html>';
 };
 for (const guide of newCategoryGuides) {
   const dir = path.join(publicDir, 'categories', guide.slug);
