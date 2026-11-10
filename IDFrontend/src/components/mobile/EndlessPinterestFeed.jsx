@@ -20,7 +20,9 @@ export default function EndlessPinterestFeed({ products = [], categoryById, what
   const appendingRef = useRef(false);
 
   const appendNext = useCallback(() => {
-    if (!products.length || appendingRef.current) return;
+    // Leave the expanded SEO and contact footer reachable even in an endless feed.
+    if (!products.length || appendingRef.current ||
+      document.getElementById('sk-business-information')?.open) return;
     appendingRef.current = true;
     const cursor = cursorRef.current;
     const next = [];

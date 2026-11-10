@@ -55,6 +55,11 @@ function PinterestStorefrontHeader({
               <Link to="/favorites" onClick={() => setMenuOpen(false)}><FaHeart/> Saved designs</Link>
               <a href={'tel:' + phoneNumber}><FaPhoneAlt/> Call our studio</a>
               <Link to="/contact" onClick={() => setMenuOpen(false)}>Contact & directions</Link>
+              <button type="button" onClick={() => {
+                setMenuOpen(false);
+                const footer = document.getElementById('sk-business-information');
+                if (footer) { footer.open = true; footer.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+              }}>More about SANJU SK Digital</button>
             </nav>
           )}
         </div>
