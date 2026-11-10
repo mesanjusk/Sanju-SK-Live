@@ -89,6 +89,10 @@ function AppRoutes() {
   useAnalytics();
   const { pathname } = useLocation();
   const isPrivateRoute = /^\/(?:admin|login|profile|upload|add|listing|list\/|SocialMedia)/i.test(pathname);
+  useEffect(() => {
+    document.body.classList.toggle('sk-site-public', !isPrivateRoute);
+    return () => document.body.classList.remove('sk-site-public');
+  }, [isPrivateRoute]);
   return (
     <PageWithSeo>
       <Suspense fallback={<div className="p-8"><LoadingSkeleton count={3} /></div>}>

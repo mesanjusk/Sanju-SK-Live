@@ -62,7 +62,8 @@ export default function AllCategory() {
               return (
                 <div key={cat._id} className="overflow-hidden rounded-[24px] border border-[#e7e3dc] bg-white shadow-[0_12px_30px_-24px_#3a3a3a]">
                   {/* Category row */}
-                  <button
+                  <div role="button" tabIndex={0} aria-expanded={isOpen}
+                    onKeyDown={e => { if (e.target === e.currentTarget && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault();handleCategoryClick(cat); } }}
                     onClick={() => handleCategoryClick(cat)}
                     className="flex w-full items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-gray-50 active:bg-gray-100"
                   >
@@ -90,7 +91,7 @@ export default function AllCategory() {
                         <span className={`text-gray-400 transition-transform duration-200 ${isOpen ? 'rotate-90' : ''}`}>›</span>
                       )}
                     </div>
-                  </button>
+                  </div>
 
                   {/* Subcategory chips */}
                   {isOpen && catSubs.length > 0 && (
