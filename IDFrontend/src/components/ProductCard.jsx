@@ -44,22 +44,22 @@ export default function ProductCard({ product, priority = false }) {
         <button type="button" aria-label={isFav ? 'Remove saved product' : 'Save product'}
           className="sk-glass-button !absolute !right-3 !top-14 !z-[5] !h-9 !w-9"
           onClick={() => toggleFavorite(product)}>
-          {isFav ? <FaHeart className="text-rose-600" /> : <FaRegHeart />}
+          {isFav ? <FaHeart className="text-[#b16a0e]" /> : <FaRegHeart />}
         </button>
       </div>
       <div className="sk-catalog-card__body">
         <p className="sk-feed-card__muted">{categoryName || 'Custom made · Gondia'}</p>
         <Link to={`/products/${product?._id}`} className="mt-1 block">
-          <h3 className="line-clamp-2 text-lg font-extrabold tracking-tight text-[#294133]">{product?.title}</h3>
+          <h3 className="line-clamp-2 text-lg font-extrabold tracking-tight text-[#252525]">{product?.title}</h3>
         </Link>
-        <p className="mt-2 line-clamp-2 min-h-[30px] text-xs leading-5 text-[#738174]">
+        <p className="mt-2 line-clamp-2 min-h-[30px] text-xs leading-5 text-[#777777]">
           {product?.description || 'Crafted for your occasion. Explore the images and request a custom quotation.'}
         </p>
         <div className="mt-4 flex items-center justify-between gap-2">
           <strong className="sk-price text-lg">{price}</strong>
           <a href={waHref} target="_blank" rel="noopener noreferrer" onClick={enquire} className="sk-order-button"><FaWhatsapp /> Enquire</a>
         </div>
-        <Link to={`/products/${product?._id}`} className="mt-3 inline-flex items-center gap-2 text-xs font-bold text-[#49694e]">
+        <Link to={`/products/${product?._id}`} className="mt-3 inline-flex items-center gap-2 text-xs font-bold text-[#795015]">
           View photos & details <FaArrowRight />
         </Link>
       </div>

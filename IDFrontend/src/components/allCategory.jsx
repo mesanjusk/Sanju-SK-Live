@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../api';
 import MobileHeader from './mobile/MobileHeader';
@@ -9,6 +9,7 @@ export default function AllCategory() {
   const [categories, setCategories] = useState([]);
   const [subcategories, setSubcategories] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState(null);
   const navigate = useNavigate();
 
@@ -18,16 +19,12 @@ export default function AllCategory() {
       api.get('/api/subcategories'),
     ]).then(([c, s]) => {
       setCategories(Array.isArray(c.data) ? c.data : c.data?.result || []);
-      setSubcategories(Array.isArray(s.data) ? s.data : []);
+      setSubcategories(Array.isArray(s.data) ? s.data : s.data?.result || []);
+      setLoadError(false);
+    }).catch(() => {
+      setLoadError(true);
     }).finally(() => setLoading(false));
   }, []);
-
-  const subcatsForSelected = useMemo(() => {
-    if (!selectedCategory) return [];
-    return subcategories.filter(
-      (s) => s.categoryId?._id === selectedCategory._id || s.categoryId === selectedCategory._id
-    );
-  }, [subcategories, selectedCategory]);
 
   const handleCategoryClick = (cat) => {
     setSelectedCategory((prev) => (prev?._id === cat._id ? null : cat));
@@ -42,7 +39,7 @@ export default function AllCategory() {
 
   return (
     <div className="sk-storefront min-h-screen pb-24">
-      <MobileHeader />
+      <MobileHeader title="Browse all categories" />
 
       <main className="sk-shell px-4 py-5">
         <div className="sk-catalog-hero"><span>YOUR CREATIVE STUDIO</span><h1>Explore the possibilities.</h1><p>Discover invitations, 3D signage, corporate gifting and premium printing by collection.</p></div>
@@ -50,6 +47,11 @@ export default function AllCategory() {
         {loading ? (
           <div className="grid gap-4">
             {[...Array(4)].map((_, i) => <LoadingSkeleton key={i} />)}
+          </div>
+        ) : loadError ? (
+          <div className="sk-public-empty">
+            <p>Categories are temporarily unavailable. You can still browse the design gallery.</p>
+            <button type="button" onClick={() => window.location.reload()}>Try again</button>
           </div>
         ) : (
           <div className="space-y-3">
@@ -60,7 +62,7 @@ export default function AllCategory() {
               );
 
               return (
-                <div key={cat._id} className="overflow-hidden rounded-[24px] border border-[#e7e8db] bg-white shadow-[0_12px_30px_-24px_#173c2a]">
+                <div key={cat._id} className="overflow-hidden rounded-[24px] border border-[#e7e5e1] bg-white shadow-[0_12px_30px_-24px_#202020]">
                   {/* Category row */}
                   <button
                     onClick={() => handleCategoryClick(cat)}
@@ -80,12 +82,7 @@ export default function AllCategory() {
                       )}
                     </div>
                     <div className="flex items-center gap-2">
-                      <button
-                        onClick={(e) => { e.stopPropagation(); goToProducts(cat._id); }}
-                        className="rounded-lg bg-gray-900 px-3 py-1.5 text-xs font-semibold text-white"
-                      >
-                        View All
-                      </button>
+                      <span className="sk-category-view-all">Browse</span>
                       {catSubs.length > 0 && (
                         <span className={`text-gray-400 transition-transform duration-200 ${isOpen ? 'rotate-90' : ''}`}>›</span>
                       )}
@@ -123,7 +120,7 @@ export default function AllCategory() {
         )}
       </main>
 
-      <MobileBottomNav />
+      <MobileBottomNav variant="pinterest" />
     </div>
   );
 }
