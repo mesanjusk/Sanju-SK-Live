@@ -10,7 +10,9 @@ export default function CatalogLoadingState({ compact = false, error = false, on
         <span className="sk-print-spark sk-print-spark-one">✦</span>
         <span className="sk-print-spark sk-print-spark-two">✧</span>
         <div className="sk-print-press">
-          <div className="sk-print-press-top"><span className="sk-print-press-mark">SK</span></div>
+          <div className="sk-print-press-top">
+            <img className="sk-print-press-logo" src="/images/sk-digital-final.svg" alt="" width="44" height="28" />
+          </div>
           <div className="sk-print-press-slot" />
           <div className="sk-print-paper">
             <span className="sk-print-paper-emblem">✦</span>

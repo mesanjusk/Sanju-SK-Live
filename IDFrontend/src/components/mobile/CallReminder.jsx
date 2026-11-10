@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { FaPhoneAlt, FaTimes } from 'react-icons/fa';
 import seo from '../../config/local-seo.json';
+import './pinterest-storefront.css';
 
 const DISMISSED_KEY = 'sk_call_reminder_dismissed';
 const FIRST_REMINDER_DELAY_MS = 15000;
@@ -55,21 +56,19 @@ export default function CallReminder({ phoneNumber = seo.phone }) {
 
   if (!visible || dismissed) return null;
   return (
-    <aside role="status" aria-label="Call SANJU SK Digital"
-      className="fixed right-2 top-1/2 z-50 w-[178px] -translate-y-1/2 rounded-2xl border border-[#dfd2ef] bg-white/95 p-3 shadow-[0_12px_32px_rgba(24,62,42,.24)] backdrop-blur sm:right-5 sm:w-[210px]">
-      <button type="button" onClick={dismiss} aria-label="Dismiss call reminders for this visit"
-        className="absolute right-2 top-2 rounded-full p-1 text-[#87789a] focus-visible:outline-2 focus-visible:outline-emerald-700">
+    <aside role="status" aria-label="Call SANJU SK Digital" className="sk-pin-call-reminder">
+      <button type="button" className="sk-pin-call-dismiss" onClick={dismiss}
+        aria-label="Dismiss call reminders for this visit">
         <FaTimes aria-hidden="true" />
       </button>
-      <div className="mb-2 flex h-8 w-8 items-center justify-center rounded-lg bg-[#efe5fa] text-[#785aa5]">
-        <FaPhoneAlt aria-hidden="true" />
+      <div className="sk-pin-call-brand">
+        <img src="/images/sk-digital-final.svg" alt="" width="42" height="30" />
+        <span>SANJU SK Digital</span>
       </div>
-      <p className="pr-3 text-[12px] font-extrabold leading-4 text-[#4e3768]">Need help choosing?</p>
-      <p className="mt-1 text-[10px] leading-4 text-[#8a7a98]">Call our Gondia studio</p>
-      <p className="mt-1 text-[10px] font-bold text-[#4e3768]">{displayNumber}</p>
-      <a href={'tel:' + dialNumber} onClick={dismiss}
-        className="mt-2 flex w-full items-center justify-center gap-1 rounded-lg bg-[#785aa5] px-2 py-2 text-xs font-bold text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#785aa5]">
-        <FaPhoneAlt aria-hidden="true" /> Call now
+      <p className="sk-pin-call-heading">Need help choosing a design?</p>
+      <p className="sk-pin-call-subtitle">Speak to our Gondia studio</p>
+      <a href={'tel:' + dialNumber} className="sk-pin-call-cta" onClick={dismiss}>
+        <FaPhoneAlt aria-hidden="true" /> Call {displayNumber}
       </a>
     </aside>
   );

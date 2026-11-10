@@ -4,6 +4,7 @@ import api from '../api';
 import seo from '../config/local-seo.json';
 import PinterestStorefrontHeader from './mobile/PinterestStorefrontHeader';
 import EndlessPinterestFeed from './mobile/EndlessPinterestFeed';
+import { uniqueDesigns } from './mobile/uniqueDesigns.mjs';
 import './mobile/festive-home.css';
 import './mobile/pinterest-storefront.css';
 import { getCategoryTheme } from './mobile/categoryThemes';
@@ -159,6 +160,8 @@ export default function Home() {
     });
   }, [listings, deferredSearch, selectedCategory, selectedSubcategory, categoryById]);
 
+  const distinctProducts = useMemo(() => uniqueDesigns(filteredProducts), [filteredProducts]);
+
   // Scroll-aware shopping bar: disappears as customers browse down, reappears
   // as they scroll up or approach the start/end. No floating More/Top buttons.
   useEffect(() => {
@@ -261,18 +264,18 @@ export default function Home() {
         {catalogReady && (
           <div className="sk-pin-feed-heading">
             <h2>{selectedCategory ? selectedCategory.name : deferredSearch.trim() ? 'Search results' : 'Discover designs'}</h2>
-            <span>{filteredProducts.length} designs</span>
+            <span>{distinctProducts.length} designs</span>
           </div>
         )}
         {catalogReady && selectedCategory && <CategorySeoBlurb name={selectedCategory.name} />}
         {!catalogReady ? (
           <CatalogLoadingState error={catalogFailed && !catalogPending} onRetry={retryCatalog} />
-        ) : filteredProducts.length ? (
+        ) : distinctProducts.length ? (
           <EndlessPinterestFeed
             key={(selectedCategory ? idOf(selectedCategory) : 'all') + '|' +
               (selectedSubcategory ? idOf(selectedSubcategory) : 'all') + '|' +
               deferredSearch.trim().toLowerCase() + '|' + catalogRetry}
-            products={filteredProducts} categoryById={categoryById}
+            products={distinctProducts} categoryById={categoryById}
             whatsappNumber={whatsappNumber} />
         ) : (
           <div className="sk-pin-end-note">
