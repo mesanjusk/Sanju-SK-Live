@@ -156,6 +156,10 @@ export default function Home() {
 
   useEffect(() => { setVisibleCount(16); }, [selectedCategory, selectedSubcategory, deferredSearch]);
   useEffect(() => {
+    if (new URLSearchParams(window.location.search).get('focus') === 'search')
+      document.getElementById('sk-pinterest-search')?.focus();
+  }, []);
+  useEffect(() => {
     if (visibleCount >= feedProducts.length || !loadMoreRef.current) return undefined;
     if (!('IntersectionObserver' in window)) return undefined;
     const observer = new IntersectionObserver(([entry]) => {

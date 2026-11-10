@@ -1,9 +1,12 @@
-import { NavLink } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 import { FaHome, FaSearch, FaUserCircle } from 'react-icons/fa';
 
 export default function MobileBottomNav({ visible = true }) {
+  const navigate=useNavigate();
   const goToSearch = () => {
-    document.getElementById('sk-pinterest-search')?.focus();
+    const input=document.getElementById('sk-pinterest-search');
+    if (!input) { navigate('/?focus=search'); return; }
+    input.focus();
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
   return (

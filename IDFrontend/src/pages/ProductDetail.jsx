@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate, useLocation } from 'react-router-dom';
 import MobileBottomNav from '../components/mobile/MobileBottomNav';
+import PinterestPin from '../components/mobile/PinterestPin';
+import '../components/mobile/pinterest-home.css';
 import { FaWhatsapp, FaHeart, FaShare, FaYoutube, FaChevronLeft, FaChevronRight, FaArrowLeft } from 'react-icons/fa';
 import api from '../api';
 import ProductStage from '../components/experience/ProductStage';
@@ -40,6 +42,8 @@ export default function ProductDetail() {
   const [qty, setQty] = useState(25);
   const [showVideo, setShowVideo] = useState(false);
   const [categoryName, setCategoryName] = useState('');
+  const [relatedProducts, setRelatedProducts] = useState([]);
+  const [showRelatedCount, setShowRelatedCount] = useState(12);
   const whatsappNumber = useWhatsAppNumber();
   const { favorites, toggleFavorite } = useFavorites();
 
@@ -79,6 +83,20 @@ export default function ProductDetail() {
     load();
     return () => { active = false; };
   }, [id, reloadKey]);
+
+  useEffect(() => {
+    let active = true;
+    // The related grid is optional; keep the product detail usable if this feed fails.
+    api.get('/api/listings', { timeout: 14000 })
+      .then(response => {
+        if (!active) return;
+        const rows = Array.isArray(response.data) ? response.data : response.data?.result;
+        if (!Array.isArray(rows)) return;
+        setRelatedProducts(rows.filter(p => String(p._id) !== String(id)));
+      })
+      .catch(() => {});
+    return () => { active = false; };
+  }, [id]);
 
   if (loading) {
     return (
@@ -163,9 +181,9 @@ export default function ProductDetail() {
       />
       <ProductStructuredData product={product} />
 
-      <div className="min-h-screen bg-white pb-24">
-        {/* Instagram-style back header */}
-        <div className="sk-detail-back">
+      <div className="sk-pinterest-detail min-h-screen bg-white pb-24">
+        {/* Pinterest-style pin detail: return, save, share and enquire. */}
+        <div className="sk-detail-back sk-pin-detail-header">
           <button
             onClick={() => navigate(-1)}
             className="flex h-9 w-9 items-center justify-center rounded-full bg-gray-100 text-gray-700 active:scale-95"
@@ -192,7 +210,7 @@ export default function ProductDetail() {
           </div>
         </div>
 
-        <div className="mx-auto max-w-6xl px-3 py-5 sm:px-6 lg:px-8">
+        <div className="sk-pin-detail-content mx-auto max-w-6xl px-3 py-5 sm:px-6 lg:px-8">
           <div className="grid items-start gap-6 lg:grid-cols-2">
             {/* Interactive stage: perspective photos; true 3D only when a model URL exists. */}
             <div className="space-y-3">
@@ -343,6 +361,30 @@ export default function ProductDetail() {
           </div>
         </div>
 
+        {relatedProducts.length > 0 && (
+          <section className="sk-pin-related" aria-label="Similar design inspiration">
+            <div className="sk-pin-related-heading">
+              <h2>More ideas for you</h2>
+              <p>Discover another design or save your favourites.</p>
+            </div>
+            <div className="sk-pinterest-masonry">
+              {relatedProducts
+                .slice()
+                .sort((a,b) => Number(String(a.category?._id||a.category||'') ===
+                  String(product.category?._id||product.category||'')) -
+                  Number(String(b.category?._id||b.category||'') ===
+                  String(product.category?._id||product.category||'')))
+                .reverse()
+                .slice(0,showRelatedCount)
+                .map((item,index)=><PinterestPin key={item._id} product={item}
+                  index={index} whatsappNumber={waNumber} />)}
+            </div>
+            {relatedProducts.length>showRelatedCount&&(
+              <button type="button" className="sk-pin-related-more"
+                onClick={()=>setShowRelatedCount(n=>n+12)}>More like this</button>
+            )}
+          </section>
+        )}
         {/* Sticky bottom CTA on mobile */}
         <div className="fixed inset-x-0 bottom-[calc(65px+env(safe-area-inset-bottom))] z-30 border-t border-[#e3e8db] bg-white/95 px-4 py-2 shadow-[0_-10px_25px_#183f3213] backdrop-blur-lg lg:hidden">
           <a

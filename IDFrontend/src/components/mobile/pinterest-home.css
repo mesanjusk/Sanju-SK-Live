@@ -67,3 +67,20 @@
 @media(min-width:740px){.sk-pinterest-masonry{columns:3;column-gap:14px;}.sk-pinterest-main{padding-inline:22px;}.sk-pin-title{font-size:14px;}.sk-pin-card{margin-bottom:19px;}.sk-pin-image-wrap{border-radius:25px;}}
 @media(min-width:1080px){.sk-pinterest-masonry{columns:4;}.sk-pin-bottom-dock{bottom:20px;}}
 @media(prefers-reduced-motion:reduce){.sk-pin-bottom-dock,.sk-pin-image-link img,.sk-pin-search-row{transition:none;}}
+
+
+/* Tapping a pin opens a clean full-image detail and related inspiration feed. */
+.sk-pinterest-detail{background:#fff;color:#191919;}
+.sk-pinterest-detail .sk-pin-detail-header{
+  display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:58;
+  padding:10px 15px;background:#fff;border-bottom:1px solid #f0f0f0;
+}
+.sk-pinterest-detail .sk-pin-detail-header h1{font-weight:700;color:#222;}
+.sk-pinterest-detail .sk-pin-detail-content{padding-top:12px;}
+.sk-pinterest-detail .sk-detail-panel h2{color:#202020;}
+.sk-pinterest-detail .sk-detail-panel .sk-order-button{background:#151515;border-radius:999px;}
+.sk-pin-related{max-width:1300px;margin:18px auto 60px;padding:0 9px;}
+.sk-pin-related-heading{text-align:center;padding:17px 0 20px;}
+.sk-pin-related-heading h2{font-size:21px;font-weight:800;color:#222;}
+.sk-pin-related-heading p{margin-top:6px;color:#777;font-size:12px;}
+.sk-pin-related-more{display:block;margin:20px auto;padding:11px 21px;background:#222;color:#fff;border-radius:99px;font-size:13px;font-weight:700;}
