@@ -307,6 +307,73 @@ assert(!vercelRules.redirects.some(r=>r.source==='/sitemap-products.xml'),
 const robotsContent=readFileSync(new URL('../public/robots.txt',import.meta.url),'utf8');
 assert(robotsContent.includes('Sitemap: https://www.sanjusk.in/sitemap-products.xml'),
   'Robots should advertise the canonical product XML sitemap path');
+
+const sharedTheme=readFileSync(new URL('../src/styles/public-theme.css',import.meta.url),'utf8');
+const innerHeader=readFileSync(new URL('../src/components/mobile/MobileHeader.jsx',import.meta.url),'utf8');
+const savedPage=readFileSync(new URL('../src/components/Favorites.jsx',import.meta.url),'utf8');
+const favoritesContext=readFileSync(new URL('../src/context/FavoritesContext.jsx',import.meta.url),'utf8');
+const catalogPage=readFileSync(new URL('../src/pages/ProductListing.jsx',import.meta.url),'utf8');
+const categoryListPage=readFileSync(new URL('../src/components/allCategory.jsx',import.meta.url),'utf8');
+const contactPage=readFileSync(new URL('../src/components/Contact.jsx',import.meta.url),'utf8');
+const galleryPage=readFileSync(new URL('../src/components/ServiceGallery.jsx',import.meta.url),'utf8');
+const standaloneTheme=readFileSync(new URL('../public/styles/brand-unified.css',import.meta.url),'utf8');
+assert(appSource.includes("import './styles/public-theme.css'") &&
+  appSource.includes("isPrivateRoute ? undefined : 'sk-public-site'"),
+  'Scope uniform theme to all public routes without recolouring admin workflows');
+assert(sharedTheme.includes('--sk-ui-ink:#202020') &&
+  sharedTheme.includes('--sk-ui-gold:#b16a0e') &&
+  sharedTheme.includes(':first-child:not(.is-active)'),
+  'White-charcoal-gold tokens and accurate Home dock active state are required');
+assert(innerHeader.includes('sk-public-header') &&
+  innerHeader.includes('/images/sk-digital-final.svg') &&
+  innerHeader.includes('sk-pin-overflow'),
+  'Inner pages require the same real SK logo and header/menu');
+assert(pinNavSource.includes("variant = 'pinterest'") &&
+  pinNavSource.includes('<NavLink to="/" end') &&
+  pinNavSource.includes('to="/?search=1"') &&
+  pinNavSource.includes('to="/favorites"'),
+  'Home, Search and Saved dock must be functional and highlight the correct route');
+assert(savedPage.includes('sk-pinterest-home sk-saved-page') &&
+  savedPage.includes('sk-pin-masonry') &&
+  savedPage.includes('PinterestPinCard') &&
+  savedPage.includes('role="tablist"') &&
+  savedPage.includes('<MobileHeader'),
+  'Saved and Liked must use the Pinterest visual design, not the old green grid');
+assert(favoritesContext.includes('toggleLiked') &&
+  pinCardSource.includes('toggleLiked(product)') &&
+  detailSource.includes('toggleLiked(product)'),
+  'Like / Unlike must actually update the Liked collection');
+assert(catalogPage.includes('<MobileHeader title="Find your design"') &&
+  catalogPage.includes('<MobileBottomNav variant="pinterest"') &&
+  categoryListPage.includes('<MobileHeader title="Browse all categories"') &&
+  categoryListPage.includes('<MobileBottomNav variant="pinterest"') &&
+  !categoryListPage.includes('e.stopPropagation()'),
+  'Products and categories must use uniform public header/dock and valid buttons');
+assert(contactPage.includes('<MobileHeader title="Contact our Gondia studio"') &&
+  contactPage.includes('<MobileBottomNav variant="pinterest"') &&
+  galleryPage.includes('sk-public-service-gallery'),
+  'Contact and service sections must follow the same storefront theme');
+assert(standaloneTheme.includes('.sk-static-bottom-nav') &&
+  standaloneTheme.includes('--gold:#b16a0e'),
+  'Standalone SEO landing pages need the same dock and logo colours');
+for (const slug of [
+ 'wedding-card-printing-gondia','digital-wedding-invitations',
+ 'corporate-gifting-gondia','3d-led-sign-boards-gondia',
+ 'custom-trophies-awards-gondia','flex-banner-printing-gondia'
+]) {
+  const page=readFileSync(new URL('../public/'+slug+'/index.html',import.meta.url),'utf8');
+  assert(page.includes('/styles/brand-unified.css') &&
+    page.includes('/images/sk-digital-final.svg') &&
+    page.includes('sk-static-bottom-nav'),
+    'SEO service page '+slug+' must inherit the public theme');
+}
+for (const guide of categoryGuideData) {
+  if (guide.existingUrl) continue;
+  const page=readFileSync(new URL('../public/categories/'+guide.slug+'/index.html',import.meta.url),'utf8');
+  assert(page.includes('/styles/brand-unified.css') &&
+    page.includes('sk-static-bottom-nav'),
+    'Category guide '+guide.slug+' must use the shared public theme');
+}
 const prevFetch=globalThis.fetch;
 function mockResponse(){
   return {
