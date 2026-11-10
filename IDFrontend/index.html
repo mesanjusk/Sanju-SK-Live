@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="manifest" href="/manifest.json" />
-    <meta name="theme-color" content="#EFE6FB" />
+    <meta name="theme-color" content="#FFFFFF" />
     <meta name="format-detection" content="telephone=yes" />
     <link rel="preconnect" href="https://res.cloudinary.com" crossorigin />
     <style id="sk-initial-seo-style">
@@ -71,7 +71,39 @@
         #sk-seo-initial .sk-boot-card { flex-basis:210px; height:254px; }
         #sk-seo-initial .sk-boot-card span { font-size:14px; }
       }
-    </style>
+    
+      /* Pinterest-style first paint matches the live React feed to prevent old-hero FOUC. */
+      html,body {background:#fff}
+      #sk-seo-initial {background:#fff;color:#181818;min-height:100vh;font-family:Inter,system-ui,sans-serif}
+      #sk-seo-initial .sk-boot-shell {background:#fff;padding:0 0 9px}
+      #sk-seo-initial .sk-boot-header {min-height:71px;display:flex;align-items:center;justify-content:space-between;padding:10px 17px}
+      #sk-seo-initial .sk-boot-brand {display:flex;gap:9px;align-items:center;color:#151515;font-size:20px;font-weight:900;letter-spacing:-.05em}
+      #sk-seo-initial .sk-boot-mark {display:grid;place-items:center;width:40px;height:40px;flex:0 0 40px;border-radius:50%;color:#fff;background:#171717;font-size:17px;box-shadow:none;border:0}
+      #sk-seo-initial .sk-boot-header-actions {display:flex;align-items:center;gap:16px;font-size:29px;color:#171717}
+      #sk-seo-initial .sk-boot-header-actions a {color:#171717;text-decoration:none}
+      #sk-seo-initial .sk-boot-category-tabs {display:flex;gap:25px;padding:11px 17px 16px;overflow-x:auto;scrollbar-width:none}
+      #sk-seo-initial .sk-boot-category-tabs a {flex:0 0 auto;display:block;width:auto;max-width:none;min-height:34px;font-size:16px;font-weight:650;color:#161616;padding:4px 0}
+      #sk-seo-initial .sk-boot-category-tabs a span {display:block;max-width:none;font-size:16px;white-space:nowrap}
+      #sk-seo-initial .sk-boot-category-tabs a[aria-current] {border-bottom:3px solid #181818}
+      #sk-seo-initial .sk-boot-picks {padding:0 7px 5px}
+      #sk-seo-initial .sk-boot-collections {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;overflow:visible;padding:0}
+      #sk-seo-initial .sk-boot-card {display:block;width:100%;height:auto;min-width:0;min-height:0;border:0;border-radius:0;background:#fff;box-shadow:none;color:#171717;overflow:visible}
+      #sk-seo-initial .sk-boot-card img {display:block;width:100%;height:auto;aspect-ratio:.82;object-fit:cover;border-radius:22px;background:#f5f3f5}
+      #sk-seo-initial .sk-boot-card:nth-child(2) img {aspect-ratio:.72}
+      #sk-seo-initial .sk-boot-card:nth-child(3) img {aspect-ratio:1}
+      #sk-seo-initial .sk-boot-card:nth-child(4) img {aspect-ratio:.76}
+      #sk-seo-initial .sk-boot-card span {display:block;min-height:0;background:transparent;color:#171717;font-size:11px;font-weight:750;padding:7px 4px 10px}
+      #sk-seo-initial .sk-boot-more {width:100%;max-width:none;margin:10px auto 0;padding:0 12px;border:0;border-top:1px solid #eee;border-radius:0;background:#fff}
+      #sk-seo-initial .sk-boot-more summary {padding:16px 4px;font-size:12px;color:#323232}
+      #sk-seo-initial .sk-boot-hero {display:block;min-height:0;padding:15px 7px;background:#faf7fb;border-radius:18px}
+      #sk-seo-initial .sk-boot-copy {max-width:100%}
+      #sk-seo-initial .sk-boot-more h1 {color:#282028;font-size:24px}
+      #sk-seo-initial .sk-boot-description {font-size:13px}
+      #sk-seo-initial .sk-boot-bottom-nav {display:flex;justify-content:center;align-items:center;gap:14px;position:fixed;bottom:16px;left:50%;transform:translateX(-50%);padding:8px;border-radius:24px;background:#fff;box-shadow:0 6px 25px #0002;z-index:40}
+      #sk-seo-initial .sk-boot-bottom-nav a {display:grid;place-items:center;width:47px;height:40px;border-radius:16px;color:#181818;text-decoration:none;font-size:25px}
+      #sk-seo-initial .sk-boot-bottom-nav a:first-child {background:#181818;color:#fff}
+      @media(min-width:700px){#sk-seo-initial .sk-boot-collections{grid-template-columns:repeat(4,minmax(0,1fr));gap:15px}}
+</style>
     <!-- SEO GENERATED HEAD START -->
     <!-- The predev/prebuild script generates crawlable meta tags and JSON-LD here. -->
     <!-- SEO GENERATED HEAD END -->

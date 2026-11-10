@@ -17,8 +17,10 @@ assert(appBootSource.includes("import Home from './components/Home'"), 'Homepage
 assert(!appBootSource.includes("lazy(() => import('./components/Home'))"), 'Do not lazy load homepage behind a second skeleton');
 assert(index.includes('class="sk-boot-header sk-boot-container"') && index.includes('class="sk-boot-hero'), 'Homepage initial HTML must match lavender storefront layout');
 assert(index.includes('class="sk-boot-hero-cta"') && index.includes('class="sk-boot-collections"'), 'Initial HTML must include unified quote CTA before collections');
-assert(index.indexOf('sk-boot-hero-cta') < index.indexOf('sk-boot-collections'), 'Hero CTA must appear before initial collections');
-assert(index.includes('<details class="sk-boot-more">') && index.includes('Common questions'), 'Initial SEO information must remain available without JS');
+assert(index.indexOf('sk-boot-collections') < index.indexOf('GONDIA DESIGN STUDIO · SINCE 2006'),
+  'The Pinterest gallery must appear before the SEO studio intro tucked into More about');
+assert(index.includes('<details class="sk-boot-more"><summary>More about SANJU SK Digital</summary>') &&
+  index.includes('Common questions'), 'Initial SEO business information must remain available inside More about without JS');
 assert(index.includes('class="sk-boot-card"') && index.includes('images/services/wedding-cards.svg'), 'Initial collection links and images must be present');
 assert(index.includes('sk-initial-seo-style') && index.includes('#f8f3fc'), 'First paint needs lavender background instead of old green fallback');
 assert(index.includes('id="sk-seo-initial"'),'Homepage initial HTML content missing');
@@ -120,81 +122,66 @@ const homeSource=readFileSync(new URL('../src/components/Home.jsx',import.meta.u
 assert(!homeSource.includes('Our online catalog is temporarily offline'),'Offline copy must never render on home');
 const gallerySource=readFileSync(new URL('../src/components/ServiceGallery.jsx',import.meta.url),'utf8');
 for(const slug of landingSlugs)assert(gallerySource.includes('/'+slug+'/'),'Service gallery missing '+slug);
-const heroSource=readFileSync(new URL('../src/components/mobile/FestiveStorefrontHero.jsx',import.meta.url),'utf8');
-const cardSource=readFileSync(new URL('../src/components/mobile/CompactProductCard.jsx',import.meta.url),'utf8');
-const carouselSource=readFileSync(new URL('../src/components/mobile/CategoryProductCarousel.jsx',import.meta.url),'utf8');
-const bottomNavSource=readFileSync(new URL('../src/components/mobile/MobileBottomNav.jsx',import.meta.url),'utf8');
-const categorySource=readFileSync(new URL('../src/components/mobile/StoryCategories.jsx',import.meta.url),'utf8');
+const pinHeaderSource=readFileSync(new URL('../src/components/mobile/PinterestStorefrontHeader.jsx',import.meta.url),'utf8');
+const pinCardSource=readFileSync(new URL('../src/components/mobile/PinterestPinCard.jsx',import.meta.url),'utf8');
+const pinCss=readFileSync(new URL('../src/components/mobile/pinterest-storefront.css',import.meta.url),'utf8');
+const detailSource=readFileSync(new URL('../src/pages/ProductDetail.jsx',import.meta.url),'utf8');
+const pinNavSource=readFileSync(new URL('../src/components/mobile/MobileBottomNav.jsx',import.meta.url),'utf8');
 const reminderSource=readFileSync(new URL('../src/components/mobile/CallReminder.jsx',import.meta.url),'utf8');
 const appSource=readFileSync(new URL('../src/App.jsx',import.meta.url),'utf8');
-assert(homeSource.includes('<details id="sk-business-information"'),'Expandable business information missing');
-assert(homeSource.includes('<FAQSection />')&&homeSource.includes('<LocalContactFooter />'),'FAQs and contact must remain in the page');
-assert(homeSource.includes('groupedProducts')&&homeSource.includes('<CategoryProductCarousel section='),'Swipeable category previews missing');
-assert(!homeSource.includes('<StoryCategories') && !heroSource.includes('sk-festive-tabs sk-festive-container'),'Remove duplicate category strips; collections carousel owns category browsing');
-assert(carouselSource.includes('calc((100% - 16px) / 3)')&&carouselSource.includes('onScroll={onScroll}'),'Three-across lazy swipe gallery missing');
-assert(homeSource.includes('filteredProducts.slice(0, visibleCount)'),'Focused product pagination missing');
-assert(heroSource.includes('phoneNumber')&&heroSource.includes('dialHref'),'Top navigation call link missing');
-assert(cardSource.includes('loading="lazy"')&&cardSource.includes('Enquire'),'Lightweight product gallery card missing');
-assert(heroSource.includes('FaEllipsisV')&&heroSource.includes('sk-top-navigation'),'Three-dot website menu missing');
 const festiveCss=readFileSync(new URL('../src/components/mobile/festive-home.css',import.meta.url),'utf8');
-assert(heroSource.includes('sk-festive-tile-top')&&heroSource.includes('sk-festive-tile-media'),'Collection photo and label must have separate layout regions');
-assert(festiveCss.includes('grid-auto-columns:44%'),'Video-style carousel should show about two large cards plus a peek of next');
-assert(festiveCss.includes('.sk-festive-tile-media img')&&festiveCss.includes('position: static'),'Collection photo must stay within its own media region');
-assert(bottomNavSource.includes('sk-mobile-bottom-nav') && bottomNavSource.includes('is-hidden'), 'Contact navigation must be smart and responsive');
-assert(heroSource.includes('Made with <FaHeart')&&heroSource.includes('sk-festive-top-phone'),'One-line heart and phone information missing');
-assert(bottomNavSource.includes('FaWhatsapp')&&bottomNavSource.includes('FaPhoneAlt')&&bottomNavSource.includes('FaHeart'),'Three floating contact icons missing');
-assert(reminderSource.includes('FIRST_REMINDER_DELAY_MS = 15000')&&reminderSource.includes('REPEAT_REMINDER_DELAY_MS = 8000'),'Call reminder timing must be 15 seconds then every 8 seconds');
-assert(reminderSource.includes('top-1/2')&&reminderSource.includes('w-[178px]'),'Call reminder must stay narrow at right-center');
-assert(reminderSource.includes('sessionStorage.setItem(DISMISSED_KEY'),'Call reminders must be dismissible for the session');
-assert(appSource.includes('<CallReminder />'),'Call reminders must work across public routes');
 
-assert(heroSource.includes('sk-festive-header-search') && heroSource.indexOf('sk-festive-header-search') < heroSource.indexOf('sk-festive-header-actions relative'), 'Search must sit in the top navigation before the three-dot menu');
-assert(!heroSource.includes('sk-festive-search" role="search"'), 'Full-width search row must be removed');
-assert(heroSource.includes('collections.map(item => renderTile(item))'), 'All collection cards must be swipeable, not only first four');
-assert(festiveCss.includes('grid-auto-columns:44%'), 'Use video-style collection card sizing on mobile');
-assert(festiveCss.includes('/* Light-lavender homepage palette') && festiveCss.includes('#efe6fb'), 'Light lavender palette required across homepage');
-assert(homeSource.indexOf('<ServiceGallery />') > homeSource.indexOf('</main>'), 'Product catalog should precede signature services');
-assert(homeSource.includes('sk-store-footer-summary') && homeSource.includes('<details id="sk-business-information"'), 'Footer information must stay compact and expandable');
-
-assert(!heroSource.includes('Explore designs'), 'Hero Explore designs button must be removed');
-assert(heroSource.includes('ref={carouselRef}') && heroSource.includes('onTouchStart={pauseCarousel}'), 'Swipe carousel must pause on user input');
-assert(heroSource.includes('window.requestAnimationFrame(move)') && heroSource.includes('prefers-reduced-motion: reduce'), 'Carousel autoplay and reduced-motion support required');
-assert(heroSource.includes('collections.map(item => renderTile(item))'), 'All real catalog categories should be accessible in the collection carousel');
-assert(!heroSource.includes('const renderTab ='), 'Old top category icon navigation must be deleted');
-const browserHTML=readFileSync(new URL('../index.html',import.meta.url),'utf8');
-assert(browserHTML.includes('<meta name="theme-color" content="#EFE6FB" />'),'Browser theme should match lavender website');
-assert(heroSource.includes('window.requestAnimationFrame(move)') && heroSource.includes('window.cancelAnimationFrame(frameId)'),'Carousel animation must clean up animation frames');
-assert(heroSource.includes('collections.map(item => renderTile(item, true))'),'Carousel needs a duplicated visual sequence for seamless looping');
-assert(heroSource.includes('prefers-reduced-motion: reduce') && heroSource.includes('onPointerDown={pauseCarousel}'),'Autoscroll must respect reduced motion and manual interaction');
-assert(festiveCss.includes('/* Promotional, image-first carousel') && festiveCss.includes('object-fit:cover'),'Carousel must use large photo-led cards');
-
-assert(heroSource.indexOf('sk-unified-quote-cta') < heroSource.indexOf('sk-festive-picks sk-festive-container'), 'Single quote CTA must be in hero before collections');
-assert(cardSource.includes('sk-gallery-product-caption') && cardSource.includes('sk-gallery-product-photo'), 'Product gallery must share collection-card photo and lavender caption structure');
-assert(cardSource.includes('saveEnquiryLead') && cardSource.includes('toggleFavorite(product)') && cardSource.includes('Enquire'), 'Product enquiries and favourites must remain functional');
-assert(festiveCss.includes('/* Image-led product cards match') && festiveCss.includes('.sk-gallery-product-photo img'), 'Image-led gallery styling must be present');
-const themeSource=readFileSync(new URL('../src/components/mobile/categoryThemes.js',import.meta.url),'utf8');
-assert(themeSource.includes('getCategoryTheme') && themeSource.includes("key:'signage'") && themeSource.includes("key:'wedding'"), 'Category themes must support wedding, signage and service categories');
-assert(heroSource.includes('sk-festive-sticky-shell') && heroSource.includes('sk-shopping-tabs'), 'Sticky category navigation must be present');
-assert(heroSource.includes('onTabCategorySelect') && heroSource.includes('aria-pressed={active}'), 'Category tabs must switch the active theme and filter state');
-assert(heroSource.includes('sk-unified-quote-cta') && heroSource.includes('promoQuoteUrl'), 'Category-specific hero quotation must be available');
-assert(homeSource.includes('sk-subcategory-rail') && homeSource.includes('selectedSubcategory'), 'Image-led subcategories must stay functional');
-assert(!homeSource.includes('sk-back-to-top') && !homeSource.includes('window.scrollTo({ top: 0'), 'No floating Back-to-top control should interrupt browsing');
-assert(homeSource.includes('CategoryProductCarousel') && homeSource.includes('whatsappNumber'), 'Three-across product and contact controls required');
-assert(festiveCss.includes('position:sticky') && festiveCss.includes('var(--sk-theme-bg)'), 'Category navigation and theme colours required');
-assert(index.includes('sk-boot-category-tabs'), 'Pre-React loading layout should reflect the new category navigation');
-const footerNavSource=readFileSync(new URL('../src/components/mobile/MobileBottomNav.jsx',import.meta.url),'utf8');
-assert(homeSource.includes('sk-store-footer') && homeSource.includes('sk-store-footer-summary'), 'Minimal business footer required');
-assert(homeSource.includes('directionTravel') && homeSource.includes('setShowBottomNav'), 'Scroll direction must automatically show and hide the nav');
-assert(homeSource.includes('More about SANJU SK Digital') && !homeSource.includes('Back to top'), 'Only the footer info disclosure should remain, with no extra top button');
-assert(homeSource.includes('<ServiceGallery />') && homeSource.includes('<FAQSection />') && homeSource.includes('<LocalContactFooter />'), 'SEO services, FAQ and contact must survive inside disclosure');
-assert(footerNavSource.includes('visible = true') && footerNavSource.includes('is-hidden') && !footerNavSource.includes('sk-quick-more'), 'Bottom actions must auto-hide without a More button');
-assert(festiveCss.includes('/* Myntra-inspired tidy footer') && festiveCss.includes('.sk-store-footer-summary'), 'New mobile footer styles missing');
-assert(!heroSource.includes('sk-merch-feature') && !heroSource.includes('Have something special in mind?'), 'Remove duplicate hero promotions');
-assert((heroSource.match(/Get a custom quote/g)||[]).length === 1, 'One generic quote link in homepage hero');
-assert(!homeSource.includes('Need multiple pieces? Request a bulk quote'), 'No repeated bulk quote CTA under every category');
-assert(!homeSource.includes('pb-24') && !homeSource.includes('sk-back-to-top'), 'No excessive whitespace or floating Top button');
-assert(homeSource.indexOf('sk-store-footer-heading') > homeSource.indexOf('sk-store-footer-expanded'), 'Business links must be hidden until the footer is expanded');
-assert(festiveCss.includes('/* PR #60: one hero quote CTA') && festiveCss.includes('.sk-mobile-bottom-nav.is-hidden'), 'Smart navigation stylesheet required');
+assert(homeSource.includes('<PinterestStorefrontHeader') && homeSource.includes('<PinterestPinCard') &&
+  homeSource.includes('sk-pin-masonry'), 'Homepage must use Pinterest header and image masonry, not grouped shop cards');
+assert(!homeSource.includes('<FestiveStorefrontHero') && !homeSource.includes('<CategoryProductCarousel'),
+  'Previous promotional hero and grouped category carousels must not render');
+assert(pinHeaderSource.includes('sk-pin-categories') && pinHeaderSource.includes('onCategorySelect?.(cat)') &&
+  pinHeaderSource.includes('aria-pressed='), 'Horizontal category tabs must filter actual database categories');
+assert(pinHeaderSource.includes('sk-pin-search-row') && pinHeaderSource.includes('disabled={!catalogReady}'),
+  'Search should open on demand and remain safe before database loads');
+assert(pinHeaderSource.includes('sk-pin-top-action') && pinHeaderSource.includes('sk-pin-overflow-menu'),
+  'Header must have custom quote action and functional overflow menu');
+assert(pinCardSource.includes("to={url} state={{ product }}") && pinCardSource.includes('sk-pin-cover') &&
+  pinCardSource.includes('sk-pin-shape-'), 'Tapping a mosaic tile must enter its real product URL with instant preview state');
+assert(pinCardSource.includes('toggleFavorite(product)') && pinCardSource.includes('saveEnquiryLead') &&
+  pinCardSource.includes('Copy link') && pinCardSource.includes('Request quote'),
+  'Pin action menu must save, copy and enquire about actual product');
+assert(pinCss.includes('columns:2') && pinCss.includes('break-inside:avoid') &&
+  pinCss.includes('sk-pin-cover') && pinCss.includes('sk-pin-detail-related'),
+  'Two-column mobile masonry and related designs styling must exist');
+assert(pinCss.includes('prefers-reduced-motion:reduce'), 'Motion accessibility must be retained');
+assert(homeSource.includes('filteredProducts.slice(0, visibleCount)') &&
+  homeSource.includes('IntersectionObserver'), 'Masonry must progressively load real products');
+assert(homeSource.indexOf('sk-pin-about-intro') > homeSource.indexOf('sk-store-footer-expanded') &&
+  homeSource.includes('GONDIA DESIGN STUDIO · SINCE 2006') &&
+  homeSource.includes('Wedding cards, signage &amp;'),
+  'Gondia SEO heading and descriptive text must move into expandable footer');
+assert(homeSource.includes('<ServiceGallery />') && homeSource.includes('<FAQSection />') &&
+  homeSource.includes('<LocalContactFooter />'), 'Service links, FAQs and contact must survive redesign');
+assert(pinNavSource.includes("variant === 'pinterest'") && pinNavSource.includes('FaHome') &&
+  pinNavSource.includes('FaSearch') && pinNavSource.includes('FaHeart') &&
+  pinNavSource.includes('sk-pin-bottom-nav'), 'Floating dock must offer Home Search and Saved');
+assert(pinNavSource.includes('FaWhatsapp') && pinNavSource.includes('FaPhoneAlt') &&
+  pinNavSource.includes('is-hidden'), 'Existing contact mode and auto-hide support must remain intact');
+assert(detailSource.includes('sk-pin-detail-visual') && detailSource.includes('sk-pin-detail-thumbs') &&
+  detailSource.includes('More ideas like this') && detailSource.includes('sk-pin-detail-related'),
+  'Product click should show immersive photo gallery and related designs');
+assert(detailSource.includes('ProductStructuredData') && detailSource.includes('saveEnquiryLead') &&
+  detailSource.includes('toggleFavorite(product)') && detailSource.includes('navigator.share') &&
+  detailSource.includes('getPriceForQty'), 'Details must retain SEO, saved, sharing and genuine pricing');
+assert(detailSource.includes('initial = idOf(location.state?.product)') &&
+  detailSource.includes("api.get('/api/listings/' + id"), 'Detail should render immediately using card state and refresh from backend');
+assert(detailSource.includes('ProductStage') && detailSource.includes('getYouTubeId'),
+  'Optional 3D model and video media features should remain');
+assert(pinCss.includes('sk-pin-about-intro') && index.includes('sk-boot-bottom-nav'),
+  'Both first paint and React layout must use Pinterest-inspired navigation');
+assert(!homeSource.includes('sk-back-to-top') && !homeSource.includes('pb-24'),
+  'No floating Top button or excessive bottom whitespace');
+assert(reminderSource.includes('FIRST_REMINDER_DELAY_MS = 15000') &&
+  reminderSource.includes('REPEAT_REMINDER_DELAY_MS = 8000') &&
+  reminderSource.includes('sessionStorage.setItem(DISMISSED_KEY'),
+  'Dismissible call reminder must remain available');
+assert(appSource.includes('<CallReminder />'), 'Call reminders must work on public routes');
 
 const categoryGuideData=JSON.parse(readFileSync(new URL('../src/config/category-seo.json',import.meta.url),'utf8'));
 const guideSource=readFileSync(new URL('../src/components/mobile/CategorySeoBlurb.jsx',import.meta.url),'utf8');
@@ -202,14 +189,15 @@ const navSource=readFileSync(new URL('../src/components/mobile/MobileBottomNav.j
 const vercelRules=JSON.parse(readFileSync(new URL('../vercel.json',import.meta.url),'utf8'));
 assert(categoryGuideData.length>=9,'Require authored category content for observed catalog categories');
 assert(new Set(categoryGuideData.map(g=>g.slug)).size===categoryGuideData.length,'Category SEO guide slugs must be unique');
-assert(homeSource.includes('<CategorySeoBlurb name={section.name} />') && homeSource.includes('<CategorySeoBlurb name={selectedCategory.name} />'),
-  'SEO summary must follow each actual live category and focused selection');
+assert(homeSource.includes('<CategorySeoBlurb name={selectedCategory.name} />') &&
+  homeSource.includes('categoryById.get(idOf(product.category))'),
+  'SEO summary and category resolution must work for selected catalog categories');
 assert(guideSource.includes('getCategoryGuide') && guideSource.includes('Browse ' + "' + name + '"),
   'Every unknown live category needs a relevant no-fabrication fallback description');
-assert(festiveCss.includes('Floating three-icon dock') && festiveCss.includes('.sk-mobile-bottom-nav.sk-floating-actions'),
-  'Return three contact buttons to a compact floating dock');
+assert(festiveCss.includes('Floating three-icon dock') && pinCss.includes('.sk-pin-bottom-nav'),
+  'Keep a floating quick dock, updated to Home Search Saved for Pinterest view');
 assert(navSource.includes('sk-floating-actions') && navSource.includes('visible = true'),
-  'Floating actions must respect the existing scroll-aware show/hide state');
+  'Floating actions must keep scroll-aware show/hide state');
 const newPages=categoryGuideData.filter(g=>!g.existingUrl);
 assert(newPages.length>=7,'Require new helpful indexable pages in addition to existing service pages');
 assert(vercelRules.rewrites.some(r=>r.source==='/categories/:slug/' && r.destination==='/categories/:slug/index.html'),
@@ -245,10 +233,10 @@ assert(homeSource.includes("loadCatalogPart('listings'") && homeSource.includes(
 assert(homeSource.includes("if (!catalogReady) return;"), 'Category actions must be gated until the catalog is ready');
 assert(homeSource.includes('<CatalogLoadingState error={catalogFailed && !catalogPending} onRetry={retryCatalog} />'),
   'Show printing animation during pending state and manual retry after failure');
-assert(heroSource.includes('disabled={!catalogReady}') && heroSource.includes('sk-shopping-loading-tabs'),
+assert(pinHeaderSource.includes('disabled={!catalogReady}') && pinHeaderSource.includes('sk-pin-tab-loading'),
   'Search and category tabs must be non-interactive while waiting for catalog data');
-assert(heroSource.includes('<CatalogLoadingState compact error={false} />') && heroSource.includes('catalogReady && <div'),
-  'Loading animation must replace the collection carousel while metadata or products are pending');
+assert(homeSource.includes('<CatalogLoadingState error={catalogFailed && !catalogPending} onRetry={retryCatalog} />'),
+  'CSS print animation must replace the masonry gallery while metadata or products are pending');
 assert(loadingComponentSource.includes('sk-print-press') && loadingComponentSource.includes('sk-print-paper') &&
   loadingComponentSource.includes('Try loading again'), 'Loader must use printing motif and an accessible retry');
 assert(festiveCss.includes('@keyframes sk-paper-print') && festiveCss.includes('@media (prefers-reduced-motion:reduce)'),
