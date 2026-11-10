@@ -5,6 +5,7 @@ import api from '../api';
 import seo from '../config/local-seo.json';
 import PinterestHeader from './mobile/PinterestHeader';
 import PinterestPin from './mobile/PinterestPin';
+import './mobile/festive-home.css';
 import './mobile/pinterest-home.css';
 import CategorySeoBlurb from './mobile/CategorySeoBlurb';
 import VideoFeedCard from './mobile/VideoFeedCard';
