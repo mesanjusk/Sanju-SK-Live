@@ -214,7 +214,7 @@ const vercelRules=JSON.parse(readFileSync(new URL('../vercel.json',import.meta.u
 assert(categoryGuideData.length>=9,'Require authored category content for observed catalog categories');
 assert(new Set(categoryGuideData.map(g=>g.slug)).size===categoryGuideData.length,'Category SEO guide slugs must be unique');
 assert(homeSource.includes('<CategorySeoBlurb name={selectedCategory.name} />') &&
-  homeSource.includes('categoryById.get(idOf(product.category))'),
+  endlessSource.includes('categoryById.get(itemKey(item.product.category))'),
   'SEO summary and category resolution must work for selected catalog categories');
 assert(guideSource.includes('getCategoryGuide') && guideSource.includes('Browse ' + "' + name + '"),
   'Every unknown live category needs a relevant no-fabrication fallback description');
