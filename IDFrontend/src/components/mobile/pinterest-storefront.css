@@ -194,3 +194,11 @@
  .sk-pin-brand .sk-pin-brand-name {font-size:15px;}
  .sk-pin-brand .sk-pin-brand-name small {font-size:6px;}
 }
+
+/* Endlessly mixed design inspiration: lazy-load in 18-pin batches. */
+.sk-pin-card { content-visibility:auto; contain-intrinsic-size:auto 270px; }
+.sk-pin-feed-sentinel {min-height:38px;padding:14px 0 25px;text-align:center;}
+.sk-pin-feed-sentinel .sk-pin-show-more {border:1px solid #ededed;border-radius:999px;background:#fff;
+ color:#333;font-size:12px;font-weight:700;padding:10px 16px;}
+.sk-pin-feed-sentinel .sk-pin-show-more span {font-size:15px;margin-left:5px;}
+.sk-pin-feed-sentinel .sk-pin-show-more:focus-visible{outline:2px solid #7653a7;outline-offset:3px;}

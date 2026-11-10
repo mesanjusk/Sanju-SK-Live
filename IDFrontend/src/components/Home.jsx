@@ -1,9 +1,9 @@
-import { useDeferredValue, useEffect, useMemo, useRef, useState } from 'react';
+import { useDeferredValue, useEffect, useMemo, useState } from 'react';
 import { FaArrowRight, FaChevronDown, FaPlay } from 'react-icons/fa';
 import api from '../api';
 import seo from '../config/local-seo.json';
 import PinterestStorefrontHeader from './mobile/PinterestStorefrontHeader';
-import PinterestPinCard from './mobile/PinterestPinCard';
+import EndlessPinterestFeed from './mobile/EndlessPinterestFeed';
 import './mobile/festive-home.css';
 import './mobile/pinterest-storefront.css';
 import { getCategoryTheme } from './mobile/categoryThemes';
@@ -30,13 +30,11 @@ export default function Home() {
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [selectedSubcategory, setSelectedSubcategory] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
-  const [visibleCount, setVisibleCount] = useState(18);
   const [searchOpen, setSearchOpen] = useState(() =>
     typeof window !== 'undefined' && new URLSearchParams(window.location.search).has('search'));
   const [showVideos, setShowVideos] = useState(false);
   const [showBottomNav, setShowBottomNav] = useState(true);
   const deferredSearch = useDeferredValue(searchTerm);
-  const loadMoreRef = useRef(null);
   // All public enquiry links use the verified Gondia business WhatsApp number.
   const whatsappNumber = String(seo.phone || '+919372333633').replace(/\D/g, '');
   const phoneNumber = seo.phone;
@@ -161,19 +159,6 @@ export default function Home() {
     });
   }, [listings, deferredSearch, selectedCategory, selectedSubcategory, categoryById]);
 
-  const focused = Boolean(selectedCategory || deferredSearch.trim());
-
-  useEffect(() => { setVisibleCount(18); }, [selectedCategory, selectedSubcategory, deferredSearch]);
-  useEffect(() => {
-    if (!catalogReady || visibleCount >= filteredProducts.length || !loadMoreRef.current) return undefined;
-    if (!('IntersectionObserver' in window)) return undefined;
-    const observer = new IntersectionObserver(([entry]) => {
-      if (entry.isIntersecting) setVisibleCount(count => Math.min(count + 18, filteredProducts.length));
-    }, { rootMargin: '350px 0px', threshold: 0 });
-    observer.observe(loadMoreRef.current);
-    return () => observer.disconnect();
-  }, [catalogReady, visibleCount, filteredProducts.length]);
-
   // Scroll-aware shopping bar: disappears as customers browse down, reappears
   // as they scroll up or approach the start/end. No floating More/Top buttons.
   useEffect(() => {
@@ -283,26 +268,12 @@ export default function Home() {
         {!catalogReady ? (
           <CatalogLoadingState error={catalogFailed && !catalogPending} onRetry={retryCatalog} />
         ) : filteredProducts.length ? (
-          <>
-            <div className="sk-pin-masonry" aria-label="Browse custom printing and design gallery">
-              {filteredProducts.slice(0, visibleCount).map((product, index) => (
-                <PinterestPinCard key={product._id} product={product} index={index}
-                  categoryName={categoryById.get(idOf(product.category))?.name || ''}
-                  whatsappNumber={whatsappNumber} />
-              ))}
-            </div>
-            {filteredProducts.length > visibleCount && (
-              <div ref={loadMoreRef} className="sk-pin-feed-sentinel">
-                <button type="button" className="sk-pin-show-more"
-                  onClick={() => setVisibleCount(n => Math.min(n + 18, filteredProducts.length))}>
-                  Load more designs
-                </button>
-              </div>
-            )}
-            {filteredProducts.length <= visibleCount && (
-              <p className="sk-pin-end-note">End of collection · Made with care in Gondia</p>
-            )}
-          </>
+          <EndlessPinterestFeed
+            key={(selectedCategory ? idOf(selectedCategory) : 'all') + '|' +
+              (selectedSubcategory ? idOf(selectedSubcategory) : 'all') + '|' +
+              deferredSearch.trim().toLowerCase() + '|' + catalogRetry}
+            products={filteredProducts} categoryById={categoryById}
+            whatsappNumber={whatsappNumber} />
         ) : (
           <div className="sk-pin-end-note">
             No designs matched. Try another category or a different search.
