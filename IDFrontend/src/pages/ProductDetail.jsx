@@ -7,6 +7,7 @@ import ProductStructuredData from '../components/ProductStructuredData';
 import MobileBottomNav from '../components/mobile/MobileBottomNav';
 import PinterestPinCard from '../components/mobile/PinterestPinCard';
 import { uniqueDesigns } from '../components/mobile/uniqueDesigns.mjs';
+import { geminiDesignIds, orderDesigns, recordDesignInterest, secureRandomSeed, interestFromProduct } from '../components/mobile/recommendations.mjs';
 import ProductStage from '../components/experience/ProductStage';
 import { useFavorites } from '../context/FavoritesContext';
 import { trackWhatsAppClick } from '../hooks/useAnalytics';
@@ -41,6 +42,7 @@ export default function ProductDetail() {
   const [quantity, setQuantity] = useState(25);
   const [categoryName, setCategoryName] = useState('');
   const [related, setRelated] = useState([]);
+  const [relatedSeed] = useState(secureRandomSeed);
   const [showVideo, setShowVideo] = useState(false);
   const { favorites, toggleFavorite } = useFavorites();
 
@@ -81,18 +83,25 @@ export default function ProductDetail() {
 
   const productCategory = idOf(product?.category);
   useEffect(() => {
+    if (product?._id) recordDesignInterest(product,'view');
+  }, [product?._id]);
+  useEffect(() => {
     if (!productCategory) return undefined;
     let active = true;
-    resolveCategoryName(product?.category).then(name=>{if(active)setCategoryName(name||'');}).catch(()=>{});
-    api.get('/api/listings',{timeout:14000})
-      .then(response=>{
-        if (!active) return;
-        const products = Array.isArray(response.data) ? response.data : response.data?.result;
-        if (Array.isArray(products)) setRelated(uniqueDesigns(products.filter(item =>
-          String(item?._id) !== String(id) && idOf(item.category) === productCategory)).slice(0,18));
-      }).catch(()=>{});
-    return () => {active=false;};
-  }, [productCategory, id]);
+    const controller = new AbortController();
+    resolveCategoryName(product?.category).then(name => {if(active)setCategoryName(name||'');}).catch(()=>{});
+    api.get('/api/listings',{timeout:14000}).then(async response=>{
+      if (!active) return;
+      const products = Array.isArray(response.data) ? response.data : response.data?.result;
+      if (!Array.isArray(products)) return;
+      const candidates = uniqueDesigns(products.filter(item=>String(item?._id)!==String(id)));
+      const interests = [interestFromProduct(product)];
+      if (active) setRelated(orderDesigns(candidates,interests,relatedSeed).slice(0,18));
+      const ids = await geminiDesignIds(candidates,interests,controller.signal);
+      if (active && ids.length) setRelated(orderDesigns(candidates,interests,relatedSeed,ids).slice(0,18));
+    }).catch(()=>{});
+    return ()=>{active=false;controller.abort();};
+  }, [productCategory,id,relatedSeed]);
 
   if (loading && !product) return (
     <div className="sk-pinterest-home sk-public-theme sk-pin-detail-page">
@@ -160,7 +169,7 @@ export default function ProductDetail() {
               onClick={share}><FaShare/></button>
             <button type="button" className={'sk-pin-round-action' + (isSaved?' sk-pin-detail-fav':'')}
               aria-pressed={isSaved} aria-label={isSaved?'Remove from saved':'Save this design'}
-              onClick={()=>toggleFavorite(product)}>
+              onClick={()=>{toggleFavorite(product);recordDesignInterest(product,'save');}}>
               {isSaved?<FaHeart/>:<FaRegHeart/>}
             </button>
           </div>

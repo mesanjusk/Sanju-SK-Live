@@ -4,6 +4,7 @@ import api from '../api';
 import MobileHeader from './mobile/MobileHeader';
 import MobileBottomNav from './mobile/MobileBottomNav';
 import LoadingSkeleton from './common/LoadingSkeleton';
+import './mobile/pinterest-storefront.css';
 
 export default function AllCategory() {
   const [categories, setCategories] = useState([]);
@@ -41,7 +42,7 @@ export default function AllCategory() {
   };
 
   return (
-    <div className="sk-storefront min-h-screen pb-24">
+    <div className="sk-storefront sk-public-theme sk-pinterest-home sk-category-page min-h-screen pb-24">
       <MobileHeader />
 
       <main className="sk-shell px-4 py-5">

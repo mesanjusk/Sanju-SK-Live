@@ -15,7 +15,8 @@ import {
   FaChevronRight,
 } from 'react-icons/fa';
 
-import ProductCard from '../components/ProductCard';
+import PinterestPinCard from '../components/mobile/PinterestPinCard';
+import '../components/mobile/pinterest-storefront.css';
 import LoadingSkeleton from '../components/common/LoadingSkeleton';
 import api from '../api';
 
@@ -409,7 +410,7 @@ export default function ProductListing() {
   );
 
   return (
-    <div className="sk-storefront min-h-screen pb-24">
+    <div className="sk-storefront sk-public-theme sk-pinterest-home sk-catalog-page min-h-screen pb-24">
       <MobileHeader />
       <MobileSearchBar value={searchTerm} onChange={setSearchTerm} />
       <div className="mx-auto max-w-7xl px-4 pt-5 sm:px-6 lg:px-8">
@@ -584,14 +585,14 @@ export default function ProductListing() {
             ) : (
               <>
                 {/* Product Grid */}
-                <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
+                <div className="sk-pin-masonry">
                   {paginatedProducts.map(
                     (product, index) => (
                       <div
                         key={product._id}
-                        className="min-w-0"
+                        className="sk-catalog-pin-wrap"
                       >
-                        <ProductCard product={product} priority={index === 0} />
+                        <PinterestPinCard product={product} index={index} whatsappNumber={whatsappNumber} />
                       </div>
                     )
                   )}

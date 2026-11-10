@@ -1,9 +1,13 @@
-import { Link, NavLink } from 'react-router-dom';
+import { Link, NavLink, useNavigate } from 'react-router-dom';
+import './pinterest-storefront.css';
+import '../../styles/public-theme.css';
 import { FaHome, FaSearch, FaPhoneAlt, FaHeart, FaWhatsapp } from 'react-icons/fa';
 
 // Compact floating pill, with the existing scroll-aware visibility behaviour.
  // The footer is no longer occupied by a full-width fixed navigation bar.
-export default function MobileBottomNav({ whatsappNumber = '919372333633', phoneNumber = '+919372333633', visible = true, variant = 'contact', onSearchClick }) {
+export default function MobileBottomNav({ whatsappNumber = '919372333633', phoneNumber = '+919372333633', visible = true, variant = 'pinterest', onSearchClick }) {
+  const navigate = useNavigate();
+  const search = () => onSearchClick ? onSearchClick() : navigate('/?search=1');
   const wa = String(whatsappNumber).replace(/\D/g, '') || '919372333633';
   const digits = String(phoneNumber).replace(/\D/g, '') || '919372333633';
   const dial = 'tel:' + (digits.length === 10 ? '+91' + digits : '+' + digits);
@@ -19,7 +23,7 @@ export default function MobileBottomNav({ whatsappNumber = '919372333633', phone
             className={({isActive}) => 'sk-mobile-bottom-link' + (isActive ? ' is-active' : '')}
             aria-label="Explore home"><FaHome aria-hidden="true"/></NavLink>
           <button type="button" className="sk-mobile-bottom-link" tabIndex={visible ? 0 : -1}
-            aria-label="Search designs" onClick={onSearchClick}>
+            aria-label="Search designs" onClick={search}>
             <FaSearch aria-hidden="true"/>
           </button>
           <NavLink to="/favorites" aria-label="Saved designs" tabIndex={visible ? 0 : -1}

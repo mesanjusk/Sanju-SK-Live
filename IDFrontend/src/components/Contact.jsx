@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { FaArrowLeft, FaWhatsapp, FaInstagram, FaPhone, FaMapMarkerAlt, FaPaperPlane, FaEnvelope } from 'react-icons/fa';
 import MobileBottomNav from './mobile/MobileBottomNav';
 import localSeo from '../config/local-seo.json';
+import './mobile/pinterest-storefront.css';
 
 const WA = '919372333633';
 export default function Contact() {
@@ -19,7 +20,7 @@ export default function Contact() {
   };
 
   return (
-    <div className="sk-storefront min-h-screen pb-32">
+    <div className="sk-storefront sk-public-theme sk-pinterest-home sk-contact-page min-h-screen pb-32">
       <header className="sk-detail-back">
         <Link to="/" className="sk-glass-button !h-9 !w-9" aria-label="Back to home"><FaArrowLeft /></Link>
         <div><h1 className="font-extrabold tracking-tight text-[#294238]">Let's create something remarkable</h1><p className="text-[10px] text-[#789080]">SANJU SK Digital · Mahi Creation</p></div>
