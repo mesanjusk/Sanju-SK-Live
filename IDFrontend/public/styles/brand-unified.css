@@ -54,3 +54,7 @@ footer{background:#fff;border-color:#e7e5e1;color:#777}
 .sk-static-bottom-nav a:hover{background:#f5f4f2}
 .sk-static-bottom-nav svg{display:block;width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;animation:none!important;transition:none!important}}
+
+/* Generated guides use the same genuine gold monogram and text lockup. */
+.logo{display:inline-flex;align-items:center;gap:9px;}
+.logo img{width:52px;height:40px;object-fit:contain;flex:none;}
