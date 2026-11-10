@@ -281,7 +281,7 @@ const categoryPage = guide => {
     '<meta name="twitter:card" content="summary_large_image">' +
     '<script type="application/ld+json">' + json + '</script>' + style +
     '<link rel="stylesheet" href="/styles/brand-unified.css"></head><body>' +
-    '<header><a href="/" class="logo">SK · SANJU SK DIGITAL</a><a href="/contact">Contact Gondia Studio</a></header>' +
+    '<header><a href="/" class="logo"><img src="/images/sk-digital-final.svg" alt="SK Digital logo" width="52" height="40"> SANJU SK DIGITAL</a><a href="/contact">Contact Gondia Studio</a></header>' +
     '<main><nav aria-label="Breadcrumb"><a href="/">Home</a> / ' + esc(guide.name) + '</nav>' +
     '<section class="hero"><p class="eyebrow">CUSTOM DESIGN & PRINTING · GONDIA</p>' +
     '<h1>' + esc(guide.name) + ' printing and personalised designs in Gondia</h1>' +
