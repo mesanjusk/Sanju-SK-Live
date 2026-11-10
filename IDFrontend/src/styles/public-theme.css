@@ -218,3 +218,19 @@
 @media(prefers-reduced-motion:reduce) {
   .sk-public-site .sk-pin-bottom-nav,.sk-public-site .sk-saved-tab {transition:none;}
 }
+
+/* Prevent Home from looking selected on Saved and other inner routes. */
+.sk-public-site .sk-pin-bottom-nav .sk-mobile-bottom-link:first-child:not(.is-active),
+.sk-public-site .sk-pin-detail-page .sk-pin-bottom-nav .sk-mobile-bottom-link:first-child:not(.is-active) {
+  background:#fff;color:#292929;
+}
+.sk-public-site .sk-public-empty {
+  min-height:42vh;display:flex;align-items:center;justify-content:center;flex-direction:column;
+  gap:11px;padding:24px;text-align:center;color:#777;font-size:13px;
+}
+.sk-public-site .sk-public-empty button {
+  padding:9px 16px;border-radius:999px;background:#222;color:#fff;font-weight:800;font-size:12px;
+}
+.sk-public-site .sk-category-view-all {
+  background:#222;color:#fff;border-radius:999px;padding:7px 11px;font-weight:750;font-size:11px;
+}
