@@ -1,6 +1,6 @@
 import { memo, useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { FaEllipsisH, FaHeart, FaPlus, FaSearch, FaTimes, FaWhatsapp, FaPhoneAlt, FaHome } from 'react-icons/fa';
+import { FaEllipsisH, FaHeart, FaSearch, FaTimes, FaWhatsapp, FaPhoneAlt, FaHome } from 'react-icons/fa';
 
 const idOf = value => String(value?._id || value?.category_uuid || value || '');
 
@@ -34,13 +34,14 @@ function PinterestStorefrontHeader({
     <div className="sk-pin-top-shell">
       <header className="sk-pin-header">
         <Link to="/" className="sk-pin-brand" aria-label="SANJU SK Digital home">
-          <span className="sk-pin-brand-mark">SK</span>
-          <span>SANJU <b>SK</b><small>DIGITAL</small></span>
+          <img className="sk-pin-brand-final-logo" src="/images/sk-digital-final.svg"
+            alt="SK Digital logo" width="59" height="43" />
+          <span className="sk-pin-brand-name">SANJU <b>SK</b><small>DIGITAL · MAHI CREATION</small></span>
         </Link>
         <div className="sk-pin-header-actions" ref={menuRef}>
           <a href={whatsapp} target="_blank" rel="noopener noreferrer"
             className="sk-pin-top-action" aria-label="Request a custom design via WhatsApp">
-            <FaPlus aria-hidden="true"/>
+            <FaWhatsapp aria-hidden="true"/>
           </a>
           <button type="button" className="sk-pin-top-action" aria-label="Open website menu"
             aria-expanded={menuOpen} aria-controls="sk-pin-overflow-menu"
@@ -54,6 +55,11 @@ function PinterestStorefrontHeader({
               <Link to="/favorites" onClick={() => setMenuOpen(false)}><FaHeart/> Saved designs</Link>
               <a href={'tel:' + phoneNumber}><FaPhoneAlt/> Call our studio</a>
               <Link to="/contact" onClick={() => setMenuOpen(false)}>Contact & directions</Link>
+              <button type="button" onClick={() => {
+                setMenuOpen(false);
+                const footer = document.getElementById('sk-business-information');
+                if (footer) { footer.open = true; footer.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+              }}>More about SANJU SK Digital</button>
             </nav>
           )}
         </div>

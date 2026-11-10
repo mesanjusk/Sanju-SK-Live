@@ -181,3 +181,24 @@
 .sk-pin-detail-page .sk-mobile-bottom-nav.sk-floating-actions.sk-pin-bottom-nav.is-hidden {
   transform:translate(-50%,calc(100% + 28px));
 }
+
+/* Final SK Digital monogram: the preserved gold vector replaces placeholder letters. */
+.sk-pin-brand .sk-pin-brand-final-logo {display:block;flex:0 0 59px;width:59px;height:43px;object-fit:contain;}
+.sk-pin-brand .sk-pin-brand-name {min-width:0;display:block;font-size:17px;letter-spacing:-.045em;}
+.sk-pin-brand .sk-pin-brand-name small {font-size:7px;letter-spacing:.13em;font-weight:750;}
+.sk-pin-header-actions .sk-pin-top-action:first-child {color:#168c59;}
+.sk-pin-header-actions .sk-pin-top-action:first-child:hover {background:#ecf9f1;}
+.sk-store-footer-final-logo {width:65px;height:47px;object-fit:contain;flex:none;}
+@media(max-width:360px) {
+ .sk-pin-brand .sk-pin-brand-final-logo {flex-basis:52px;width:52px;height:39px;}
+ .sk-pin-brand .sk-pin-brand-name {font-size:15px;}
+ .sk-pin-brand .sk-pin-brand-name small {font-size:6px;}
+}
+
+/* Endlessly mixed design inspiration: lazy-load in 18-pin batches. */
+.sk-pin-card { content-visibility:auto; contain-intrinsic-size:auto 270px; }
+.sk-pin-feed-sentinel {min-height:38px;padding:14px 0 25px;text-align:center;}
+.sk-pin-feed-sentinel .sk-pin-show-more {border:1px solid #ededed;border-radius:999px;background:#fff;
+ color:#333;font-size:12px;font-weight:700;padding:10px 16px;}
+.sk-pin-feed-sentinel .sk-pin-show-more span {font-size:15px;margin-left:5px;}
+.sk-pin-feed-sentinel .sk-pin-show-more:focus-visible{outline:2px solid #7653a7;outline-offset:3px;}

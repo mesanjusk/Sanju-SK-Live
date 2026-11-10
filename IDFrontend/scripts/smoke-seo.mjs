@@ -3,6 +3,7 @@ import fs from 'node:fs';
 import { readFileSync } from 'node:fs';
 import productHandler from '../api/product-seo.js';
 import sitemapHandler from '../api/sitemap-products.js';
+import { shuffleNextCycle, itemKey } from '../src/components/mobile/endlessOrder.mjs';
 const id='67b78c2180d7a4d5e21c9af0';
 const product={
   _id:id,title:'Premium Laser Cut Wedding Invitation',description:'Custom printed laser-cut wedding invitation with envelopes.',
@@ -131,8 +132,8 @@ const reminderSource=readFileSync(new URL('../src/components/mobile/CallReminder
 const appSource=readFileSync(new URL('../src/App.jsx',import.meta.url),'utf8');
 const festiveCss=readFileSync(new URL('../src/components/mobile/festive-home.css',import.meta.url),'utf8');
 
-assert(homeSource.includes('<PinterestStorefrontHeader') && homeSource.includes('<PinterestPinCard') &&
-  homeSource.includes('sk-pin-masonry'), 'Homepage must use Pinterest header and image masonry, not grouped shop cards');
+assert(homeSource.includes('<PinterestStorefrontHeader') && homeSource.includes('<EndlessPinterestFeed') &&
+  homeSource.includes('filteredProducts'), 'Homepage must use Pinterest header and endlessly looping real product masonry');
 assert(!homeSource.includes('<FestiveStorefrontHero') && !homeSource.includes('<CategoryProductCarousel'),
   'Previous promotional hero and grouped category carousels must not render');
 assert(pinHeaderSource.includes('sk-pin-categories') && pinHeaderSource.includes('onCategorySelect?.(cat)') &&
@@ -150,8 +151,31 @@ assert(pinCss.includes('columns:2') && pinCss.includes('break-inside:avoid') &&
   pinCss.includes('sk-pin-cover') && pinCss.includes('sk-pin-detail-related'),
   'Two-column mobile masonry and related designs styling must exist');
 assert(pinCss.includes('prefers-reduced-motion:reduce'), 'Motion accessibility must be retained');
-assert(homeSource.includes('filteredProducts.slice(0, visibleCount)') &&
-  homeSource.includes('IntersectionObserver'), 'Masonry must progressively load real products');
+const endlessSource=readFileSync(new URL('../src/components/mobile/EndlessPinterestFeed.jsx',import.meta.url),'utf8');
+assert(endlessSource.includes('shuffleNextCycle') && endlessSource.includes('IntersectionObserver') &&
+  endlessSource.includes('pins.map') && endlessSource.includes('BATCH_SIZE = 18'),
+  'Pinterest feed must extend in progressive batches and reshuffle after full cycles');
+assert(!homeSource.includes('End of collection'), 'The design collection must not stop at a finite end');
+const samplePins=['alpha','beta','gamma','delta','epsilon'].map(_id=>({_id}));
+let previousPins=samplePins;
+for(let cycle=0;cycle<8;cycle+=1) {
+  const nextPins=shuffleNextCycle(previousPins,()=>0.34);
+  assert.equal(nextPins.length,previousPins.length,'Full cycles must contain every design');
+  assert.equal(new Set(nextPins.map(itemKey)).size,samplePins.length,'No repeats within a shuffled cycle');
+  assert.notDeepEqual(nextPins.map(itemKey),previousPins.map(itemKey),'Each new cycle must be in a new order');
+  assert.notEqual(itemKey(nextPins[0]),itemKey(previousPins[previousPins.length-1]),
+    'Avoid immediate repeats at the boundary between two design cycles');
+  previousPins=nextPins;
+}
+assert(pinHeaderSource.includes('<FaWhatsapp aria-hidden="true"/>') && !pinHeaderSource.includes('<FaPlus'),
+  'Header custom design action must show WhatsApp, not a plus');
+assert(pinHeaderSource.includes('sk-pin-brand-final-logo') &&
+  homeSource.includes('sk-store-footer-final-logo'), 'Use the final SK logo in header and footer');
+const finalLogo=readFileSync(new URL('../public/images/sk-digital-final.svg',import.meta.url),'utf8');
+assert(finalLogo.includes('viewBox="0 0 590 429"') &&
+  finalLogo.includes('fill-rule="evenodd"'), 'Finalized monogram SVG asset missing');
+assert(index.includes('sk-boot-real-logo') && index.includes('sk-boot-whatsapp-link') &&
+  index.includes('href="/images/sk-digital-final.svg"'), 'SEO initial paint must show the real logo and WhatsApp link');
 assert(homeSource.indexOf('sk-pin-about-intro') > homeSource.indexOf('sk-store-footer-expanded') &&
   homeSource.includes('GONDIA DESIGN STUDIO · SINCE 2006') &&
   homeSource.includes('Wedding cards, signage &amp;'),
@@ -190,7 +214,7 @@ const vercelRules=JSON.parse(readFileSync(new URL('../vercel.json',import.meta.u
 assert(categoryGuideData.length>=9,'Require authored category content for observed catalog categories');
 assert(new Set(categoryGuideData.map(g=>g.slug)).size===categoryGuideData.length,'Category SEO guide slugs must be unique');
 assert(homeSource.includes('<CategorySeoBlurb name={selectedCategory.name} />') &&
-  homeSource.includes('categoryById.get(idOf(product.category))'),
+  endlessSource.includes('categoryById.get(itemKey(item.product.category))'),
   'SEO summary and category resolution must work for selected catalog categories');
 assert(guideSource.includes('getCategoryGuide') && guideSource.includes('Browse ' + "' + name + '"),
   'Every unknown live category needs a relevant no-fabrication fallback description');
