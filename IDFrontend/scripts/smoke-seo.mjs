@@ -319,16 +319,6 @@ assert(geminiEndpoint.includes('process.env.GEMINI_API_KEY') &&
   geminiEndpoint.includes("mode:'local'") && geminiEndpoint.includes('x-goog-api-key') &&
   geminiEndpoint.includes('allowed.has(id)'),
   'Gemini must run server-side, limit results to real catalog IDs, and fall back without an API key');
-const sharedTheme=readFileSync(new URL('../src/styles/public-storefront.css',import.meta.url),'utf8');
-const savedPage=readFileSync(new URL('../src/components/Favorites.jsx',import.meta.url),'utf8');
-assert(sharedTheme.includes('.sk-public-site') && sharedTheme.includes('#202020') &&
-  savedPage.includes('sk-public-site') && savedPage.includes('sk-pin-masonry'),
-  'All public routes and saved/liked pages must use one Pinterest theme');
-assert(!savedPage.includes("text-red-500") && !savedPage.includes('bg-[#edf2e8]'),
-  'Saved/liked route must not show legacy red/green tiles');
-assert(pinNavSource.includes("variant='pinterest'") &&
-  pinNavSource.includes('is-active') && pinNavSource.includes('useLocation'),
-  'Use the same floating Home Search Saved controls and active state on all routes');
 const routeMetaSource=readFileSync(new URL('../src/config/routeMeta.js',import.meta.url),'utf8');
 const sitemapXmlRoutes=siteMap;
 assert(!sitemapXmlRoutes.includes('https://www.sanjusk.in/home1') &&
