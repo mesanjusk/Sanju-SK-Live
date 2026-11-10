@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { FaEllipsisH, FaHeart, FaRegHeart, FaWhatsapp, FaLink } from 'react-icons/fa';
 import { useFavorites } from '../../context/FavoritesContext';
 import { optimizedImage } from '../../utils/media';
+import {recordDesignInterest} from './interestRank.mjs';
 import { trackWhatsAppClick } from '../../hooks/useAnalytics';
 import { saveEnquiryLead } from '../../hooks/useWhatsApp';
 
@@ -23,6 +24,7 @@ function PinterestPinCard({ product, index = 0, categoryName = '', whatsappNumbe
     '. Design ID: ' + id + '. https://www.sanjusk.in' + url;
   const whatsapp = 'https://wa.me/' + String(whatsappNumber).replace(/\D/g, '') + '?text=' + encodeURIComponent(message);
   const enquire = () => {
+    recordDesignInterest(product,'enquire');
     trackWhatsAppClick(id);
     saveEnquiryLead({productId:id,productName:product.title,message});
     setMenuOpen(false);
@@ -34,7 +36,7 @@ function PinterestPinCard({ product, index = 0, categoryName = '', whatsappNumbe
   return (
     <article className={'sk-pin-card sk-pin-shape-' + (index % 5)}>
       <div className="sk-pin-cover-wrap">
-        <Link to={url} state={{ product }} className="sk-pin-cover" aria-label={'Open ' + product.title}>
+        <Link to={url} state={{ product }} onClick={() => recordDesignInterest(product)} className="sk-pin-cover" aria-label={'Open ' + product.title}>
           {image ? <img src={optimizedImage(image, 540)}
             alt={product.title + ' custom design by SANJU SK Digital, Gondia'}
             loading={index < 3 ? 'eager' : 'lazy'} decoding="async" width="480" height="600"/> :
@@ -42,13 +44,13 @@ function PinterestPinCard({ product, index = 0, categoryName = '', whatsappNumbe
         </Link>
         <button type="button" className={'sk-pin-save' + (isSaved ? ' is-saved' : '')}
           aria-label={isSaved ? 'Remove design from saved' : 'Save this design'}
-          aria-pressed={isSaved} onClick={() => toggleFavorite(product)}>
+          aria-pressed={isSaved} onClick={() => {recordDesignInterest(product,'save');toggleFavorite(product);}}>
           {isSaved ? <FaHeart/> : <FaRegHeart/>}
         </button>
       </div>
       <div className="sk-pin-under">
         <div className="sk-pin-card-text">
-          <Link to={url} state={{ product }} className="sk-pin-card-title">{product.title}</Link>
+          <Link to={url} state={{ product }} onClick={() => recordDesignInterest(product)} className="sk-pin-card-title">{product.title}</Link>
           {price && <p>{price}</p>}
         </div>
         <div className="sk-pin-menu-container">
@@ -58,7 +60,7 @@ function PinterestPinCard({ product, index = 0, categoryName = '', whatsappNumbe
           </button>
           {menuOpen && (
             <div className="sk-pin-card-actions">
-              <button type="button" onClick={() => {toggleFavorite(product);setMenuOpen(false);}}>
+              <button type="button" onClick={() => {recordDesignInterest(product,'save');toggleFavorite(product);setMenuOpen(false);}}>
                 <FaHeart/> {isSaved ? 'Unsave' : 'Save design'}
               </button>
               <button type="button" onClick={() => {toggleLiked(product);setMenuOpen(false);}}>
