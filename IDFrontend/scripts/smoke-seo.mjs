@@ -413,6 +413,33 @@ for (const guide of categoryGuideData) {
     page.includes('sk-static-bottom-nav'),
     'Category guide '+guide.slug+' must use the shared public theme');
 }
+
+const inspirationPage=readFileSync(new URL('../src/components/Insta.jsx',import.meta.url),'utf8');
+const notFoundPage=readFileSync(new URL('../src/pages/NotFound.jsx',import.meta.url),'utf8');
+const storyPage=readFileSync(new URL('../src/components/StoryGallery.jsx',import.meta.url),'utf8');
+assert(inspirationPage.includes('sk-pinterest-home') &&
+  inspirationPage.includes('<MobileHeader') &&
+  inspirationPage.includes('<MobileBottomNav variant="pinterest"') &&
+  !inspirationPage.includes('from-pink-100'),
+  'Legacy image gallery must match the main Pinterest-themed storefront');
+assert(notFoundPage.includes('<MobileHeader') &&
+  notFoundPage.includes('<MobileBottomNav variant="pinterest"') &&
+  !notFoundPage.includes('bg-red-600'),
+  '404 page must use the matching brand colours and navigation');
+assert(storyPage.includes('/images/sk-digital-final.svg') &&
+  storyPage.includes('Return to design gallery'),
+  'Immersive story route needs the genuine branded back action');
+assert(appSource.includes('LegacyCategoryRedirect') &&
+  appSource.includes("<Navigate to={'/products?category='") &&
+  appSource.includes('<Route path="/home1"') &&
+  appSource.includes('<Navigate to="/" replace />'),
+  'Legacy category and homepage routes should open the current shopping experience');
+for (const guide of categoryGuideData) {
+  if (guide.existingUrl) continue;
+  const page=readFileSync(new URL('../public/categories/'+guide.slug+'/index.html',import.meta.url),'utf8');
+  assert(page.includes('/images/sk-digital-final.svg'),
+    'Category guide '+guide.slug+' should use the finalized SK logo');
+}
 const prevFetch=globalThis.fetch;
 function mockResponse(){
   return {
