@@ -42,6 +42,10 @@ function PinterestPinCard({ product, index = 0, categoryName = '', whatsappNumbe
             loading={index < 3 ? 'eager' : 'lazy'} decoding="async" width="480" height="600"/> :
             <span className="sk-pin-no-image" aria-label="Image unavailable">✦</span>}
         </Link>
+        <a href={whatsapp} target="_blank" rel="noopener noreferrer"
+          className="sk-pin-hover-quote" onClick={enquire}>
+          <FaWhatsapp aria-hidden="true" /> Request quote
+        </a>
         <button type="button" className={'sk-pin-save' + (isSaved ? ' is-saved' : '')}
           aria-label={isSaved ? 'Remove design from saved' : 'Save this design'}
           aria-pressed={isSaved} onClick={() => {recordDesignInterest(product,'save');toggleFavorite(product);}}>
