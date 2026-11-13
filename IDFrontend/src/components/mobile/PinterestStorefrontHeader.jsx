@@ -9,11 +9,15 @@ function PinterestStorefrontHeader({
   whatsappNumber = '919372333633', phoneNumber = '+919372333633',
 }) {
   const searchRef = useRef(null);
+  const desktopSearchRef = useRef(null);
   const menuRef = useRef(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const [searchFocused, setSearchFocused] = useState(false);
   useEffect(() => {
-    if (searchOpen) searchRef.current?.focus();
+    if (searchOpen) {
+      const desktop = window.matchMedia('(min-width:960px)').matches;
+      (desktop ? desktopSearchRef.current : searchRef.current)?.focus();
+    }
   }, [searchOpen]);
   useEffect(() => {
     if (!menuOpen) return undefined;
@@ -28,6 +32,17 @@ function PinterestStorefrontHeader({
       document.removeEventListener('keydown', esc);
     };
   }, [menuOpen]);
+  useEffect(() => {
+    if (!searchFocused) return undefined;
+    const close = event => {
+      if (!event.target.closest('.sk-pin-search-row,.sk-pin-suggestions,.sk-pin-overflow')) {
+        setSearchFocused(false);
+        onSearchOpen?.(false);
+      }
+    };
+    document.addEventListener('pointerdown', close);
+    return () => document.removeEventListener('pointerdown', close);
+  }, [searchFocused, onSearchOpen]);
   const whatsapp = 'https://wa.me/' + String(whatsappNumber).replace(/\D/g, '') +
     '?text=' + encodeURIComponent('Hi SANJU SK Digital, I would like to discuss a custom design.');
   const suggested = categories.filter(cat => cat?.name?.toLowerCase().includes(searchTerm.toLowerCase().trim()))
@@ -42,7 +57,7 @@ function PinterestStorefrontHeader({
     <div className={'sk-pin-search-row sk-pin-search-inline' + (searchFocused ? ' has-focus' : '')}
       role="search">
       <FaSearch aria-hidden="true" />
-      <input ref={mobile ? searchRef : undefined} type="search" value={searchTerm}
+      <input ref={mobile ? searchRef : desktopSearchRef} type="search" value={searchTerm}
         disabled={!catalogReady} onChange={event => onSearchChange?.(event.target.value)}
         onFocus={() => { setSearchFocused(true); onSearchOpen?.(true); }}
         onKeyDown={event => { if (event.key === 'Escape') {
