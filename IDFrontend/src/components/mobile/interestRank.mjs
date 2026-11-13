@@ -15,7 +15,7 @@ export function recordDesignInterest(product,action='open'){
   const id=productId(product);if(!id||typeof window==='undefined')return;
   const row={id,title:String(product.title||'').slice(0,140),description:String(product.description||'').slice(0,120),
     category:categoryId(product),subcategory:String(product.subcategory?._id||product.subcategory||'').slice(0,90),
-    weight:action==='enquire'?1.8:action==='save'?1.5:1};
+    weight:action==='enquire'?1.8:action==='save'?1.5:action==='like'?1.25:1};
   const next=[row,...getDesignInterests().filter(r=>r.id!==id)].slice(0,8);
   try{sessionStorage.setItem(KEY,JSON.stringify(next));}catch{}
   window.dispatchEvent(new Event('sk-design-interest'));

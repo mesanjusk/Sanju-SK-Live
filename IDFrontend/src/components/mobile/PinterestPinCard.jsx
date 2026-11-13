@@ -67,7 +67,7 @@ function PinterestPinCard({ product, index = 0, categoryName = '', whatsappNumbe
               <button type="button" onClick={() => {recordDesignInterest(product,'save');toggleFavorite(product);setMenuOpen(false);}}>
                 <FaHeart/> {isSaved ? 'Unsave' : 'Save design'}
               </button>
-              <button type="button" onClick={() => {toggleLiked(product);setMenuOpen(false);}}>
+              <button type="button" onClick={() => {recordDesignInterest(product,'like');toggleLiked(product);setMenuOpen(false);}}>
                 {isLiked ? <FaHeart/> : <FaRegHeart/>} {isLiked ? 'Unlike design' : 'Like design'}
               </button>
               <a href={whatsapp} target="_blank" rel="noopener noreferrer" onClick={enquire}>

@@ -8,6 +8,7 @@ import NotFound from './pages/NotFound';
 import { useAnalytics } from './hooks/useAnalytics';
 import { checkAndApplyAccessToken } from './components/ScrollGatePopup';
 import CallReminder from './components/mobile/CallReminder';
+import PinterestDesktopRail from './components/mobile/PinterestDesktopRail';
 import Home from './components/Home';
 import './styles/public-theme.css';
 
@@ -96,6 +97,7 @@ function AppRoutes() {
   return (
     <PageWithSeo>
       <div className={isPrivateRoute ? undefined : 'sk-public-site'}>
+        {!isPrivateRoute && <PinterestDesktopRail />}
         <Suspense fallback={<div className="p-8"><LoadingSkeleton count={3} /></div>}>
         <Routes>
           {/* Main pages */}
