@@ -3,6 +3,11 @@
 :root { --sk-discovery-ink:#202020;--sk-discovery-gold:#ad7629;
   --sk-discovery-stroke:#eeeeeb;--sk-discovery-search:#efefef; }
 .sk-public-site { background:#fff; }
+/* Older festive CSS clips the homepage, which breaks sticky Pinterest headers.
+   Keep vertical overflow visible while individual images remain clipped. */
+.sk-festive-home.sk-pinterest-home { overflow:visible!important; }
+.sk-festive-home.sk-pinterest-home .sk-pin-top-shell { position:sticky;top:0; }
+
 .sk-pin-top-shell{position:sticky;top:0;z-index:56;background:#fff;box-shadow:0 1px 0 #eeeeee; }
 .sk-pin-header {max-width:none;min-height:66px;padding:9px 19px;gap:17px;border-bottom:none!important;}
 .sk-pin-brand {flex:0 0 auto;max-width:215px;}
