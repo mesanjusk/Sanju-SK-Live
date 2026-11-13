@@ -7,7 +7,7 @@ import ProductStructuredData from '../components/ProductStructuredData';
 import MobileBottomNav from '../components/mobile/MobileBottomNav';
 import PinterestPinCard from '../components/mobile/PinterestPinCard';
 import { uniqueDesigns } from '../components/mobile/uniqueDesigns.mjs';
-import {recordDesignInterest,rankDesigns,getDesignInterests,freshFeedSeed} from '../components/mobile/interestRank.mjs';
+import {recordDesignInterest,rankDesigns,getDesignInterests,freshFeedSeed,productId,categoryId} from '../components/mobile/interestRank.mjs';
 import ProductStage from '../components/experience/ProductStage';
 import { useFavorites } from '../context/FavoritesContext';
 import { trackWhatsAppClick } from '../hooks/useAnalytics';
@@ -42,8 +42,16 @@ export default function ProductDetail() {
   const [quantity, setQuantity] = useState(25);
   const [categoryName, setCategoryName] = useState('');
   const [related, setRelated] = useState([]);
+  const [relatedSeed] = useState(freshFeedSeed);
+  const [zoomOpen,setZoomOpen] = useState(false);
   const [showVideo, setShowVideo] = useState(false);
   const { favorites, liked, toggleFavorite, toggleLiked } = useFavorites();
+  useEffect(()=>{
+    if (!zoomOpen) return undefined;
+    const onEscape = event => { if(event.key === 'Escape') setZoomOpen(false); };
+    document.addEventListener('keydown',onEscape);
+    return () => document.removeEventListener('keydown',onEscape);
+  },[zoomOpen]);
 
   useEffect(() => {
     let active = true;
@@ -86,17 +94,36 @@ export default function ProductDetail() {
   useEffect(() => {
     if (!productCategory) return undefined;
     let active = true;
+    const controller = new AbortController();
     resolveCategoryName(product?.category).then(name=>{if(active)setCategoryName(name||'');}).catch(()=>{});
     api.get('/api/listings',{timeout:14000})
-      .then(response=>{
+      .then(async response=>{
         if (!active) return;
         const products = Array.isArray(response.data) ? response.data : response.data?.result;
-        if (Array.isArray(products)) setRelated(rankDesigns(
-          uniqueDesigns(products.filter(item => String(item?._id) !== String(id))),
-          {seed:freshFeedSeed(),interests:getDesignInterests()}).slice(0,18));
+        if (!Array.isArray(products)) return;
+        const candidates=uniqueDesigns(products.filter(item=>String(item?._id)!==String(id)));
+        const interests=getDesignInterests();
+        setRelated(rankDesigns(candidates,{seed:relatedSeed,interests}).slice(0,24));
+        if(!interests.length||candidates.length<2)return;
+        try {
+          const sample=rankDesigns(candidates,{seed:relatedSeed,interests}).slice(0,48);
+          const ai=await fetch('/api/recommendations',{
+            method:'POST',signal:controller.signal,headers:{'Content-Type':'application/json'},
+            body:JSON.stringify({interests:interests.slice(0,4),
+              candidates:sample.map(p=>({id:productId(p),
+                title:String(p.title||'').slice(0,130),
+                category:String(p.category?.name||categoryId(p)),
+                description:String(p.description||'').slice(0,120)}))})
+          });
+          if(!ai.ok)return;
+          const result=await ai.json();
+          if(active&&!controller.signal.aborted&&result.mode==='gemini'&&Array.isArray(result.ids)){
+            setRelated(rankDesigns(candidates,{seed:relatedSeed,interests,aiIds:result.ids}).slice(0,24));
+          }
+        } catch { /* Local related-design ranking is the fallback. */ }
       }).catch(()=>{});
-    return () => {active=false;};
-  }, [productCategory, id]);
+    return () => {active=false;controller.abort();};
+  }, [productCategory, id, relatedSeed]);
 
   if (loading && !product) return (
     <div className="sk-pinterest-home sk-pin-detail-page sk-public-site">
@@ -165,7 +192,7 @@ export default function ProductDetail() {
               onClick={share}><FaShare/></button>
             <button type="button" className={'sk-pin-round-action' + (isLiked?' sk-pin-detail-fav':'')}
               aria-pressed={isLiked} aria-label={isLiked?'Unlike this design':'Like this design'}
-              onClick={()=>toggleLiked(product)}>
+              onClick={()=>{recordDesignInterest(product,'like');toggleLiked(product);}}>
               {isLiked?<FaThumbsUp/>:<FaRegThumbsUp/>}
             </button>
             <button type="button" className={'sk-pin-round-action' + (isSaved?' sk-pin-detail-fav':'')}
@@ -178,8 +205,10 @@ export default function ProductDetail() {
         <div className="sk-pin-detail-grid">
           <div>
             <div className="sk-pin-detail-visual">
-              {image ? <img src={image} alt={product.title+' custom design'} className="sk-pin-detail-image"
-                fetchPriority="high" decoding="async" /> :
+              {image ? <button type="button" className="sk-pin-detail-image-button"
+                aria-label="View full size image" onClick={()=>setZoomOpen(true)}>
+                <img src={image} alt={product.title+' custom design'} className="sk-pin-detail-image"
+                fetchPriority="high" decoding="async" /></button> :
                 <div className="sk-pin-no-image">✦</div>}
               {images.length>1 && <div className="sk-pin-detail-visual-nav">
                 <button type="button" aria-label="Previous photo"
@@ -250,6 +279,12 @@ export default function ProductDetail() {
               index={index} categoryName={categoryName} />)}
           </div>
         </section>}
+        {zoomOpen&&image&&<div role="dialog" aria-modal="true" aria-label="Full size design photo"
+          className="sk-pin-zoom-modal" onClick={()=>setZoomOpen(false)}>
+          <button type="button" className="sk-pin-zoom-close" onClick={()=>setZoomOpen(false)}
+            aria-label="Close full size image">×</button>
+          <img src={image} alt={product.title+' full size design'} onClick={event=>event.stopPropagation()}/>
+        </div>}
         {showVideo&&ytId&& <div role="dialog" aria-modal="true" aria-label="Design video"
           className="sk-pin-detail-modal" onClick={()=>setShowVideo(false)}>
           <div onClick={event=>event.stopPropagation()}>

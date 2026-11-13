@@ -1,0 +1,183 @@
+/* Pinterest-inspired visual discovery, adapted for SANJU SK Digital.
+   Shared across desktop, tablet, mobile, category pages and product detail. */
+:root { --sk-discovery-ink:#202020;--sk-discovery-gold:#ad7629;
+  --sk-discovery-stroke:#eeeeeb;--sk-discovery-search:#efefef; }
+.sk-public-site { background:#fff; }
+/* Older festive CSS clips the homepage, which breaks sticky Pinterest headers.
+   Keep vertical overflow visible while individual images remain clipped. */
+.sk-festive-home.sk-pinterest-home { overflow:visible!important; }
+.sk-festive-home.sk-pinterest-home .sk-pin-top-shell { position:sticky;top:0; }
+
+.sk-pin-top-shell{position:sticky;top:0;z-index:56;background:#fff;box-shadow:0 1px 0 #eeeeee; }
+.sk-pin-header {max-width:none;min-height:66px;padding:9px 19px;gap:17px;border-bottom:none!important;}
+.sk-pin-brand {flex:0 0 auto;max-width:215px;}
+.sk-pin-brand-name {white-space:nowrap;}
+.sk-pin-desktop-search {display:none;}
+.sk-pin-mobile-search {padding:1px 12px 9px;background:#fff;}
+.sk-pin-search-row.sk-pin-search-inline {margin:0 auto;padding:0 18px;border:2px solid transparent;
+  background:#f1f1f1;height:47px;max-width:none;border-radius:28px;gap:11px;
+  box-shadow:none;color:#676767;}
+.sk-pin-search-row.sk-pin-search-inline.has-focus,
+.sk-pin-search-row.sk-pin-search-inline:focus-within {background:#e9e9e9;border-color:#888;}
+.sk-pin-search-row.sk-pin-search-inline input {font-size:14px;font-weight:600;color:#252525;}
+.sk-pin-search-row.sk-pin-search-inline input::placeholder {color:#858585;font-weight:500;}
+.sk-pin-search-row.sk-pin-search-inline input:disabled {opacity:.5;cursor:wait;}
+.sk-pin-header-actions{gap:3px;}
+.sk-pin-header-actions .sk-pin-top-action{height:43px;width:43px;flex:0 0 43px;border-radius:50%;
+ font-size:22px;color:#333;}
+.sk-pin-header-actions .sk-pin-top-action:hover{background:#f4f4f4;}
+.sk-pin-header-actions .sk-pin-whatsapp-top {color:#188a53!important;}
+.sk-pin-header-actions .sk-pin-saved-top{display:none;}
+.sk-pin-categories{max-width:none;padding:10px 14px 11px;gap:24px;scrollbar-width:none;}
+.sk-pin-category-tab{min-height:37px;padding:3px 0 9px;font-size:14px;font-weight:700;color:#555;}
+.sk-pin-category-tab.is-current{color:#151515;font-weight:850;}
+.sk-pin-category-tab.is-current::after{height:3px;background:#222;border-radius:5px;}
+.sk-pin-suggestions{position:absolute;top:113px;left:12px;right:12px;z-index:85;
+  max-width:660px;min-height:75px;padding:16px;background:#fff;
+  border:1px solid #e7e7e7;border-radius:20px;box-shadow:0 15px 45px #0003;}
+.sk-pin-suggest-title{font-size:12px;font-weight:850;color:#5a5a5a;padding:3px 7px 10px;}
+.sk-pin-suggest-list{display:flex;flex-direction:column;gap:2px;}
+.sk-pin-suggest-list button{display:flex;align-items:center;gap:12px;min-height:40px;width:100%;
+  border-radius:11px;text-align:left;font-size:13px;font-weight:700;color:#282828;padding:10px;}
+.sk-pin-suggest-list button:hover,.sk-pin-suggest-list button:focus-visible{background:#f3f3f3;}
+.sk-pin-suggest-list svg{flex:none;color:#7c7c7c;}
+.sk-pin-suggest-close{margin:7px 0 0 4px;color:#777;font-size:11px;text-decoration:underline;}
+.sk-pin-overflow{box-shadow:0 13px 30px #0002;border-color:#ececec;}
+.sk-pin-feed-wrap {width:100%;max-width:none;margin:0 auto;padding:9px 10px 52px;}
+.sk-pin-feed-heading{padding:6px 7px 14px;}
+.sk-pin-feed-heading h2{font-size:15px;font-weight:850;}
+.sk-pin-feed-heading span{font-size:11px;}
+.sk-pin-masonry{columns:2;column-gap:12px;orphans:1;widows:1;}
+.sk-pin-card{display:inline-block;width:100%;margin:0 0 17px;break-inside:avoid;
+  -webkit-column-break-inside:avoid;vertical-align:top;}
+.sk-pin-cover-wrap{position:relative;overflow:hidden;border-radius:19px;background:#f5f4f2;}
+.sk-pin-cover{display:block;aspect-ratio:auto!important;width:100%;height:auto!important;min-height:0;}
+.sk-pin-cover img{display:block;width:100%;height:auto!important;aspect-ratio:auto!important;
+  object-fit:contain!important;object-position:center;transition:filter .18s ease,transform .23s ease;}
+.sk-pin-cover .sk-pin-no-image{display:grid;min-height:170px;aspect-ratio:.82;place-items:center;}
+.sk-pin-card:focus-within .sk-pin-cover img,.sk-pin-card:hover .sk-pin-cover img{filter:brightness(.95);}
+.sk-pin-save{width:34px;height:34px;background:#fff;color:#2d2d2d;font-size:16px;top:9px;right:9px;
+  box-shadow:0 2px 11px #0002;}
+.sk-pin-save.is-saved{color:#ad7629!important;}
+.sk-pin-hover-quote{display:none;position:absolute;left:10px;bottom:11px;z-index:4;
+  align-items:center;justify-content:center;gap:7px;
+  padding:10px 13px;border-radius:99px;background:#222;color:#fff!important;
+  font-size:11px;font-weight:800;text-decoration:none;box-shadow:0 3px 10px #0004;}
+.sk-pin-hover-quote:hover{background:#111;}
+.sk-pin-under{padding:7px 3px 0;gap:4px;}
+.sk-pin-card-title{font-size:12px;line-height:1.4;color:#242424;font-weight:750;}
+.sk-pin-card-text p{font-size:11px;color:#777;}
+.sk-pin-card-actions{z-index:35;min-width:165px;}
+.sk-pin-card-menu{color:#444;}
+.sk-pin-bottom-nav{max-width:100vw;}
+.sk-public-site .sk-pin-bottom-nav .sk-mobile-bottom-link:first-child:not(.is-active){background:#fff;color:#222;}
+.sk-public-site .sk-pin-bottom-nav .sk-mobile-bottom-link.is-active{background:#222!important;color:#fff!important;}
+.sk-pin-detail-page{padding-bottom:110px;}
+.sk-pin-detail-head{max-width:none;padding:11px 13px;}
+.sk-pin-detail-grid{max-width:1280px;margin:auto;gap:15px;padding:0 10px;}
+.sk-pin-detail-visual{background:#f4f3f1;border-radius:22px;display:grid;place-items:center;}
+.sk-pin-detail-image-button{display:block;width:100%;border:none;background:transparent;padding:0;
+  text-align:center;cursor:zoom-in;overflow:hidden;border-radius:inherit;}
+.sk-pin-detail-image{width:100%;max-height:78vh;object-fit:contain;}
+.sk-pin-detail-info{padding:15px 12px 24px;}
+.sk-pin-detail-info h1{font-size:clamp(23px,3vw,29px);line-height:1.25;letter-spacing:-.02em;}
+.sk-pin-detail-info .sk-pin-detail-quote{border-radius:999px;}
+.sk-pin-detail-related{max-width:none;padding:15px 11px 25px;}
+.sk-pin-detail-related .sk-pin-masonry{columns:2;}
+.sk-pin-detail-sticky-cta{bottom:calc(env(safe-area-inset-bottom,0px) + 87px);}
+.sk-pin-zoom-modal{position:fixed;inset:0;z-index:100;display:flex;align-items:center;
+  justify-content:center;padding:18px;background:#000e;cursor:zoom-out;}
+.sk-pin-zoom-modal img{max-width:min(92vw,1250px);max-height:91vh;object-fit:contain;
+  border-radius:12px;cursor:default;box-shadow:0 15px 45px #0008;}
+.sk-pin-zoom-close{position:absolute;top:15px;right:17px;display:grid;place-items:center;
+  width:43px;height:43px;border-radius:50%;background:#fff;color:#222;font-size:29px;z-index:1;}
+.sk-pin-desktop-rail{display:none;}
+/* Preserve the full, local SEO footer behind the existing single disclosure. */
+.sk-pinterest-home .sk-store-footer{background:#fff;margin:0;border-top:1px solid #ececec;}
+.sk-pinterest-home .sk-store-footer-summary{font-size:12px;color:#444;}
+/* Tablet: three and then four visual masonry columns. */
+@media(min-width:620px){
+  .sk-pin-masonry,.sk-pin-detail-related .sk-pin-masonry{columns:3;column-gap:13px;}
+  .sk-pin-feed-wrap{padding:10px 13px 50px;}
+  .sk-pin-save{width:36px;height:36px;}
+}
+@media(min-width:790px){
+  .sk-pin-masonry,.sk-pin-detail-related .sk-pin-masonry{columns:4;column-gap:15px;}
+  .sk-pin-categories{gap:26px;}
+  .sk-pin-category-tab{font-size:15px;}
+}
+/* Desktop: left icon rail, always-accessible search, multicolumn full-bleed imagery. */
+@media(min-width:960px){
+  .sk-public-site{padding-left:78px;}
+  .sk-pin-desktop-rail{display:flex;flex-direction:column;justify-content:space-between;
+    position:fixed;left:0;top:0;bottom:0;z-index:87;width:78px;
+    border-right:1px solid #ededed;background:#fff;padding:10px 6px 17px;}
+  .sk-pin-rail-main,.sk-pin-rail-bottom{display:flex;align-items:center;flex-direction:column;gap:14px;}
+  .sk-pin-rail-main{gap:15px;}
+  .sk-pin-rail-logo{display:grid;place-items:center;width:63px;height:63px;
+    border-radius:16px;outline-offset:3px;}
+  .sk-pin-rail-logo img{display:block;width:51px;height:48px;object-fit:contain;}
+  .sk-pin-rail-link{display:flex;flex-direction:column;align-items:center;justify-content:center;
+    gap:5px;min-width:63px;min-height:60px;padding:8px 3px;border-radius:13px;
+    color:#383838;text-align:center;text-decoration:none;font-size:19px;}
+  .sk-pin-rail-link span{font-size:9px;font-weight:800;line-height:1.1;}
+  .sk-pin-rail-link:hover{background:#f5f4f3;}
+  .sk-pin-rail-link.is-current{background:#222;color:#fff;}
+  .sk-pin-top-shell{top:0;}
+  .sk-pin-header{height:76px;max-width:none;padding:10px 24px;gap:17px;}
+  .sk-pin-brand{max-width:220px;}
+  .sk-pin-desktop-search{display:block;flex:1;min-width:220px;max-width:1000px;margin:0 auto;}
+  .sk-pin-desktop-search .sk-pin-search-row{height:49px;}
+  .sk-pin-mobile-search{display:none;}
+  .sk-pin-header-actions .sk-pin-saved-top{display:grid;}
+  .sk-pin-categories{padding:4px 25px 12px;gap:30px;}
+  .sk-pin-category-tab{font-size:16px;min-height:38px;}
+  .sk-pin-suggestions{top:69px;left:clamp(225px,23vw,410px);
+    right:auto;width:min(720px,calc(100vw - 480px));}
+  .sk-pin-feed-wrap{padding:13px 17px 48px;max-width:none;}
+  .sk-pin-masonry,.sk-pin-detail-related .sk-pin-masonry{columns:5;column-gap:17px;}
+  .sk-pin-card{margin-bottom:22px;}
+  .sk-pin-cover-wrap{border-radius:20px;}
+  .sk-pin-hover-quote{display:inline-flex;opacity:0;pointer-events:none;
+    transform:translateY(6px);transition:opacity .16s ease,transform .16s ease;}
+  .sk-pin-card:hover .sk-pin-hover-quote,.sk-pin-card:focus-within .sk-pin-hover-quote{
+    opacity:1;pointer-events:auto;transform:translateY(0);}
+  .sk-public-site .sk-mobile-bottom-nav.sk-pin-bottom-nav{display:none!important;}
+  .sk-pin-detail-head{max-width:1400px;margin:auto;padding:15px 16px;}
+  .sk-pin-detail-grid{grid-template-columns:minmax(0,1.12fr) minmax(320px,.88fr);
+    max-width:1440px;padding:8px 20px 30px;gap:34px;align-items:start;}
+  .sk-pin-detail-visual{border-radius:27px;min-height:480px;}
+  .sk-pin-detail-image{max-height:min(78vh,850px);}
+  .sk-pin-detail-info{position:sticky;top:135px;border-radius:24px;
+    border:1px solid #f0efed;padding:24px;box-shadow:0 4px 19px #0000000c;background:#fff;}
+  .sk-pin-detail-info h1{font-size:29px;}
+  .sk-pin-detail-related{padding:14px 25px 40px;}
+  .sk-pin-detail-sticky-cta{display:none;}
+}
+@media(min-width:1280px){
+  .sk-pin-masonry,.sk-pin-detail-related .sk-pin-masonry{columns:6;column-gap:18px;}
+  .sk-pin-feed-wrap{padding-left:20px;padding-right:20px;}
+}
+@media(min-width:1580px){
+  .sk-pin-masonry,.sk-pin-detail-related .sk-pin-masonry{columns:7;column-gap:18px;}
+  .sk-pin-feed-wrap{padding:15px 24px 55px;}
+}
+@media(min-width:1920px){
+  .sk-pin-masonry,.sk-pin-detail-related .sk-pin-masonry{columns:8;column-gap:20px;}
+}
+/* Native UI adjustments for mobile touch and narrow screens. */
+@media(max-width:480px){
+  .sk-pin-header{padding:8px 13px;min-height:58px;}
+  .sk-pin-brand-final-logo{width:53px!important;height:39px!important;flex-basis:53px!important;}
+  .sk-pin-brand-name{font-size:16px!important;}
+  .sk-pin-header-actions .sk-pin-top-action{width:37px;height:37px;flex-basis:37px;font-size:20px;}
+  .sk-pin-feed-wrap{padding:8px 7px 42px;}
+  .sk-pin-masonry{column-gap:9px;}
+  .sk-pin-card{margin-bottom:15px;}
+  .sk-pin-save{width:33px;height:33px;}
+  .sk-pin-categories{gap:23px;}
+  .sk-pin-hover-quote{display:none;}
+}
+@media(prefers-reduced-motion:reduce){
+  .sk-pin-cover img,.sk-pin-hover-quote,.sk-pin-tab-loading{transition:none;animation:none;}
+}

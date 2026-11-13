@@ -233,6 +233,43 @@ assert(reminderSource.includes('FIRST_REMINDER_DELAY_MS = 15000') &&
   'Dismissible call reminder must remain available');
 assert(appSource.includes('<CallReminder />'), 'Call reminders must work on public routes');
 
+
+const desktopRailSource=readFileSync(new URL('../src/components/mobile/PinterestDesktopRail.jsx',import.meta.url),'utf8');
+const responsiveCss=readFileSync(new URL('../src/styles/pinterest-responsive-2026.css',import.meta.url),'utf8');
+const mainEntrySource=readFileSync(new URL('../src/main.jsx',import.meta.url),'utf8');
+assert(appSource.includes('<PinterestDesktopRail />') &&
+  desktopRailSource.includes('sk-pin-desktop-rail') &&
+  desktopRailSource.includes('/allCategories') &&
+  desktopRailSource.includes('/favorites'), 'Desktop rail must be on all public routes with Home Explore Saved');
+assert(pinHeaderSource.includes('sk-pin-desktop-search') &&
+  pinHeaderSource.includes('sk-pin-mobile-search') &&
+  pinHeaderSource.includes('sk-pin-suggestions') &&
+  pinHeaderSource.includes('desktopSearchRef') &&
+  pinHeaderSource.includes('onCategorySelect?.(cat)'),
+  'Responsive search, category suggestions and real catalog filtering are required');
+assert(responsiveCss.includes('min-width:960px') &&
+  responsiveCss.includes('min-width:1920px') &&
+  responsiveCss.includes('columns:8') &&
+  responsiveCss.includes('.sk-pin-detail-info') &&
+  responsiveCss.includes('position:sticky'), 'Desktop responsive masonry and sticky product details missing');
+assert(responsiveCss.includes('columns:2') &&
+  responsiveCss.includes('.sk-pin-hover-quote') &&
+  responsiveCss.includes('prefers-reduced-motion:reduce'),
+  'Mobile masonry, pin hover and motion-accessibility styles missing');
+assert(mainEntrySource.includes('pinterest-responsive-2026.css'),
+  'Responsive style must be imported last after existing legacy page CSS');
+assert(pinCardSource.includes('sk-pin-hover-quote') &&
+  pinCardSource.includes('onClick={enquire}'), 'Pinterest-style quote action must work from desktop Pin preview');
+assert(detailSource.includes('sk-pin-zoom-modal') &&
+  detailSource.includes('setZoomOpen(true)'), 'Pin detail must allow full-size image viewing');
+assert(detailSource.includes("fetch('/api/recommendations'") &&
+  detailSource.includes("result.mode==='gemini'") &&
+  detailSource.includes('getDesignInterests()'), 'Related pins must use Gemini endpoint with preference-based fallback');
+assert(index.includes('sk-boot-desktop-rail') &&
+  index.includes('sk-boot-mobile-search') &&
+  index.includes('sk-boot-desktop-search'),
+  'Static SEO first paint must reflect desktop and mobile responsive navigation');
+
 const categoryGuideData=JSON.parse(readFileSync(new URL('../src/config/category-seo.json',import.meta.url),'utf8'));
 const guideSource=readFileSync(new URL('../src/components/mobile/CategorySeoBlurb.jsx',import.meta.url),'utf8');
 const navSource=readFileSync(new URL('../src/components/mobile/MobileBottomNav.jsx',import.meta.url),'utf8');
