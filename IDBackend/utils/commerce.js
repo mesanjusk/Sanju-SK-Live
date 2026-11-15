@@ -8,7 +8,7 @@ export function priceForQuantity(listing, quantity) {
   const matching = tiers.filter(t => q >= Number(t.minQty) && (!t.maxQty || q <= Number(t.maxQty)))
     .sort((a,b)=>Number(b.minQty)-Number(a.minQty))[0];
   const unit = tiers.length ? Number(matching?.price) : Number(listing.price);
-  if (!Number.isFinite(unit) || unit <= 0 || Math.round(unit*100)!==unit*100) {
+  if (!Number.isFinite(unit) || unit <= 0 || Math.abs(Math.round(unit*100)-unit*100)>0.00001) {
     throw new Error('Price needs confirmation. Please request a quote.');
   }
   const amountPaise=Math.round(unit * q * 100);
