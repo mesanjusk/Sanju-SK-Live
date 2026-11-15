@@ -8,7 +8,7 @@ const BROWSER=new Set(['Chrome','Firefox','Safari','Edge','Other']);
 const OS=new Set(['Android','iOS','Windows','macOS','Linux','Other']);
 const CONNECTION=new Set(['slow-2g','2g','3g','4g','unknown']);
 const ID=/^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/i;
-const escape=s=>String(s||'').replace(/[^a-zA-Z0-9 _./-]+/g,' ').trim();
+const escape=s=>String(s||'').replace(/[^a-zA-Z0-9 _.\/-]+/g,' ').trim();
 const limited=(s,n=64)=>escape(s).slice(0,n);
 const marketing=s=>{
   const v=limited(s);
