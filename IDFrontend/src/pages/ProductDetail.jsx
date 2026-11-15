@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate, useLocation, Link } from 'react-router-dom';
-import { FaArrowLeft, FaChevronLeft, FaChevronRight, FaHeart, FaRegHeart, FaRegThumbsUp, FaThumbsUp, FaShare, FaWhatsapp, FaYoutube, FaEllipsisH } from 'react-icons/fa';
+import { FaArrowLeft, FaChevronLeft, FaChevronRight, FaHeart, FaRegHeart, FaRegThumbsUp, FaThumbsUp, FaShare, FaWhatsapp, FaYoutube, FaEllipsisH, FaMagic } from 'react-icons/fa';
 import api from '../api';
 import SEO from '../components/SEO';
 import ProductStructuredData from '../components/ProductStructuredData';
@@ -215,6 +215,10 @@ export default function ProductDetail() {
                 <img src={image} alt={product.title+' custom design'} className="sk-pin-detail-image"
                 fetchPriority="high" decoding="async" /></button> :
                 <div className="sk-pin-no-image">✦</div>}
+              <button type="button" className="sk-pin-related-jump" aria-label="Explore visually similar designs"
+                onClick={()=>document.getElementById('sk-pin-related-heading')?.scrollIntoView({behavior:'smooth',block:'start'})}>
+                <FaMagic aria-hidden="true" />
+              </button>
               {images.length>1 && <div className="sk-pin-detail-visual-nav">
                 <button type="button" aria-label="Previous photo"
                   onClick={()=>setImgIdx((activeIndex-1+images.length)%images.length)}>
@@ -260,7 +264,10 @@ export default function ProductDetail() {
                 Buy now
               </button>
             </div>
-            <span className="sk-pin-detail-seller">{categoryName || 'Made to order'} · SANJU SK Digital</span>
+            <div className="sk-pin-creator">
+              <img src="/images/sk-digital-final.svg" alt="" width="33" height="33" />
+              <span>SANJU SK Digital <small>{categoryName || 'Custom made to order'}</small></span>
+            </div>
             <h1>{product.title}</h1>
             {product.description && <p>{product.description}</p>}
             <div className="sk-pin-detail-fields">
