@@ -11,9 +11,10 @@ const ID=/^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/i;
 const escape=s=>String(s||'').replace(/[^a-zA-Z0-9 _.\/-]+/g,' ').trim();
 const limited=(s,n=64)=>escape(s).slice(0,n);
 const marketing=s=>{
-  const v=limited(s);
-  // Discard likely sensitive phone numbers, emails, tracking identifiers.
-  return /\d{8,}|@/.test(v)?'':v;
+  const raw=String(s||'');
+  // Reject e-mail/phone information before punctuation sanitization.
+  if(/@|\d{8,}/.test(raw))return '';
+  return limited(raw);
 };
 export function isAnonymousId(id){return ID.test(String(id||''));}
 export function cleanAnalyticsEvent(body={}){
