@@ -32,6 +32,7 @@ jobs:
         run: |
           node --test IDFrontend/src/components/mobile/categoryOrder.test.mjs
           node --test IDFrontend/src/components/mobile/catalogSessionCache.test.mjs
+          node --test IDFrontend/src/hooks/consentPreference.test.mjs
       - name: Check frontend bundle
         run: |
           npm ci --prefix IDFrontend

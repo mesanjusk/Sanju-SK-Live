@@ -102,16 +102,16 @@ function PinterestStorefrontHeader({
         </div>
       </header>
       <nav className="sk-pin-categories" aria-label="Browse design categories">
+        <button type="button" disabled={!catalogReady}
+          className={'sk-pin-category-tab' + (!selectedCategory ? ' is-current' : '')}
+          aria-pressed={!selectedCategory}
+          onClick={() => onCategorySelect?.(null)}>All</button>
         {firstWedding&&<button type="button" className={'sk-pin-category-tab'+
           (idOf(firstWedding)===idOf(selectedCategory)?' is-current':'')}
           aria-pressed={idOf(firstWedding)===idOf(selectedCategory)}
           onClick={()=>onCategorySelect?.(firstWedding)}>
           {firstWedding.name}
         </button>}
-        <button type="button" disabled={!catalogReady}
-          className={'sk-pin-category-tab' + (!selectedCategory ? ' is-current' : '')}
-          aria-pressed={!selectedCategory}
-          onClick={() => onCategorySelect?.(null)}>All</button>
         {catalogReady ? remainingCategories.map((category, index) => (
           <button type="button" key={idOf(category) || index}
             className={'sk-pin-category-tab' +
