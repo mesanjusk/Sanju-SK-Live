@@ -24,8 +24,14 @@ jobs:
           node --check IDBackend/utils/orderPricing.js
           node --check IDBackend/utils/orderLifecycle.js
           node --check IDBackend/utils/orderSync.js
+          node --check IDBackend/routes/analyticsRoutes.js
+          node --check IDBackend/utils/growthAnalytics.js
       - name: Test server-authoritative pricing and payment verification
         run: node --test IDBackend/tests/*.test.js
+      - name: Test Wedding-first order, intent ranking and return caching
+        run: |
+          node --test IDFrontend/src/components/mobile/categoryOrder.test.mjs
+          node --test IDFrontend/src/components/mobile/catalogSessionCache.test.mjs
       - name: Check frontend bundle
         run: |
           npm ci --prefix IDFrontend
