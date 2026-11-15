@@ -131,6 +131,8 @@ const pinCss=readFileSync(new URL('../src/components/mobile/pinterest-storefront
 const detailSource=readFileSync(new URL('../src/pages/ProductDetail.jsx',import.meta.url),'utf8');
 const pinNavSource=readFileSync(new URL('../src/components/mobile/MobileBottomNav.jsx',import.meta.url),'utf8');
 const reminderSource=readFileSync(new URL('../src/components/mobile/CallReminder.jsx',import.meta.url),'utf8');
+const checkoutSource=readFileSync(new URL('../src/pages/Checkout.jsx',import.meta.url),'utf8');
+const catalogCacheSource=readFileSync(new URL('../src/components/mobile/catalogSessionCache.mjs',import.meta.url),'utf8');
 const unifiedCss=readFileSync(new URL('../src/styles/pinterest-unified-2026.css',import.meta.url),'utf8');
 const appSource=readFileSync(new URL('../src/App.jsx',import.meta.url),'utf8');
 const festiveCss=readFileSync(new URL('../src/components/mobile/festive-home.css',import.meta.url),'utf8');
@@ -152,8 +154,11 @@ assert(pinHeaderSource.includes('sk-pin-top-action') && pinHeaderSource.includes
 assert(pinCardSource.includes("to={url} state={{ product }}") && pinCardSource.includes('sk-pin-cover') &&
   pinCardSource.includes('sk-pin-shape-'), 'Tapping a mosaic tile must enter its real product URL with instant preview state');
 assert(pinCardSource.includes('toggleFavorite(product)') && pinCardSource.includes('saveEnquiryLead') &&
-  pinCardSource.includes('Copy link') && pinCardSource.includes('Request quote'),
-  'Pin action menu must save, copy and enquire about actual product');
+  pinCardSource.includes('sk-pin-card-unit-price') &&
+  !pinCardSource.includes('sk-pin-card-menu') &&
+  !pinCardSource.includes('From ₹') &&
+  pinCardSource.includes('Request quote'),
+  'Pin cards must show a bold right-side unit price instead of three dots or From pricing');
 assert(pinCss.includes('columns:2') && pinCss.includes('break-inside:avoid') &&
   pinCss.includes('sk-pin-cover') && pinCss.includes('sk-pin-detail-related'),
   'Two-column mobile masonry and related designs styling must exist');
@@ -248,14 +253,35 @@ assert(!pinHeaderSource.includes('sk-pin-desktop-search') &&
   !pinHeaderSource.includes('sk-pin-mobile-search') &&
   pinHeaderSource.includes('sk-pin-search-open'),
   'No always-on desktop or mobile search field');
-assert(detailSource.indexOf('sk-pin-commerce-actions') < detailSource.indexOf('sk-pin-product-specs') &&
-  detailSource.includes('sk-pin-product-specs-summary') &&
+assert(detailSource.includes('sk-pin-commerce-actions') &&
+  detailSource.includes('sk-pin-buy-primary') &&
+  !detailSource.includes('sk-pin-product-specs') &&
+  !detailSource.includes('sk-pin-detail-qty') &&
   !detailSource.includes('<MobileBottomNav'),
-  'Buy Now must precede folded product specs and detail pages must not show the home dock');
+  'Pin detail must prioritize Buy Now, with quantity/details moved to checkout');
 assert(unifiedCss.includes('sk-mobile-bottom-link.is-active') &&
   unifiedCss.includes('background:#fff!important') &&
   unifiedCss.includes('sk-pin-help-label'),
   'Floating footer and phone helper must follow the same white/ink theme');
+
+assert(checkoutSource.includes('sk-checkout-quantity-tiers') &&
+  checkoutSource.includes('Choose quantity') &&
+  checkoutSource.includes('sk-checkout-extra') &&
+  checkoutSource.includes('Full name') &&
+  checkoutSource.includes('Mobile number') &&
+  checkoutSource.includes('findUnitPrice(product,quantity)'),
+  'Buy Now checkout must include quantity tiers, price total and minimum contact details');
+assert(catalogCacheSource.includes('MAX_AGE_MS') &&
+  catalogCacheSource.includes('readCatalogRows') &&
+  catalogCacheSource.includes('isCatalogCacheFresh') &&
+  homeSource.includes("readCatalogRows('listings')") &&
+  homeSource.includes("rememberCatalogRows(key, rows)") &&
+  homeSource.includes('sk-home-scroll-position') &&
+  endlessSource.includes('rememberedVisibleCount'),
+  'Home must show previously cached designs immediately and restore scroll/feed depth');
+assert(reminderSource.includes('VISIBLE_DURATION = 4500') &&
+  reminderSource.includes('FIRST_SHOW_DELAY + VISIBLE_DURATION'),
+  'Need help bubble must auto-dismiss after a short timed appearance');
 
 const desktopRailSource=readFileSync(new URL('../src/components/mobile/PinterestDesktopRail.jsx',import.meta.url),'utf8');
 const responsiveCss=readFileSync(new URL('../src/styles/pinterest-responsive-2026.css',import.meta.url),'utf8');
@@ -432,9 +458,9 @@ assert(savedPage.includes('sk-saved-page') &&
   savedPage.includes('<MobileHeader'),
   'Saved and Liked must use the Pinterest visual design, not the old green grid');
 assert(favoritesContext.includes('toggleLiked') &&
-  pinCardSource.includes('toggleLiked(product)') &&
-  detailSource.includes('toggleLiked(product)'),
-  'Like / Unlike must actually update the Liked collection');
+  detailSource.includes('toggleLiked(product)') &&
+  pinCardSource.includes('toggleFavorite(product)'),
+  'Opened pins must retain like/save while cards stay minimal');
 assert(catalogPage.includes('<MobileHeader title="Find your design"') &&
   catalogPage.includes('<MobileBottomNav variant="pinterest"') &&
   categoryListPage.includes('<MobileHeader title="Browse all categories"') &&
