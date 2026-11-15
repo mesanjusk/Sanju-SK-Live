@@ -1,4 +1,5 @@
-import { useDeferredValue, useEffect, useMemo, useState } from 'react';
+import { useCallback, useDeferredValue, useEffect, useMemo, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { FaArrowRight, FaChevronDown, FaPlay } from 'react-icons/fa';
 import api from '../api';
 import seo from '../config/local-seo.json';
@@ -19,6 +20,8 @@ import ServiceGallery from './ServiceGallery';
 const idOf = (value) => String(value?._id || value?.category_uuid || value || '');
 
 export default function Home() {
+  const navigate = useNavigate();
+  const location = useLocation();
   const [listings, setListings] = useState([]);
   const [categories, setCategories] = useState([]);
   const [subcategories, setSubcategories] = useState([]);
@@ -36,6 +39,15 @@ export default function Home() {
   const [searchTerm, setSearchTerm] = useState('');
   const [searchOpen, setSearchOpen] = useState(() =>
     typeof window !== 'undefined' && new URLSearchParams(window.location.search).has('search'));
+  const handleSearchVisibility = useCallback((open) => {
+    setSearchOpen(open);
+    if (!open && new URLSearchParams(location.search).has('search')) {
+      const params = new URLSearchParams(location.search);
+      params.delete('search');
+      navigate({pathname:'/',search:params.toString() ? '?' + params.toString() : ''},
+        {replace:true});
+    }
+  }, [location.search, navigate]);
   const [showVideos, setShowVideos] = useState(false);
   const [showBottomNav, setShowBottomNav] = useState(true);
   const deferredSearch = useDeferredValue(searchTerm);
@@ -280,7 +292,7 @@ export default function Home() {
         onSearchChange={handleSearchChange}
         catalogReady={catalogReady}
         searchOpen={searchOpen}
-        onSearchOpen={setSearchOpen}
+        onSearchOpen={handleSearchVisibility}
         whatsappNumber={whatsappNumber}
         phoneNumber={phoneNumber}
       />
@@ -382,7 +394,7 @@ export default function Home() {
         </details>
       </footer>
       <MobileBottomNav whatsappNumber={whatsappNumber} phoneNumber={phoneNumber}
-        visible={showBottomNav} variant="pinterest" onSearchClick={() => setSearchOpen(true)} />
+        visible={showBottomNav} variant="pinterest" onSearchClick={() => handleSearchVisibility(true)} />
     </div>
   );
 }
