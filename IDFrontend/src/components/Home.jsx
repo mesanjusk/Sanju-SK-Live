@@ -8,7 +8,6 @@ import { uniqueDesigns } from './mobile/uniqueDesigns.mjs';
 import {freshFeedSeed,getDesignInterests,rankDesigns,productId,categoryId} from './mobile/interestRank.mjs';
 import './mobile/festive-home.css';
 import './mobile/pinterest-storefront.css';
-import { getCategoryTheme } from './mobile/categoryThemes';
 import CategorySeoBlurb from './mobile/CategorySeoBlurb';
 import VideoFeedCard from './mobile/VideoFeedCard';
 import MobileBottomNav from './mobile/MobileBottomNav';
@@ -43,12 +42,12 @@ export default function Home() {
   // All public enquiry links use the verified Gondia business WhatsApp number.
   const whatsappNumber = String(seo.phone || '+919372333633').replace(/\D/g, '');
   const phoneNumber = seo.phone;
-  const activeTheme = getCategoryTheme(selectedCategory?.name);
+  // One consistent public color system across categories; only imagery varies.
   const merchStyles = {
-    '--sk-theme-bg': activeTheme.background,
-    '--sk-theme-accent': activeTheme.accent,
-    '--sk-theme-ink': activeTheme.ink,
-    '--sk-theme-soft': activeTheme.soft,
+    '--sk-theme-bg': '#ffffff',
+    '--sk-theme-accent': '#e60023',
+    '--sk-theme-ink': '#202020',
+    '--sk-theme-soft': '#f3f3f3',
   };
 
   useEffect(() => {
