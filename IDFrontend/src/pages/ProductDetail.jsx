@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useParams, useNavigate, useLocation, Link } from 'react-router-dom';
 import { FaArrowLeft, FaChevronLeft, FaChevronRight, FaHeart, FaRegHeart, FaRegThumbsUp, FaThumbsUp, FaShare, FaWhatsapp, FaYoutube, FaEllipsisH, FaMagic } from 'react-icons/fa';
 import api from '../api';
@@ -8,10 +8,12 @@ import PinterestPinCard from '../components/mobile/PinterestPinCard';
 import { uniqueDesigns } from '../components/mobile/uniqueDesigns.mjs';
 import {recordDesignInterest,rankDesigns,getDesignInterests,freshFeedSeed,productId,categoryId} from '../components/mobile/interestRank.mjs';
 import ProductStage from '../components/experience/ProductStage';
+import useStableGalleryAspect from '../components/mobile/useStableGalleryAspect';
 import { useFavorites } from '../context/FavoritesContext';
 import { trackWhatsAppClick,trackAnalyticsEvent } from '../hooks/useAnalytics';
 import { saveEnquiryLead, resolveCategoryName } from '../hooks/useWhatsApp';
 import '../components/mobile/pinterest-storefront.css';
+import '../styles/product-gallery-fixed.css';
 
 const idOf = value => String(value?._id || value?.category_uuid || value || '');
 const getPriceForQty = (product, qty) => {
@@ -42,6 +44,12 @@ export default function ProductDetail() {
   const [relatedSeed] = useState(freshFeedSeed);
   const [zoomOpen,setZoomOpen] = useState(false);
   const [showVideo, setShowVideo] = useState(false);
+  const images=useMemo(()=>Array.isArray(product?.images)
+    ? product.images.filter(src=>typeof src==='string'&&src.trim())
+    : [product?.images||product?.imageUrl].filter(src=>typeof src==='string'&&src.trim()),
+    [product?.images,product?.imageUrl]);
+  // Measure *all* photos once; selected images never change the container height.
+  const galleryHeightRatio=useStableGalleryAspect(images,id);
   const { favorites, liked, toggleFavorite, toggleLiked } = useFavorites();
   useEffect(()=>{
     if(id)trackAnalyticsEvent('product_view',{productId:String(id)});
@@ -142,8 +150,6 @@ export default function ProductDetail() {
     </div>
   );
 
-  const images = Array.isArray(product.images) ? product.images.filter(Boolean) :
-    [product.images || product.imageUrl].filter(Boolean);
   const activeIndex = Math.min(imgIdx,Math.max(0,images.length-1));
   const image = images[activeIndex] || null;
   const isSaved = favorites.some(item=>String(item._id)===String(product._id));
@@ -206,7 +212,9 @@ export default function ProductDetail() {
         </header>
         <div className="sk-pin-detail-grid">
           <div>
-            <div className="sk-pin-detail-visual">
+            <div className="sk-pin-detail-visual" style={{
+              '--sk-product-gallery-aspect':'1 / '+galleryHeightRatio
+            }}>
               {image ? <button type="button" className="sk-pin-detail-image-button"
                 aria-label="View full size image" onClick={()=>setZoomOpen(true)}>
                 <img src={image} alt={product.title+' custom design'} className="sk-pin-detail-image"
