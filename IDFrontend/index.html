@@ -110,7 +110,7 @@
       /* 2026 desktop and mobile discovery first paint, before React hydration. */
       #sk-seo-initial .sk-boot-desktop-rail {display:none}
       #sk-seo-initial .sk-boot-desktop-search{display:none}
-      #sk-seo-initial .sk-boot-mobile-search{padding:0 12px 9px;background:#fff}
+      #sk-seo-initial .sk-boot-mobile-search{display:none!important;}
       #sk-seo-initial .sk-boot-mobile-search a{display:block;padding:15px 17px;
         border-radius:99px;background:#efefef;color:#777;text-decoration:none;font-size:13px;font-weight:650;}
       #sk-seo-initial .sk-boot-header {max-width:none;}
@@ -146,6 +146,24 @@
       }
       @media(min-width:1580px){
         #sk-seo-initial .sk-boot-collections{grid-template-columns:repeat(7,minmax(0,1fr));}
+      }
+
+      /* The first paint must mirror the real home screen, without persistent search. */
+      #sk-seo-initial .sk-boot-mobile-search,
+      #sk-seo-initial .sk-boot-desktop-search {display:none!important;}
+      #sk-seo-initial .sk-boot-header-actions .sk-boot-whatsapp-link{color:#202020!important;}
+      #sk-seo-initial .sk-boot-bottom-nav {
+        padding:0!important;background:transparent!important;box-shadow:none!important;
+        border:0!important;gap:12px!important;
+      }
+      #sk-seo-initial .sk-boot-bottom-nav a,
+      #sk-seo-initial .sk-boot-bottom-nav a:first-child{
+        display:grid;place-items:center;width:63px;height:62px;border-radius:23px;
+        background:#fff!important;color:#202020!important;border:1px solid #ececec;
+        box-shadow:0 6px 22px #00000024;
+      }
+      #sk-seo-initial .sk-boot-header,#sk-seo-initial .sk-boot-shell{
+        background:#fff!important;color:#202020!important;
       }
 </style>
     <!-- SEO GENERATED HEAD START -->
