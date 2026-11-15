@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate, useLocation, Link } from 'react-router-dom';
-import { FaArrowLeft, FaChevronLeft, FaChevronRight, FaHeart, FaRegHeart, FaRegThumbsUp, FaThumbsUp, FaShare, FaWhatsapp, FaYoutube, FaEllipsisH, FaMagic } from 'react-icons/fa';
+import { FaArrowLeft, FaChevronLeft, FaChevronRight, FaChevronDown, FaHeart, FaRegHeart, FaRegThumbsUp, FaThumbsUp, FaShare, FaWhatsapp, FaYoutube, FaEllipsisH, FaMagic } from 'react-icons/fa';
 import api from '../api';
 import SEO from '../components/SEO';
 import ProductStructuredData from '../components/ProductStructuredData';
