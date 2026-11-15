@@ -401,6 +401,8 @@ export default function Home() {
           <a href="/3d-led-sign-boards-gondia/">3D signs</a>
           <a href="/custom-trophies-awards-gondia/">Awards</a>
           <a href="/flex-banner-printing-gondia/">Flex printing</a>
+          <a href="/track-order">Track order</a>
+          <a href="/order-information">Ordering information</a>
         </nav>
             <ServiceGallery />
             {videos.length > 0 && (
