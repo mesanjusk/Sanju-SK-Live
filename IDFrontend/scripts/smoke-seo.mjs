@@ -319,15 +319,27 @@ assert(index.includes('sk-boot-desktop-rail') &&
   !index.includes('class="sk-boot-desktop-search"'),
   'SSR first paint must not flash the old search bar');
 
+const analyticsClient=readFileSync(new URL('../src/hooks/useAnalytics.js',import.meta.url),'utf8');
+const consentSource=readFileSync(new URL('../src/components/AnalyticsConsent.jsx',import.meta.url),'utf8');
+const cacheSource=readFileSync(new URL('../src/components/mobile/catalogSessionCache.mjs',import.meta.url),'utf8');
+assert(analyticsClient.includes("analyticsConsent()!=='accepted'") &&
+  analyticsClient.includes('trackAnalyticsEvent') &&
+  consentSource.includes('Allow analytics') && consentSource.includes('No thanks'),
+  'Only opted-in analytics can track identifiable browser sessions');
+assert(homeSource.includes('LANDING_KEYWORD') && homeSource.includes('RETURN_KEY') &&
+  cacheSource.includes('sessionStorage.setItem(PREFIX+key'),
+  'Catalog ordering and browsing position must survive checkout navigation');
 const categoryGuideData=JSON.parse(readFileSync(new URL('../src/config/category-seo.json',import.meta.url),'utf8'));
 const guideSource=readFileSync(new URL('../src/components/mobile/CategorySeoBlurb.jsx',import.meta.url),'utf8');
 const navSource=readFileSync(new URL('../src/components/mobile/MobileBottomNav.jsx',import.meta.url),'utf8');
 const vercelRules=JSON.parse(readFileSync(new URL('../vercel.json',import.meta.url),'utf8'));
 assert(categoryGuideData.length>=9,'Require authored category content for observed catalog categories');
 assert(new Set(categoryGuideData.map(g=>g.slug)).size===categoryGuideData.length,'Category SEO guide slugs must be unique');
-assert(homeSource.includes('<CategorySeoBlurb name={selectedCategory.name} />') &&
+assert(!homeSource.includes('<CategorySeoBlurb') &&
+  homeSource.includes('orderStoreCategories(categories,') &&
+  pinHeaderSource.includes('firstWedding') &&
   endlessSource.includes('categoryById.get(itemKey(product.category))'),
-  'SEO summary and category resolution must work for selected catalog categories');
+  'Category feed must hide sales copy while keeping Wedding first and names resolved');
 assert(guideSource.includes('getCategoryGuide') && guideSource.includes('Browse ' + "' + name + '"),
   'Every unknown live category needs a relevant no-fabrication fallback description');
 assert(festiveCss.includes('Floating three-icon dock') && pinCss.includes('.sk-pin-bottom-nav'),
