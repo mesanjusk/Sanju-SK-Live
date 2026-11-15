@@ -24,7 +24,8 @@ assert(index.indexOf('sk-boot-collections') < index.indexOf('GONDIA DESIGN STUDI
 assert(index.includes('<details class="sk-boot-more"><summary>More about SANJU SK Digital</summary>') &&
   index.includes('Common questions'), 'Initial SEO business information must remain available inside More about without JS');
 assert(index.includes('class="sk-boot-card"') && index.includes('images/services/wedding-cards.svg'), 'Initial collection links and images must be present');
-assert(index.includes('sk-initial-seo-style') && index.includes('#f8f3fc'), 'First paint needs lavender background instead of old green fallback');
+assert(index.includes('sk-initial-seo-style') && index.includes('html,body {background:#fff}'),
+  'Initial HTML should use the unified white first paint');
 assert(index.includes('id="sk-seo-initial"'),'Homepage initial HTML content missing');
 assert(index.includes('structured-data-jsonld'),'Homepage business JSON-LD missing');
 const seoConfig=JSON.parse(readFileSync(new URL('../src/config/local-seo.json',import.meta.url),'utf8'));
@@ -130,6 +131,7 @@ const pinCss=readFileSync(new URL('../src/components/mobile/pinterest-storefront
 const detailSource=readFileSync(new URL('../src/pages/ProductDetail.jsx',import.meta.url),'utf8');
 const pinNavSource=readFileSync(new URL('../src/components/mobile/MobileBottomNav.jsx',import.meta.url),'utf8');
 const reminderSource=readFileSync(new URL('../src/components/mobile/CallReminder.jsx',import.meta.url),'utf8');
+const unifiedCss=readFileSync(new URL('../src/styles/pinterest-unified-2026.css',import.meta.url),'utf8');
 const appSource=readFileSync(new URL('../src/App.jsx',import.meta.url),'utf8');
 const festiveCss=readFileSync(new URL('../src/components/mobile/festive-home.css',import.meta.url),'utf8');
 
@@ -137,10 +139,14 @@ assert(homeSource.includes('<PinterestStorefrontHeader') && homeSource.includes(
   homeSource.includes('filteredProducts'), 'Homepage must use Pinterest header and endlessly looping real product masonry');
 assert(!homeSource.includes('<FestiveStorefrontHero') && !homeSource.includes('<CategoryProductCarousel'),
   'Previous promotional hero and grouped category carousels must not render');
-assert(pinHeaderSource.includes('sk-pin-categories') && pinHeaderSource.includes('onCategorySelect?.(cat)') &&
-  pinHeaderSource.includes('aria-pressed='), 'Horizontal category tabs must filter actual database categories');
-assert(pinHeaderSource.includes('sk-pin-search-row') && pinHeaderSource.includes('disabled={!catalogReady}'),
-  'Search should open on demand and remain safe before database loads');
+assert(pinHeaderSource.includes('sk-pin-categories') &&
+  pinHeaderSource.includes('onCategorySelect?.(category)') &&
+  pinHeaderSource.includes('aria-pressed='),
+  'Horizontal categories must filter the actual catalog');
+assert(pinHeaderSource.includes('sk-pin-search-row') &&
+  pinHeaderSource.includes('sk-pin-search-overlay') &&
+  pinHeaderSource.includes('searchOpen &&'),
+  'Search should be opened on demand, not shown in the default home header');
 assert(pinHeaderSource.includes('sk-pin-top-action') && pinHeaderSource.includes('sk-pin-overflow-menu'),
   'Header must have custom quote action and functional overflow menu');
 assert(pinCardSource.includes("to={url} state={{ product }}") && pinCardSource.includes('sk-pin-cover') &&
@@ -186,15 +192,14 @@ assert(detailSource.includes('uniqueDesigns(products.filter('),
 assert(loadingSource.includes('/images/sk-digital-final.svg') &&
   !loadingSource.includes('sk-print-press-mark'),
   'Loading animation must show the finalized SK logo, not placeholder letters');
-assert(reminderSource.includes('sk-pin-call-reminder') &&
-  reminderSource.includes('/images/sk-digital-final.svg'),
-  'Call popup must use the same real SK monogram and unified layout');
-assert(pinCss.includes('--sk-brand-accent:#b16a0e') &&
-  pinCss.includes('.sk-pinterest-home .sk-catalog-loading') &&
-  pinCss.includes('.sk-pin-call-reminder'),
-  'Loading, logo and call popup must share charcoal/white/gold theme');
-assert(pinHeaderSource.includes('<FaWhatsapp aria-hidden="true"/>') && !pinHeaderSource.includes('<FaPlus'),
-  'Header custom design action must show WhatsApp, not a plus');
+assert(reminderSource.includes('sk-pin-help-bubble') &&
+  reminderSource.includes('sk-pin-help-label') &&
+  reminderSource.includes('sk-pin-help-icon'),
+  'Phone help must be a rounded label above a circular phone control');
+assert(pinCss.includes('.sk-pinterest-home .sk-catalog-loading'),
+  'The SK logo printing animation must still be available');
+assert(pinHeaderSource.includes('FaWhatsapp aria-hidden') && !pinHeaderSource.includes('<FaPlus'),
+  'Header must keep existing WhatsApp action, not substitute a plus button');
 assert(pinHeaderSource.includes('sk-pin-brand-final-logo') &&
   homeSource.includes('sk-store-footer-final-logo'), 'Use the final SK logo in header and footer');
 const finalLogo=readFileSync(new URL('../public/images/sk-digital-final.svg',import.meta.url),'utf8');
@@ -227,12 +232,30 @@ assert(pinCss.includes('sk-pin-about-intro') && index.includes('sk-boot-bottom-n
   'Both first paint and React layout must use Pinterest-inspired navigation');
 assert(!homeSource.includes('sk-back-to-top') && !homeSource.includes('pb-24'),
   'No floating Top button or excessive bottom whitespace');
-assert(reminderSource.includes('FIRST_REMINDER_DELAY_MS = 15000') &&
-  reminderSource.includes('REPEAT_REMINDER_DELAY_MS = 8000') &&
-  reminderSource.includes('sessionStorage.setItem(DISMISSED_KEY'),
-  'Dismissible call reminder must remain available');
+assert(reminderSource.includes('FIRST_SHOW_DELAY = 8000') &&
+  reminderSource.includes('sessionStorage.setItem(DISMISSED_KEY') &&
+  !reminderSource.includes('REPEAT_REMINDER_DELAY_MS'),
+  'Need help should be unobtrusive and stop showing after a call');
 assert(appSource.includes('<CallReminder />'), 'Call reminders must work on public routes');
 
+
+assert(appSource.includes("import './styles/pinterest-unified-2026.css'") &&
+  unifiedCss.includes('--sk-ui-ink:#202020') &&
+  unifiedCss.includes('.sk-pin-search-overlay') &&
+  unifiedCss.includes('.sk-pin-help-bubble'),
+  'One public black/white/red theme must cover search, dock and phone assistance');
+assert(!pinHeaderSource.includes('sk-pin-desktop-search') &&
+  !pinHeaderSource.includes('sk-pin-mobile-search') &&
+  pinHeaderSource.includes('sk-pin-search-open'),
+  'No always-on desktop or mobile search field');
+assert(detailSource.indexOf('sk-pin-commerce-actions') < detailSource.indexOf('sk-pin-product-specs') &&
+  detailSource.includes('sk-pin-product-specs-summary') &&
+  !detailSource.includes('<MobileBottomNav'),
+  'Buy Now must precede folded product specs and detail pages must not show the home dock');
+assert(unifiedCss.includes('sk-mobile-bottom-link.is-active') &&
+  unifiedCss.includes('background:#fff!important') &&
+  unifiedCss.includes('sk-pin-help-label'),
+  'Floating footer and phone helper must follow the same white/ink theme');
 
 const desktopRailSource=readFileSync(new URL('../src/components/mobile/PinterestDesktopRail.jsx',import.meta.url),'utf8');
 const responsiveCss=readFileSync(new URL('../src/styles/pinterest-responsive-2026.css',import.meta.url),'utf8');
@@ -241,12 +264,12 @@ assert(appSource.includes('<PinterestDesktopRail />') &&
   desktopRailSource.includes('sk-pin-desktop-rail') &&
   desktopRailSource.includes('/allCategories') &&
   desktopRailSource.includes('/favorites'), 'Desktop rail must be on all public routes with Home Explore Saved');
-assert(pinHeaderSource.includes('sk-pin-desktop-search') &&
-  pinHeaderSource.includes('sk-pin-mobile-search') &&
-  pinHeaderSource.includes('sk-pin-suggestions') &&
-  pinHeaderSource.includes('desktopSearchRef') &&
-  pinHeaderSource.includes('onCategorySelect?.(cat)'),
-  'Responsive search, category suggestions and real catalog filtering are required');
+assert(pinHeaderSource.includes('sk-pin-search-overlay') &&
+  pinHeaderSource.includes('sk-pin-search-results') &&
+  !pinHeaderSource.includes('sk-pin-mobile-search') &&
+  !pinHeaderSource.includes('desktopSearchRef') &&
+  pinHeaderSource.includes('onCategorySelect?.(category)'),
+  'Footer-only search should still expose functional category suggestions');
 assert(responsiveCss.includes('min-width:960px') &&
   responsiveCss.includes('min-width:1920px') &&
   responsiveCss.includes('columns:8') &&
@@ -266,9 +289,9 @@ assert(detailSource.includes("fetch('/api/recommendations'") &&
   detailSource.includes("result.mode==='gemini'") &&
   detailSource.includes('getDesignInterests()'), 'Related pins must use Gemini endpoint with preference-based fallback');
 assert(index.includes('sk-boot-desktop-rail') &&
-  index.includes('sk-boot-mobile-search') &&
-  index.includes('sk-boot-desktop-search'),
-  'Static SEO first paint must reflect desktop and mobile responsive navigation');
+  !index.includes('class="sk-boot-mobile-search"') &&
+  !index.includes('class="sk-boot-desktop-search"'),
+  'SSR first paint must not flash the old search bar');
 
 const categoryGuideData=JSON.parse(readFileSync(new URL('../src/config/category-seo.json',import.meta.url),'utf8'));
 const guideSource=readFileSync(new URL('../src/components/mobile/CategorySeoBlurb.jsx',import.meta.url),'utf8');
