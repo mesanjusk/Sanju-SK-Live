@@ -4,7 +4,6 @@ import { FaArrowLeft, FaChevronLeft, FaChevronRight, FaHeart, FaRegHeart, FaRegT
 import api from '../api';
 import SEO from '../components/SEO';
 import ProductStructuredData from '../components/ProductStructuredData';
-import MobileBottomNav from '../components/mobile/MobileBottomNav';
 import PinterestPinCard from '../components/mobile/PinterestPinCard';
 import { uniqueDesigns } from '../components/mobile/uniqueDesigns.mjs';
 import {recordDesignInterest,rankDesigns,getDesignInterests,freshFeedSeed,productId,categoryId} from '../components/mobile/interestRank.mjs';
@@ -340,7 +339,6 @@ export default function ProductDetail() {
           </div>
         </div>}
 
-        <MobileBottomNav variant="pinterest" onSearchClick={()=>navigate('/?search=1')}/>
       </div>
     </>
   );
