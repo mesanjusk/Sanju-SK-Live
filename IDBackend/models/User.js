@@ -1,3 +1,4 @@
+import {randomBytes,scryptSync,timingSafeEqual} from 'node:crypto';
 import mongoose from 'mongoose';
 
 const permissionsSchema = new mongoose.Schema({
@@ -28,7 +29,72 @@ const UsersSchema = new mongoose.Schema({
   permissions:   { type: permissionsSchema, default: () => ({ ...ROLE_DEFAULTS.admin }) },
 });
 
+export function hashUserPassword(value) {
+  const salt=randomBytes(16).toString('hex');
+  const digest=scryptSync(String(value),salt,64).toString('hex');
+  return 'scrypt
+  if (this.isModified('role') && !this.isModified('permissions')) {
+    this.permissions = { ...ROLE_DEFAULTS[this.role] };
+  }
+  next();
+});
+
+export { ROLE_DEFAULTS };
+export default mongoose.model('Users', UsersSchema);
++salt+'
+  if (this.isModified('role') && !this.isModified('permissions')) {
+    this.permissions = { ...ROLE_DEFAULTS[this.role] };
+  }
+  next();
+});
+
+export { ROLE_DEFAULTS };
+export default mongoose.model('Users', UsersSchema);
++digest;
+}
+export function checkUserPassword(entered,stored) {
+  if(typeof entered!=='string'||typeof stored!=='string')return false;
+  if(stored.startsWith('scrypt
+  if (this.isModified('role') && !this.isModified('permissions')) {
+    this.permissions = { ...ROLE_DEFAULTS[this.role] };
+  }
+  next();
+});
+
+export { ROLE_DEFAULTS };
+export default mongoose.model('Users', UsersSchema);
+)){
+    const [,salt,hash]=stored.split('
+  if (this.isModified('role') && !this.isModified('permissions')) {
+    this.permissions = { ...ROLE_DEFAULTS[this.role] };
+  }
+  next();
+});
+
+export { ROLE_DEFAULTS };
+export default mongoose.model('Users', UsersSchema);
+);
+    if(!salt||!/^[a-f0-9]{128}$/i.test(hash||''))return false;
+    const expected=Buffer.from(hash,'hex'),actual=scryptSync(entered,salt,64);
+    return timingSafeEqual(expected,actual);
+  }
+  // One-time migration of pre-existing legacy passwords.
+  const enteredBuffer=Buffer.from(entered),storedBuffer=Buffer.from(stored);
+  return enteredBuffer.length===storedBuffer.length && timingSafeEqual(enteredBuffer,storedBuffer);
+}
 UsersSchema.pre('save', function (next) {
+  if(this.isModified('Password') && !this.Password.startsWith('scrypt
+  if (this.isModified('role') && !this.isModified('permissions')) {
+    this.permissions = { ...ROLE_DEFAULTS[this.role] };
+  }
+  next();
+});
+
+export { ROLE_DEFAULTS };
+export default mongoose.model('Users', UsersSchema);
+)){
+    this.Password=hashUserPassword(this.Password);
+  }
   if (this.isModified('role') && !this.isModified('permissions')) {
     this.permissions = { ...ROLE_DEFAULTS[this.role] };
   }
