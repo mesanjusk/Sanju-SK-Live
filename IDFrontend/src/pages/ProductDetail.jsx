@@ -269,7 +269,16 @@ export default function ProductDetail() {
               <span>SANJU SK Digital <small>{categoryName || 'Custom made to order'}</small></span>
             </div>
             <h1>{product.title}</h1>
-            {product.description && <p>{product.description}</p>}
+            <details className="sk-pin-product-specs" id="sk-pin-product-specs">
+              <summary className="sk-pin-product-specs-summary">
+                <span>Product details &amp; quantity</span>
+                <span className="sk-pin-product-specs-price">
+                  {price !== null ? '₹' + price.toLocaleString('en-IN') + ' / piece' : 'Price on request'}
+                  <FaChevronDown aria-hidden="true" />
+                </span>
+              </summary>
+              <div className="sk-pin-product-specs-content">
+                {product.description && <p>{product.description}</p>}
             <div className="sk-pin-detail-fields">
               {product.size && <span>Size: {String(product.size)}</span>}
               {product.badge && <span>{String(product.badge)}</span>}
@@ -305,6 +314,8 @@ export default function ProductDetail() {
                   onIndexChange={setImgIdx} modelUrl={product.model3dUrl||product.modelUrl||product.glbUrl} />
               </details>
             )}
+              </div>
+            </details>
           </section>
         </div>
         {related.length>0 && <section className="sk-pin-detail-related" aria-labelledby="sk-pin-related-heading">
