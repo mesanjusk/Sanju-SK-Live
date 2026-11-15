@@ -338,6 +338,7 @@ assert(new Set(categoryGuideData.map(g=>g.slug)).size===categoryGuideData.length
 assert(!homeSource.includes('<CategorySeoBlurb') &&
   homeSource.includes('orderStoreCategories(categories,') &&
   pinHeaderSource.includes('firstWedding') &&
+  pinHeaderSource.indexOf('>All</button>') < pinHeaderSource.indexOf('{firstWedding&&<button') &&
   endlessSource.includes('categoryById.get(itemKey(product.category))'),
   'Category feed must hide sales copy while keeping Wedding first and names resolved');
 assert(guideSource.includes('getCategoryGuide') && guideSource.includes('Browse ' + "' + name + '"),
