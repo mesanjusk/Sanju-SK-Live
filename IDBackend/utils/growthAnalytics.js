@@ -20,7 +20,9 @@ export function isAnonymousId(id){return ID.test(String(id||''));}
 export function cleanAnalyticsEvent(body={}){
   if(!isAnonymousId(body.visitorId)||!isAnonymousId(body.sessionId)||
     !EVENTS.has(body.event))throw new Error('Invalid anonymous analytics event.');
-  const path=String(body.path||'/').split('?')[0].split('#')[0];
+  const path=String(body.path||'/');
+  if(path.includes('?')||path.includes('#'))
+    throw new Error('Analytics paths must exclude query and fragment data.');
   if(!/^\/(?!\/)[\w/-]*$/.test(path)||path.length>160)
     throw new Error('Invalid public page path.');
   const productId=/^[a-f\d]{24}$/i.test(String(body.productId||''))
