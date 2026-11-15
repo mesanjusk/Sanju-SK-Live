@@ -58,3 +58,41 @@ footer{background:#fff;border-color:#e7e5e1;color:#777}
 /* Generated guides use the same genuine gold monogram and text lockup. */
 .logo{display:inline-flex;align-items:center;gap:9px;}
 .logo img{width:52px;height:40px;object-fit:contain;flex:none;}
+
+
+/* November Pinterest storefront alignment: same neutrals and separate icon cards
+   on the public service and category pages served without the React router. */
+:root{
+  --ink:#202020;
+  --teal:#202020;
+  --deep:#202020;
+  --gold:#202020;
+  --cream:#ffffff;
+  --line:#e8e8e8;
+}
+html,body{background:#fff;color:#202020;}
+a{color:#202020;}
+a:focus-visible,button:focus-visible,summary:focus-visible{
+  outline:2px solid #202020;outline-offset:3px;
+}
+.nav-call,.btn-green,.button.alt,.btn.alt{
+  background:#f4f4f4;color:#202020;border-color:#e8e8e8;
+}
+.eyebrow,.section-kicker,.feature .number{color:#202020;}
+.hero .eyebrow{color:#f5f5f5;}
+.hero .btn-primary{background:#fff;color:#202020;}
+.links a{background:#f4f4f4;color:#202020;}
+.sk-static-bottom-nav{
+  gap:12px;padding:0;border:0;box-shadow:none;background:transparent;
+  bottom:calc(env(safe-area-inset-bottom,0px) + 19px);border-radius:0;
+}
+.sk-static-bottom-nav a{
+  flex:0 0 63px;width:63px;height:62px;min-height:62px;
+  background:#fff;color:#202020;border:1px solid #ececec;
+  border-radius:23px;box-shadow:0 6px 22px #00000024;
+}
+.sk-static-bottom-nav a:hover{background:#f4f4f4;}
+@media(max-width:480px){
+  .sk-static-bottom-nav{gap:10px;}
+  .sk-static-bottom-nav a{width:61px;height:60px;min-height:60px;flex-basis:61px;border-radius:22px;}
+}
