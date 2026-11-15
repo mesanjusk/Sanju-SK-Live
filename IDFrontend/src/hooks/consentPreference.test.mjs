@@ -50,6 +50,9 @@ test('unanswered popup offered flag prevents repeated interruption in one tab',(
   assert.equal(wasConsentPrompted(),false);
   markConsentPrompted();
   assert.equal(wasConsentPrompted(),true);
+  // Simulate a new page/tab: the first-party cookie remembers the offer.
+  globalThis.sessionStorage=storage();
+  assert.equal(wasConsentPrompted(),true);
   saveConsentChoice('declined');
   assert.equal(readConsentChoice(),'declined');
   allowConsentPromptAgain();
