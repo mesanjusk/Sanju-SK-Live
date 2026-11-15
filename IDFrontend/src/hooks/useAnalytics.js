@@ -38,6 +38,18 @@ export function setAnalyticsConsent(value){
   if(typeof window!=='undefined')
     window.dispatchEvent(new CustomEvent('sk-analytics-consent',{detail:value}));
 }
+export function resetAnalyticsConsent(){
+  try{
+    const id=localStorage.getItem(VISITOR_KEY);
+    localStorage.removeItem(VISITOR_KEY);
+    localStorage.removeItem(CONSENT_KEY);
+    sessionStorage.removeItem(SESSION_KEY);
+    sessionStorage.removeItem(ATTR_KEY);
+    if(id)api.delete('/api/analytics/visitor',{data:{visitorId:id},timeout:6000}).catch(()=>{});
+  }catch{}
+  if(typeof window!=='undefined')
+    window.dispatchEvent(new CustomEvent('sk-analytics-consent',{detail:'unset'}));
+}
 function getIds(){
   let visitorId=localStorage.getItem(VISITOR_KEY),isNew=false;
   if(!visitorId){visitorId=uuid();localStorage.setItem(VISITOR_KEY,visitorId);isNew=true;}
@@ -78,7 +90,7 @@ function attribution(){
   }
   return saved;
 }
-export function trackAnalyticsEvent(event,{productId='',categoryId='',keyword=''}={}){
+export function trackAnalyticsEvent(event,{productId='',categoryId='',categoryName='',keyword=''}={}){
   if(typeof window==='undefined'||!ALLOWED_EVENTS.has(event)||analyticsConsent()!=='accepted')return;
   if(/^\/(admin|login|profile|upload|listing)/i.test(window.location.pathname))return;
   try{
@@ -86,7 +98,8 @@ export function trackAnalyticsEvent(event,{productId='',categoryId='',keyword=''
     const path=window.location.pathname.slice(0,160);
     const data={...ids,...deviceInfo(),...attribution(),path,event,
       productId:String(productId||'').slice(0,50),
-      categoryId:String(categoryId||'').slice(0,80)};
+      categoryId:String(categoryId||'').slice(0,80),
+      categoryName:String(categoryName||'').slice(0,70)};
     if(event==='search')data.keyword=safeCampaign(keyword);
     api.post('/api/analytics/track',data,{timeout:6000}).catch(()=>{});
   }catch{}
