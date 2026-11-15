@@ -1,8 +1,8 @@
 import {useEffect} from 'react';
 import {useLocation} from 'react-router-dom';
 import api from '../api';
+import {readConsentChoice,saveConsentChoice,forgetConsentChoice,allowConsentPromptAgain} from './consentPreference.mjs';
 
-const CONSENT_KEY='sk_analytics_consent_v2';
 const VISITOR_KEY='sk_analytics_visitor_v2';
 const SESSION_KEY='sk_analytics_session_v2';
 const ATTR_KEY='sk_analytics_attr_v2';
@@ -23,21 +23,21 @@ function uuid(){
   return [h.slice(0,8),h.slice(8,12),h.slice(12,16),h.slice(16,20),h.slice(20)].join('-');
 }
 export function analyticsConsent(){
-  try{return localStorage.getItem(CONSENT_KEY)||'unset';}catch{return 'unset';}
+  return readConsentChoice();
 }
 export function setAnalyticsConsent(value){
   if(!['accepted','declined'].includes(value))return;
-  try{
-    const prior=localStorage.getItem(VISITOR_KEY);
-    if(value==='declined'){
+  if(value==='declined'){
+    try{
+      const prior=localStorage.getItem(VISITOR_KEY);
       localStorage.removeItem(VISITOR_KEY);
       sessionStorage.removeItem(SESSION_KEY);
       sessionStorage.removeItem(ATTR_KEY);
-      // Deletion uses the anonymous key only; the customer is never identified.
+      // Opt-out is stored only as a functional preference, not as consent.
       if(prior)api.delete('/api/analytics/visitor',{data:{visitorId:prior},timeout:6000}).catch(()=>{});
-    }
-    localStorage.setItem(CONSENT_KEY,value);
-  }catch{}
+    }catch{}
+  }
+  saveConsentChoice(value);
   if(typeof window!=='undefined')
     window.dispatchEvent(new CustomEvent('sk-analytics-consent',{detail:value}));
 }
@@ -45,11 +45,12 @@ export function resetAnalyticsConsent(){
   try{
     const id=localStorage.getItem(VISITOR_KEY);
     localStorage.removeItem(VISITOR_KEY);
-    localStorage.removeItem(CONSENT_KEY);
     sessionStorage.removeItem(SESSION_KEY);
     sessionStorage.removeItem(ATTR_KEY);
     if(id)api.delete('/api/analytics/visitor',{data:{visitorId:id},timeout:6000}).catch(()=>{});
   }catch{}
+  forgetConsentChoice();
+  allowConsentPromptAgain();
   if(typeof window!=='undefined')
     window.dispatchEvent(new CustomEvent('sk-analytics-consent',{detail:'unset'}));
 }
