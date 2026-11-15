@@ -11,13 +11,16 @@ const ALLOWED_EVENTS=new Set(['pageview','category_view','product_view','product
   'payment_client_confirmed']);
 const clean=s=>String(s||'').toLowerCase().replace(/[^a-z0-9 _.-]+/g,' ').trim().slice(0,64);
 function safeCampaign(s){
-  const value=clean(s);
-  if(/[0-9]{8,}|@/.test(value))return '';
-  return value;
+  const original=String(s||'');
+  if(/[0-9]{8,}|@/.test(original))return '';
+  return clean(original);
 }
 function uuid(){
-  return typeof crypto!=='undefined'&&crypto.randomUUID?crypto.randomUUID():
-    Array.from(crypto.getRandomValues(new Uint8Array(16)),n=>n.toString(16).padStart(2,'0')).join('');
+  if(crypto.randomUUID)return crypto.randomUUID();
+  const bytes=crypto.getRandomValues(new Uint8Array(16));
+  bytes[6]=(bytes[6]&15)|64;bytes[8]=(bytes[8]&63)|128;
+  const h=Array.from(bytes,n=>n.toString(16).padStart(2,'0')).join('');
+  return [h.slice(0,8),h.slice(8,12),h.slice(12,16),h.slice(16,20),h.slice(20)].join('-');
 }
 export function analyticsConsent(){
   try{return localStorage.getItem(CONSENT_KEY)||'unset';}catch{return 'unset';}
@@ -77,9 +80,10 @@ function attribution(){
     let host='';
     try{host=new URL(document.referrer).hostname.toLowerCase().slice(0,120);}catch{}
     const isSearch=/\b(google|bing|duckduckgo|yahoo)\b/.test(host);
+    const provider=['google','bing','duckduckgo','yahoo','instagram','facebook','pinterest','youtube','whatsapp','twitter'].find(name=>host.includes(name))||'';
     const isSocial=/\b(instagram|facebook|pinterest|youtube|twitter|t\.co|whatsapp)\b/.test(host);
     saved={
-      source:safeCampaign(params.get('utm_source')|| (isSearch?host.split('.')[0]:isSocial?host.split('.')[0]:host?'referral':'direct')),
+      source:safeCampaign(params.get('utm_source')||provider||(host?'referral':'direct')),
       medium:safeCampaign(params.get('utm_medium')||(isSearch?'organic':isSocial?'social':host?'referral':'none')),
       campaign:safeCampaign(params.get('utm_campaign')),
       keyword:safeCampaign(params.get('utm_term')||params.get('q')||params.get('search')),
