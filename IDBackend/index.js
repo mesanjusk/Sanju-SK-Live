@@ -22,6 +22,8 @@ import webhookRoutes from './routes/webhookRoutes.js';
 import leadRoutes from './routes/leadRoutes.js';
 import inboxRoutes from './routes/inboxRoutes.js';
 import videoRoutes from './routes/videoRoutes.js';
+import orderRoutes from './routes/orderRoutes.js';
+import {verifyToken} from './utils/authMiddleware.js';
 
 dotenv.config();
 
@@ -35,9 +37,49 @@ if (!MONGO_URI) {
 }
 
 app.use(cors());
-app.use(express.json({ limit: '20mb' }));
+app.use(express.json({ limit: '20mb', verify(req,_res,buffer){
+  if(req.originalUrl.startsWith('/api/orders/webhook'))req.rawBody=Buffer.from(buffer);
+} }));
 app.use(express.urlencoded({ extended: true, limit: '20mb' }));
 app.use('/uploads', express.static(path.join(path.resolve(), 'uploads')));
+
+// Enforce admin permissions server-side. Public catalog and lead submissions remain accessible.
+const guardedWrites=[
+  ['/api/listings','canManageProducts'],['/api/images','canManageProducts'],
+  ['/api/categories','canManageCategories'],['/api/subcategories','canManageCategories'],
+  ['/api/banners','canManageBanners'],['/api/videos','canManageProducts'],
+  ['/api/titles','canManageProducts'],['/api/prices','canManageProducts'],
+  ['/api/religions','canManageProducts'],['/api/confi','canManageSettings'],
+  ['/api/instas','canManageProducts']
+];
+function requireRole(req,res,next,permission){
+  verifyToken(req,res,()=>{
+    if(req.user?.role==='admin' || (req.user?.permissions?.[permission]===true)){
+      next();return;
+    }
+    res.status(403).json({message:'Not authorized for this action.'});
+  });
+}
+app.use((req,res,next)=>{
+  if(req.method==='OPTIONS')return next();
+  const pathname=req.path.toLowerCase();
+  if(pathname==='/api/users/login')return next();
+  if(pathname.startsWith('/api/users'))
+    return requireRole(req,res,next,'canManageUsers');
+  if(pathname.startsWith('/api/google-drive')||pathname.startsWith('/api/inbox')||
+     pathname.startsWith('/api/auto-reply'))
+    return requireRole(req,res,next,'canManageWhatsApp');
+  if((pathname.startsWith('/api/leads') && req.method!=='POST') ||
+     (pathname.startsWith('/api/leads/') && req.method==='POST'))
+    return requireRole(req,res,next,'canManageLeads');
+  if(pathname==='/api/analytics/summary')
+    return requireRole(req,res,next,'canViewAnalytics');
+  if(!['GET','HEAD'].includes(req.method)){
+    const found=guardedWrites.find(([prefix])=>pathname.startsWith(prefix));
+    if(found)return requireRole(req,res,next,found[1]);
+  }
+  next();
+});
 
 app.use('/api/images', imageRoutes);
 app.use('/api/listings', listingRoutes);
@@ -57,6 +99,7 @@ app.use('/api/webhook', webhookRoutes);
 app.use('/api/leads', leadRoutes);
 app.use('/api/inbox', inboxRoutes);
 app.use('/api/videos', videoRoutes);
+app.use('/api/orders', orderRoutes);
 
 app.get('/api/ping', (req, res) => res.status(200).send('✅ Backend is alive!'));
 

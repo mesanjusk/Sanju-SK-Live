@@ -1,5 +1,5 @@
 import express from 'express';
-import Users, { ROLE_DEFAULTS } from '../models/User.js';
+import Users, { ROLE_DEFAULTS, checkUserPassword, hashUserPassword } from '../models/User.js';
 import { v4 as uuid } from 'uuid';
 import { generateToken } from '../utils/authMiddleware.js';
 
@@ -10,9 +10,10 @@ router.post('/login', async (req, res) => {
   try {
     const user = await Users.findOne({ User_name });
     if (!user) return res.json({ status: 'notexist' });
-    if (Password !== user.Password) return res.json({ status: 'invalid', message: 'Invalid credentials.' });
+    if (!checkUserPassword(Password,user.Password)) return res.json({ status: 'invalid', message: 'Invalid credentials.' });
+    if(!user.Password.startsWith('scrypt$'))await user.save();
 
-    const token = generateToken({ id: user._id, username: user.User_name, role: user.role });
+    const token = generateToken({ id: user._id, username: user.User_name, role: user.role, permissions: user.permissions });
     res.json({
       status: 'exist',
       token,
@@ -45,7 +46,7 @@ router.post('/addUser', async (req, res) => {
 
 router.get('/GetUserList', async (req, res) => {
   try {
-    const data = await Users.find({});
+    const data = await Users.find({}).select('-Password');
     if (data.length) res.json({ success: true, result: data.filter((a) => a.User_name) });
     else res.json({ success: false, message: 'User Not found' });
   } catch (err) {
@@ -59,7 +60,7 @@ router.put('/updateUser/:id', async (req, res) => {
   const { User_name, Mobile_number, Password, role, permissions } = req.body;
   try {
     const updateData = { User_name, Mobile_number };
-    if (Password) updateData.Password = Password;
+    if (Password) updateData.Password = hashUserPassword(Password);
     if (role) {
       updateData.role = role;
       // If permissions explicitly provided use them, otherwise derive from role
@@ -68,7 +69,7 @@ router.put('/updateUser/:id', async (req, res) => {
       updateData.permissions = permissions;
     }
 
-    const user = await Users.findByIdAndUpdate(id, updateData, { new: true });
+    const user = await Users.findByIdAndUpdate(id, updateData, { new: true }).select('-Password');
     if (!user) return res.status(404).json({ success: false, message: 'User not found' });
     res.json({ success: true, result: user });
   } catch (error) {
@@ -79,7 +80,7 @@ router.put('/updateUser/:id', async (req, res) => {
 
 router.get('/:id', async (req, res) => {
   try {
-    const user = await Users.findById(req.params.id);
+    const user = await Users.findById(req.params.id).select('-Password');
     if (!user) return res.status(404).json({ success: false, message: 'User not found' });
     res.status(200).json({ success: true, result: user });
   } catch (error) {
@@ -89,7 +90,7 @@ router.get('/:id', async (req, res) => {
 
 router.get('/getUserByName/:username', async (req, res) => {
   try {
-    const user = await Users.findOne({ User_name: req.params.username });
+    const user = await Users.findOne({ User_name: req.params.username }).select('-Password');
     if (!user) return res.status(404).json({ success: false, message: 'User not found' });
     res.status(200).json({ success: true, result: user });
   } catch (error) {

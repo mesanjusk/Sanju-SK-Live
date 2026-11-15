@@ -1,0 +1,29 @@
+name: Commerce security and UI checks
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  commerce:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - name: Check backend syntax
+        run: |
+          node --version
+          node --check IDBackend/index.js
+          node --check IDBackend/routes/orderRoutes.js
+          node --check IDBackend/routes/userRoutes.js
+          node --check IDBackend/models/User.js
+          node --check IDBackend/models/Order.js
+      - name: Test server-authoritative pricing and payment verification
+        run: node --test IDBackend/tests/*.test.js
+      - name: Check frontend bundle
+        run: |
+          npm ci --prefix IDFrontend
+          npm run build --prefix IDFrontend

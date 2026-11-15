@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate, useLocation, Link } from 'react-router-dom';
-import { FaArrowLeft, FaChevronLeft, FaChevronRight, FaHeart, FaRegHeart, FaRegThumbsUp, FaThumbsUp, FaShare, FaWhatsapp, FaYoutube } from 'react-icons/fa';
+import { FaArrowLeft, FaChevronLeft, FaChevronRight, FaHeart, FaRegHeart, FaRegThumbsUp, FaThumbsUp, FaShare, FaWhatsapp, FaYoutube, FaEllipsisH, FaMagic } from 'react-icons/fa';
 import api from '../api';
 import SEO from '../components/SEO';
 import ProductStructuredData from '../components/ProductStructuredData';
@@ -20,8 +20,7 @@ const getPriceForQty = (product, qty) => {
   const matched = tiers.filter(t => qty >= Number(t.minQty) &&
     (!t.maxQty || qty <= Number(t.maxQty))).sort((a,b) => Number(b.minQty) - Number(a.minQty))[0];
   if (matched && Number(matched.price) > 0) return Number(matched.price);
-  const fallback = tiers.map(t => Number(t.price)).filter(p => p > 0);
-  if (fallback.length) return Math.min(...fallback);
+  if (tiers.length) return null; // Never price an unmatched quantity at a different tier.
   return Number(product?.price) > 0 ? Number(product.price) : null;
 };
 const getYouTubeId = url => {
@@ -166,6 +165,12 @@ export default function ProductDetail() {
     trackWhatsAppClick(id);
     saveEnquiryLead({productId:id,productName:product.title,message});
   };
+  const buyNow = () => {
+    if (price === null || total === null) return;
+    recordDesignInterest(product, 'enquire');
+    navigate('/checkout?product=' + encodeURIComponent(id) + '&qty=' + quantity,
+      {state:{product,quantity}});
+  };
   const share = () => {
     const url = 'https://www.sanjusk.in/products/' + id;
     if (navigator.share) navigator.share({title:product.title,url}).catch(()=>{});
@@ -210,6 +215,10 @@ export default function ProductDetail() {
                 <img src={image} alt={product.title+' custom design'} className="sk-pin-detail-image"
                 fetchPriority="high" decoding="async" /></button> :
                 <div className="sk-pin-no-image">✦</div>}
+              <button type="button" className="sk-pin-related-jump" aria-label="Explore visually similar designs"
+                onClick={()=>document.getElementById('sk-pin-related-heading')?.scrollIntoView({behavior:'smooth',block:'start'})}>
+                <FaMagic aria-hidden="true" />
+              </button>
               {images.length>1 && <div className="sk-pin-detail-visual-nav">
                 <button type="button" aria-label="Previous photo"
                   onClick={()=>setImgIdx((activeIndex-1+images.length)%images.length)}>
@@ -232,7 +241,33 @@ export default function ProductDetail() {
             )}
           </div>
           <section className="sk-pin-detail-info">
-            <span className="sk-pin-detail-seller">{categoryName || 'Made to order'} · SANJU SK Digital</span>
+            <div className="sk-pin-commerce-actions" aria-label="Design actions">
+              <button type="button" className={'sk-pin-commerce-icon'+(isLiked?' is-liked':'')}
+                aria-label={isLiked?'Unlike design':'Like design'} aria-pressed={isLiked}
+                onClick={()=>{recordDesignInterest(product,'like');toggleLiked(product);}}>
+                {isLiked?<FaHeart/>:<FaRegHeart/>}
+              </button>
+              <button type="button" className="sk-pin-commerce-icon"
+                aria-label="Share design" onClick={share}><FaShare/></button>
+              <details className="sk-pin-commerce-menu">
+                <summary aria-label="More design actions"><FaEllipsisH/></summary>
+                <div className="sk-pin-commerce-menu-panel">
+                  <button type="button" onClick={()=>toggleFavorite(product)}>
+                    {isSaved?'Remove from saved':'Save this design'}
+                  </button>
+                  <a href={waHref} target="_blank" rel="noopener noreferrer"
+                    onClick={enquire}>Request a custom quote</a>
+                </div>
+              </details>
+              <button type="button" className="sk-pin-buy-primary" onClick={buyNow}
+                disabled={price===null} title={price===null?'Request pricing before checkout':undefined}>
+                Buy now
+              </button>
+            </div>
+            <div className="sk-pin-creator">
+              <img src="/images/sk-digital-final.svg" alt="" width="33" height="33" />
+              <span>SANJU SK Digital <small>{categoryName || 'Custom made to order'}</small></span>
+            </div>
             <h1>{product.title}</h1>
             {product.description && <p>{product.description}</p>}
             <div className="sk-pin-detail-fields">
@@ -293,11 +328,7 @@ export default function ProductDetail() {
               allow="autoplay;encrypted-media" allowFullScreen/>
           </div>
         </div>}
-        <div className="sk-pin-detail-sticky-cta">
-          <a href={waHref} target="_blank" rel="noopener noreferrer" onClick={enquire}>
-            <FaWhatsapp/> Request a custom quote
-          </a>
-        </div>
+
         <MobileBottomNav variant="pinterest" onSearchClick={()=>navigate('/?search=1')}/>
       </div>
     </>
