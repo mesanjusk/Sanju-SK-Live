@@ -1,0 +1,47 @@
+/*
+ * One product = one stable image stage. Its ratio comes from the tallest
+ * full image in that product's photo set, irrespective of active thumbnail.
+ * The stage has a viewport-height ceiling so tall posters remain usable.
+ * Every photo is fully visible and letterboxed rather than cropped.
+ */
+.sk-public-site.sk-pin-detail-page .sk-pin-detail-visual {
+  box-sizing:border-box;
+  width:100%;
+  aspect-ratio:var(--sk-product-gallery-aspect, 1 / 1.35);
+  max-height:90svh;
+  min-height:0;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  position:relative;
+  overflow:hidden;
+}
+.sk-public-site.sk-pin-detail-page .sk-pin-detail-visual .sk-pin-detail-image-button {
+  box-sizing:border-box;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  width:100%;
+  height:100%;
+  min-width:0;
+  min-height:0;
+  padding:0;
+  background:transparent;
+  border:0;
+}
+.sk-public-site.sk-pin-detail-page .sk-pin-detail-visual .sk-pin-detail-image {
+  display:block;
+  width:100%;
+  height:100%;
+  min-width:0;
+  min-height:0;
+  max-width:100%;
+  max-height:100%;
+  object-fit:contain;
+  object-position:center;
+}
+@media(min-width:790px) {
+  .sk-public-site.sk-pin-detail-page .sk-pin-detail-visual {
+    max-height:min(80svh,850px);
+  }
+}
