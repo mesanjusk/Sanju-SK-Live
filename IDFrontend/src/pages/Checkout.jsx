@@ -2,6 +2,7 @@ import {useEffect,useMemo,useState} from 'react';
 import {Link,useLocation,useNavigate,useSearchParams} from 'react-router-dom';
 import {FaArrowLeft,FaWhatsapp,FaLock,FaCheckCircle,FaChevronDown} from 'react-icons/fa';
 import api from '../api';
+import {trackAnalyticsEvent} from '../hooks/useAnalytics';
 import SEO from '../components/SEO';
 import '../styles/pinterest-responsive-2026.css';
 
@@ -56,6 +57,9 @@ export default function Checkout(){
   const [form,setForm]=useState({name:'',phone:'',address:'',instructions:''});
   const [custom,setCustom]=useState({size:'',material:'',deadline:'',artworkNotes:''});
   const [busy,setBusy]=useState(false),[error,setError]=useState(''),[completion,setCompletion]=useState(null);
+  useEffect(()=>{
+    if(productId)trackAnalyticsEvent('checkout_start',{productId});
+  },[productId]);
 
   useEffect(()=>{
     let active=true;
@@ -123,6 +127,7 @@ export default function Checkout(){
     const r=await api.post('/api/orders/enquiries',
       {productId,quantity,customer:buyer,customization},{timeout:25000});
     if(!r.data?.orderRef||!r.data?.trackingToken)throw Error('Order reference missing.');
+    trackAnalyticsEvent('quote_request',{productId});
     setCompletion({kind:'quote',ref:r.data.orderRef,token:r.data.trackingToken});
   }
   async function submit(event){
@@ -156,6 +161,7 @@ export default function Checkout(){
               razorpay_signature:details.razorpay_signature
             },{timeout:25000});
             if(confirm.data?.verified&&confirm.data?.status==='paid'){
+              trackAnalyticsEvent('payment_client_confirmed',{productId});
               setCompletion({kind:'paid',ref:orderRef,token:trackingToken});setError('');
             }else setError('Payment is pending verification. Do not pay twice. Contact us with your payment reference.');
           }catch{
