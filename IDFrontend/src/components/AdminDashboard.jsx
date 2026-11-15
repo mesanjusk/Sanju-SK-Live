@@ -37,6 +37,7 @@ import WhatsAppBotManager from '../pages/admin/WhatsAppBotManager';
 import LeadsManager from '../pages/admin/LeadsManager';
 import InboxManager from '../pages/admin/InboxManager';
 import VideoManager from '../pages/admin/VideoManager';
+import OrdersManager from '../pages/admin/OrdersManager';
 import CreateListing from './CreateListing';
 import api from '../api';
 import { StatCard, SurfaceCard, PageContainer } from './admin/AdminUiKit';
@@ -66,6 +67,7 @@ const theme = createTheme({
 const ALL_NAV = [
   { key: 'overview',      label: 'Dashboard',     Icon: DashboardIcon,       permission: 'canViewDashboard' },
   { key: 'analytics',     label: 'Analytics',     Icon: BarChartIcon,        permission: 'canViewAnalytics' },
+  { key: 'orders',        label: 'Orders & payments', Icon: AttachMoneyIcon, permission: 'canManageProducts' },
   { key: 'leads',         label: 'Leads',         Icon: LeaderboardIcon,     permission: 'canManageLeads' },
   { key: 'inbox',         label: 'WA Inbox',      Icon: InboxIcon,           permission: 'canManageWhatsApp' },
   { key: 'listings',      label: 'Products',      Icon: Inventory2Icon,      permission: 'canManageProducts' },
@@ -175,7 +177,8 @@ export default function AdminDashboard() {
   // Auth guard
   useEffect(() => {
     const user = localStorage.getItem('User_name');
-    if (!user) { window.location.replace('/login'); }
+    const token = localStorage.getItem('authToken');
+    if (!user || !token) { window.location.replace('/login'); }
   }, []);
 
   // If current tab is not accessible, switch to first available
@@ -215,6 +218,7 @@ export default function AdminDashboard() {
     switch (activeTab) {
       case 'overview':      return <Overview onNavigate={handleTab} userRole={userRole} />;
       case 'analytics':     return <PageContainer title="Analytics" breadcrumb={['Admin', 'Analytics']}><AnalyticsPage /></PageContainer>;
+      case 'orders':        return <PageContainer title="Orders" breadcrumb={['Admin', 'Orders']}><OrdersManager /></PageContainer>;
       case 'leads':         return <PageContainer title="Leads" breadcrumb={['Admin', 'Leads']}><LeadsManager /></PageContainer>;
       case 'listings':      return <CreateListing />;
       case 'videos':        return <VideoManager />;
