@@ -54,12 +54,13 @@ export default function Home() {
   const [aiIds,setAiIds] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [selectedSubcategory, setSelectedSubcategory] = useState(null);
-  browseRef.current={categoryId:idOf(selectedCategory),subcategoryId:idOf(selectedSubcategory),query:searchTerm};
+
   useEffect(()=>()=>{
     try{sessionStorage.setItem(RETURN_KEY,JSON.stringify({...browseRef.current,at:Date.now()}));
       sessionStorage.setItem('sk-home-scroll-position',String(Math.max(0,window.scrollY)));}catch{}
   },[]);
   const [searchTerm, setSearchTerm] = useState(returnView?.query||'');
+  browseRef.current={categoryId:idOf(selectedCategory),subcategoryId:idOf(selectedSubcategory),query:searchTerm};
   const [searchOpen, setSearchOpen] = useState(() =>
     typeof window !== 'undefined' && new URLSearchParams(window.location.search).has('search'));
   const handleSearchVisibility = useCallback((open) => {
