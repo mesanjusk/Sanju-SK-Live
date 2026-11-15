@@ -2,7 +2,7 @@ import { useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } f
 import { useLocation, useNavigate } from 'react-router-dom';
 import { FaArrowRight, FaChevronDown, FaPlay } from 'react-icons/fa';
 import api from '../api';
-import {trackAnalyticsEvent,resetAnalyticsConsent} from '../hooks/useAnalytics';
+import {trackAnalyticsEvent} from '../hooks/useAnalytics';
 import seo from '../config/local-seo.json';
 import PinterestStorefrontHeader from './mobile/PinterestStorefrontHeader';
 import EndlessPinterestFeed from './mobile/EndlessPinterestFeed';
@@ -441,9 +441,9 @@ export default function Home() {
           <a href="/flex-banner-printing-gondia/">Flex printing</a>
           <a href="/track-order">Track order</a>
           <a href="/order-information">Ordering information</a>
-          <button type="button" onClick={resetAnalyticsConsent}>
+          <a href="/order-information#analytics-preferences">
             Analytics preferences
-          </button>
+          </a>
         </nav>
             <ServiceGallery />
             {videos.length > 0 && (

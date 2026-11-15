@@ -502,3 +502,41 @@
   .sk-order-tracking{padding:0 8px 35px;}
   .sk-tracking-content .sk-checkout-panel{padding:16px;}
 }
+
+
+/* Optional analytics preferences live on the information page, never as a modal. */
+.sk-public-site .sk-inline-analytics-preferences {
+  scroll-margin-top: 90px;
+  border-top: 1px solid #e9e9e9;
+  border-bottom: 1px solid #e9e9e9;
+  margin: 18px 0;
+  padding: 12px 0 18px;
+}
+.sk-public-site .sk-analytics-choice-inline {
+  display: flex;
+  align-items: stretch;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin: 14px 0;
+}
+.sk-public-site .sk-analytics-choice-inline button {
+  font: inherit;
+  font-weight: 750;
+  font-size: 13px;
+  color: #303030;
+  background: #f5f5f5;
+  border: 1px solid #dedede;
+  border-radius: 999px;
+  min-height: 44px;
+  padding: 10px 15px;
+  cursor: pointer;
+}
+.sk-public-site .sk-analytics-choice-inline button[aria-pressed="true"] {
+  background: #202020;
+  color: #fff;
+  border-color: #202020;
+}
+.sk-public-site .sk-analytics-choice-inline button:focus-visible {
+  outline: 3px solid #b986d8;
+  outline-offset: 2px;
+}

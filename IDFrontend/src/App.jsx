@@ -6,7 +6,6 @@ import LoadingSkeleton from './components/common/LoadingSkeleton';
 import { routeMeta } from './config/routeMeta';
 import NotFound from './pages/NotFound';
 import { useAnalytics } from './hooks/useAnalytics';
-import AnalyticsConsent from './components/AnalyticsConsent';
 import { checkAndApplyAccessToken } from './components/ScrollGatePopup';
 import CallReminder from './components/mobile/CallReminder';
 import PinterestDesktopRail from './components/mobile/PinterestDesktopRail';
@@ -163,7 +162,6 @@ function AppRoutes() {
         </Routes>
       </Suspense>
       {!isPrivateRoute && <CallReminder />}
-      {!isPrivateRoute && <AnalyticsConsent />}
       </div>
     </PageWithSeo>
   );
