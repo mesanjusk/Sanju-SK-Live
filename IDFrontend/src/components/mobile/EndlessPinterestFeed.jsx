@@ -4,6 +4,8 @@ import { itemKey } from './endlessOrder.mjs';
 import { uniqueDesigns } from './uniqueDesigns.mjs';
 
 const BATCH_SIZE = 18;
+// Keep the progressively loaded depth when navigating Home → pin → Home.
+let rememberedVisibleCount = BATCH_SIZE;
 
 /**
  * Display each real catalog design once per filter view. Unlike the old
@@ -12,7 +14,8 @@ const BATCH_SIZE = 18;
  */
 export default function EndlessPinterestFeed({ products = [], categoryById, whatsappNumber }) {
   const uniqueProducts = useMemo(() => uniqueDesigns(products), [products]);
-  const [visibleCount, setVisibleCount] = useState(() => Math.min(BATCH_SIZE, uniqueProducts.length));
+  const [visibleCount, setVisibleCount] = useState(() =>
+    Math.min(Math.max(BATCH_SIZE, rememberedVisibleCount), uniqueProducts.length));
   const tailRef = useRef(null);
   const loadingRef = useRef(false);
   const remaining = Math.max(0, uniqueProducts.length - visibleCount);
@@ -25,6 +28,9 @@ export default function EndlessPinterestFeed({ products = [], categoryById, what
   }, [remaining, uniqueProducts.length]);
 
   useEffect(() => { loadingRef.current = false; }, [visibleCount]);
+  useEffect(() => {
+    rememberedVisibleCount = Math.max(rememberedVisibleCount, visibleCount);
+  }, [visibleCount]);
 
   useEffect(() => {
     if (!remaining || !tailRef.current || !('IntersectionObserver' in window)) return undefined;

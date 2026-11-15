@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate, useLocation, Link } from 'react-router-dom';
-import { FaArrowLeft, FaChevronLeft, FaChevronRight, FaChevronDown, FaHeart, FaRegHeart, FaRegThumbsUp, FaThumbsUp, FaShare, FaWhatsapp, FaYoutube, FaEllipsisH, FaMagic } from 'react-icons/fa';
+import { FaArrowLeft, FaChevronLeft, FaChevronRight, FaHeart, FaRegHeart, FaRegThumbsUp, FaThumbsUp, FaShare, FaWhatsapp, FaYoutube, FaEllipsisH, FaMagic } from 'react-icons/fa';
 import api from '../api';
 import SEO from '../components/SEO';
 import ProductStructuredData from '../components/ProductStructuredData';
@@ -37,7 +37,6 @@ export default function ProductDetail() {
   const [loadError, setLoadError] = useState(false);
   const [reloadKey, setReloadKey] = useState(0);
   const [imgIdx, setImgIdx] = useState(0);
-  const [quantity, setQuantity] = useState(25);
   const [categoryName, setCategoryName] = useState('');
   const [related, setRelated] = useState([]);
   const [relatedSeed] = useState(freshFeedSeed);
@@ -61,7 +60,6 @@ export default function ProductDetail() {
     setImgIdx(0);
     setRelated([]);
     window.scrollTo({top:0,behavior:'auto'});
-    if (preview?.quantityPricing?.length) setQuantity(Number(preview.quantityPricing[0].minQty) || 25);
     const fetchProduct = async () => {
       for (let attempt = 0; attempt < 3; attempt += 1) {
         try {
@@ -72,9 +70,6 @@ export default function ProductDetail() {
           recordDesignInterest(response.data);
           setLoading(false);
           setLoadError(false);
-          if (response.data.quantityPricing?.length) {
-            setQuantity(Number(response.data.quantityPricing[0].minQty) || 25);
-          }
           return;
         } catch (error) {
           if (!active) return;
@@ -150,12 +145,13 @@ export default function ProductDetail() {
   const image = images[activeIndex] || null;
   const isSaved = favorites.some(item=>String(item._id)===String(product._id));
   const isLiked = liked.some(item=>String(item._id)===String(product._id));
-  const price = getPriceForQty(product,quantity);
-  const total = price !== null ? price*quantity : null;
   const tiers = Array.isArray(product.quantityPricing) ? product.quantityPricing : [];
+  const firstTier = [...tiers].sort((a,b)=>Number(a.minQty)-Number(b.minQty))[0];
+  const initialQuantity = Math.max(1, Number(firstTier?.minQty)||1);
+  const price = getPriceForQty(product,initialQuantity);
   const ytId = getYouTubeId(product.youtubeUrl);
   const message = 'Hi SANJU SK Digital, please quote for *' + product.title + '*\n' +
-    'Design ID: ' + id + '\nQuantity: ' + quantity + '\n' +
+    'Design ID: ' + id + '\n' +
     (price !== null ? 'Indicative unit price: ₹' + price + '\n' : '') +
     (image ? 'Design photo: ' + image + '\n' : '') +
     'Design link: https://www.sanjusk.in/products/' + id;
@@ -165,10 +161,9 @@ export default function ProductDetail() {
     saveEnquiryLead({productId:id,productName:product.title,message});
   };
   const buyNow = () => {
-    if (price === null || total === null) return;
     recordDesignInterest(product, 'enquire');
-    navigate('/checkout?product=' + encodeURIComponent(id) + '&qty=' + quantity,
-      {state:{product,quantity}});
+    navigate('/checkout?product=' + encodeURIComponent(id),
+      {state:{product}});
   };
   const share = () => {
     const url = 'https://www.sanjusk.in/products/' + id;
@@ -258,8 +253,7 @@ export default function ProductDetail() {
                     onClick={enquire}>Request a custom quote</a>
                 </div>
               </details>
-              <button type="button" className="sk-pin-buy-primary" onClick={buyNow}
-                disabled={price===null} title={price===null?'Request pricing before checkout':undefined}>
+              <button type="button" className="sk-pin-buy-primary" onClick={buyNow}>
                 Buy now
               </button>
             </div>
@@ -268,53 +262,15 @@ export default function ProductDetail() {
               <span>SANJU SK Digital <small>{categoryName || 'Custom made to order'}</small></span>
             </div>
             <h1>{product.title}</h1>
-            <details className="sk-pin-product-specs" id="sk-pin-product-specs">
-              <summary className="sk-pin-product-specs-summary">
-                <span>Product details &amp; quantity</span>
-                <span className="sk-pin-product-specs-price">
-                  {price !== null ? '₹' + price.toLocaleString('en-IN') + ' / piece' : 'Price on request'}
-                  <FaChevronDown aria-hidden="true" />
-                </span>
-              </summary>
-              <div className="sk-pin-product-specs-content">
-                {product.description && <p>{product.description}</p>}
-            <div className="sk-pin-detail-fields">
-              {product.size && <span>Size: {String(product.size)}</span>}
-              {product.badge && <span>{String(product.badge)}</span>}
-              {product.religions && <span>{String(product.religions)}</span>}
-            </div>
-            <p className="sk-pin-detail-price">
-              {price !== null ? <><b>₹{price.toLocaleString('en-IN')}</b> per piece</> :
-                <b>Price on request</b>}
-            </p>
-            <div className="sk-pin-detail-qty">
-              <h2>Custom quantity</h2>
-              {tiers.length>0 && <div>
-                {tiers.map((tier,i)=><button type="button" key={i}
-                  className={quantity>=Number(tier.minQty)&&(!tier.maxQty||quantity<=Number(tier.maxQty))?'is-current':''}
-                  onClick={()=>setQuantity(Number(tier.minQty)||25)}>
-                  {tier.minQty}{tier.maxQty?'–'+tier.maxQty:'+'} pcs
-                </button>)}
-              </div>}
-              <label className="sk-pin-detail-qty-input">Pieces
-                <input type="number" min="1" max="100000" value={quantity} step="1"
-                  onChange={event=>setQuantity(Math.min(100000,Math.max(1,Number(event.target.value)||1)))} />
-              </label>
-              {total!==null && <p>Estimated total: <strong>₹{total.toLocaleString('en-IN')}</strong> · confirm final quotation</p>}
-            </div>
-            <a href={waHref} target="_blank" rel="noopener noreferrer" className="sk-pin-detail-quote"
-              onClick={enquire}><FaWhatsapp/> Request a quote</a>
             {ytId && <button type="button" className="sk-pin-detail-video-btn"
               onClick={()=>setShowVideo(true)}><FaYoutube/> Watch design video</button>}
             {(product.model3dUrl||product.modelUrl||product.glbUrl) && (
               <details className="sk-pin-detail-model">
-                <summary>Explore interactive 3D view</summary>
+                <summary>View this design in 3D</summary>
                 <ProductStage images={images} title={product.title} activeIndex={activeIndex}
                   onIndexChange={setImgIdx} modelUrl={product.model3dUrl||product.modelUrl||product.glbUrl} />
               </details>
             )}
-              </div>
-            </details>
           </section>
         </div>
         {related.length>0 && <section className="sk-pin-detail-related" aria-labelledby="sk-pin-related-heading">

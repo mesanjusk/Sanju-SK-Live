@@ -292,3 +292,123 @@
   .sk-pin-detail-info .sk-pin-creator{margin-top:3px;}
   .sk-pin-detail-info .sk-pin-detail-qty{margin-top:8px;}
 }
+
+
+/* Nov 2026: three-dot card menu replaced by one bold unit-price link on right. */
+.sk-public-site .sk-pin-under {
+  display:flex;align-items:center;justify-content:space-between;gap:6px;
+  padding:8px 3px 0;min-height:28px;
+}
+.sk-public-site .sk-pin-card-text{flex:1 1 auto;min-width:0;}
+.sk-public-site .sk-pin-card-title{
+  display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;
+  overflow:hidden;line-height:1.35;font-size:12px;
+}
+.sk-public-site .sk-pin-card-unit-price{
+  display:inline-flex;flex:0 0 auto;align-items:center;justify-content:flex-end;
+  gap:1px;min-height:32px;padding:3px 0 3px 4px;color:#202020;
+  font-size:14px;text-decoration:none;white-space:nowrap;
+}
+.sk-public-site .sk-pin-card-unit-price strong{font-weight:850;font-variant-numeric:tabular-nums;}
+.sk-public-site .sk-pin-card-unit-price span{font-weight:850;}
+.sk-public-site .sk-pin-card-unit-price .sk-pin-ask-price{
+  font-size:11px;color:#5c5c5c;white-space:nowrap;font-weight:700;
+}
+
+/* Fast, single-column Buy Now screen — only ordering essentials at first glance. */
+.sk-public-site .sk-commerce-checkout-compact{
+  background:#fff;color:#202020;padding:0 10px 38px;min-height:100vh;
+}
+.sk-public-site .sk-commerce-checkout-compact .sk-checkout-header,
+.sk-public-site .sk-commerce-checkout-compact .sk-checkout-layout{
+  width:100%;max-width:550px;margin-left:auto;margin-right:auto;
+}
+.sk-public-site .sk-commerce-checkout-compact .sk-checkout-header{
+  min-height:58px;padding:9px 2px 12px;gap:12px;
+}
+.sk-public-site .sk-commerce-checkout-compact .sk-checkout-header strong{font-size:17px;}
+.sk-public-site .sk-commerce-checkout-compact .sk-checkout-layout{
+  display:flex;flex-direction:column;gap:14px;margin-top:15px;
+}
+.sk-public-site .sk-commerce-checkout-compact .sk-checkout-panel{
+  width:100%;min-width:0;padding:15px 16px;border-radius:19px;
+  box-shadow:none;border:1px solid #e9e9e9;
+}
+.sk-public-site .sk-commerce-checkout-compact .sk-checkout-panel h1{
+  font-size:17px;line-height:1.3;font-weight:800;margin:0 0 5px;
+}
+.sk-public-site .sk-commerce-checkout-compact .sk-checkout-panel h2{
+  font-size:15px;margin:0 0 12px;line-height:1.3;font-weight:850;
+}
+.sk-public-site .sk-commerce-checkout-compact .sk-checkout-product{
+  display:flex;align-items:center;gap:14px;margin-bottom:6px;
+}
+.sk-public-site .sk-commerce-checkout-compact .sk-checkout-product img{
+  width:78px;height:92px;object-fit:contain;border-radius:13px;flex:0 0 78px;
+}
+.sk-public-site .sk-commerce-checkout-compact .sk-checkout-product p{
+  font-size:12px;line-height:1.35;margin:2px 0;color:#757575;
+}
+.sk-public-site .sk-checkout-quantity{padding:16px 0 0;margin-top:12px;border-top:1px solid #efefef;}
+.sk-public-site .sk-checkout-quantity-tiers{
+  display:flex;align-items:center;flex-wrap:wrap;gap:7px;margin:0 0 13px;
+}
+.sk-public-site .sk-checkout-quantity-tiers button{
+  display:inline-flex;align-items:center;justify-content:center;
+  border-radius:999px;background:#f1f1f1;color:#222;
+  font-size:12px;font-weight:750;padding:9px 12px;min-height:36px;
+}
+.sk-public-site .sk-checkout-quantity-tiers button.is-current{
+  background:#202020;color:#fff;
+}
+.sk-public-site .sk-checkout-quantity-input{
+  display:flex;align-items:center;gap:12px;font-size:13px;font-weight:750;
+  margin:0 0 11px;
+}
+.sk-public-site .sk-checkout-quantity-input input{
+  max-width:118px;height:42px;min-height:42px;padding:8px 11px;
+  border-radius:13px;border:1px solid #d9d9d9;font-size:16px;
+}
+.sk-public-site .sk-checkout-total{
+  display:flex;justify-content:space-between;align-items:baseline;gap:8px;
+  border-top:1px solid #efefef;padding-top:12px;
+}
+.sk-public-site .sk-checkout-total span{font-size:13px;color:#666;}
+.sk-public-site .sk-checkout-total strong{
+  font-size:20px;line-height:1.2;color:#202020;font-weight:900;
+}
+.sk-public-site .sk-checkout-extra{
+  margin-top:13px;padding-top:12px;border-top:1px solid #f0f0f0;
+}
+.sk-public-site .sk-checkout-extra summary{
+  cursor:pointer;display:flex;justify-content:space-between;align-items:center;
+  gap:8px;list-style:none;font-size:12px;font-weight:700;color:#777;
+}
+.sk-public-site .sk-checkout-extra summary::-webkit-details-marker{display:none;}
+.sk-public-site .sk-checkout-extra summary svg{font-size:12px;}
+.sk-public-site .sk-checkout-extra[open] summary svg{transform:rotate(180deg);}
+.sk-public-site .sk-checkout-extra p{font-size:12px;color:#666;margin:9px 0 0;line-height:1.5;}
+.sk-public-site .sk-checkout-extra textarea{
+  display:block;width:100%;margin-top:11px;padding:10px 12px;border-radius:12px;
+  border:1px solid #ddd;resize:vertical;
+}
+.sk-public-site .sk-commerce-checkout-compact .sk-checkout-customer form{gap:11px;}
+.sk-public-site .sk-commerce-checkout-compact .sk-checkout-customer label{
+  gap:5px;font-size:12px;
+}
+.sk-public-site .sk-commerce-checkout-compact .sk-checkout-customer input,
+.sk-public-site .sk-commerce-checkout-compact .sk-checkout-customer textarea{
+  font-size:14px;min-height:43px;border-radius:11px;padding:9px 12px;
+}
+.sk-public-site .sk-commerce-checkout-compact .sk-checkout-customer .sk-checkout-note{
+  margin:4px 0 0;font-size:11px;line-height:1.5;
+}
+.sk-public-site .sk-commerce-checkout-compact .sk-checkout-whatsapp{
+  margin-top:13px;font-size:14px;min-height:46px;
+}
+@media(max-width:420px){
+  .sk-public-site .sk-commerce-checkout-compact .sk-checkout-panel{padding:13px;}
+  .sk-public-site .sk-checkout-quantity-tiers button{padding:8px 10px;font-size:11px;}
+  .sk-public-site .sk-pin-card-unit-price{font-size:12px;min-height:28px;}
+  .sk-public-site .sk-pin-card-title{font-size:11px;}
+}

@@ -6,6 +6,7 @@ import './pinterest-storefront.css';
 
 const DISMISSED_KEY = 'sk_help_call_used';
 const FIRST_SHOW_DELAY = 8000;
+const VISIBLE_DURATION = 4500;
 
 // One unobtrusive contact control: rounded "Need help?" label above a circular call icon.
 export default function CallReminder({ phoneNumber = seo.phone }) {
@@ -22,9 +23,12 @@ export default function CallReminder({ phoneNumber = seo.phone }) {
   }, [phoneNumber]);
 
   useEffect(() => {
-    if (dismissed) return undefined;
-    const timer = window.setTimeout(() => setVisible(true), FIRST_SHOW_DELAY);
-    return () => window.clearTimeout(timer);
+    if (dismissed || pathname.startsWith('/checkout') ||
+      pathname.startsWith('/admin') || pathname.startsWith('/login')) return undefined;
+    // A short, one-time popup per storefront visit – never a permanent overlay.
+    const show = window.setTimeout(() => setVisible(true), FIRST_SHOW_DELAY);
+    const hide = window.setTimeout(() => setVisible(false), FIRST_SHOW_DELAY + VISIBLE_DURATION);
+    return () => {window.clearTimeout(show);window.clearTimeout(hide);setVisible(false);};
   }, [dismissed]);
 
   const onCall = () => {

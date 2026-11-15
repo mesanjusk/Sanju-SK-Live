@@ -5,6 +5,8 @@ import api from '../api';
 import seo from '../config/local-seo.json';
 import PinterestStorefrontHeader from './mobile/PinterestStorefrontHeader';
 import EndlessPinterestFeed from './mobile/EndlessPinterestFeed';
+import {readCatalogRows,isCatalogCacheFresh,rememberCatalogRows,clearCatalogCache}
+  from './mobile/catalogSessionCache.mjs';
 import { uniqueDesigns } from './mobile/uniqueDesigns.mjs';
 import {freshFeedSeed,getDesignInterests,rankDesigns,productId,categoryId} from './mobile/interestRank.mjs';
 import './mobile/festive-home.css';
@@ -18,20 +20,25 @@ import LocalContactFooter from './LocalContactFooter';
 import ServiceGallery from './ServiceGallery';
 
 const idOf = (value) => String(value?._id || value?.category_uuid || value || '');
+// Stable while visiting product pages; reset/randomized on each full reload.
+const HOME_FEED_SEED=freshFeedSeed();
 
 export default function Home() {
   const navigate = useNavigate();
   const location = useLocation();
-  const [listings, setListings] = useState([]);
-  const [categories, setCategories] = useState([]);
-  const [subcategories, setSubcategories] = useState([]);
-  const [videos, setVideos] = useState([]);
+  const [listings, setListings] = useState(() => readCatalogRows('listings') || []);
+  const [categories, setCategories] = useState(() => readCatalogRows('categories') || []);
+  const [subcategories, setSubcategories] = useState(() => readCatalogRows('subcategories') || []);
+  const [videos, setVideos] = useState(() => readCatalogRows('videos') || []);
   const [config, setConfig] = useState({});
   // Load categories and products independently, but do not expose clickable
   // category controls until both API responses are ready.
-  const [catalogStatus, setCatalogStatus] = useState({ listings: 'loading', categories: 'loading' });
+  const [catalogStatus, setCatalogStatus] = useState(() => ({
+    listings: readCatalogRows('listings') !== null ? 'ready' : 'loading',
+    categories: readCatalogRows('categories') !== null ? 'ready' : 'loading',
+  }));
   const [catalogRetry, setCatalogRetry] = useState(0);
-  const [feedSeed] = useState(freshFeedSeed);
+  const [feedSeed] = useState(() => HOME_FEED_SEED);
   const [interests,setInterests] = useState(getDesignInterests);
   const [aiIds,setAiIds] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState(null);
@@ -72,33 +79,47 @@ export default function Home() {
     // Render's cold-start can delay either endpoint. One bounded retry avoids
     // treating slow backend responses as empty categories or zero products.
     const loadCatalogPart = async (key, url, setRows) => {
+      // On returning from a pin, reuse the warmed catalog immediately.
+      if(catalogRetry===0 && isCatalogCacheFresh(key)) return;
       for (let attempt = 0; attempt < 2; attempt += 1) {
         try {
           const response = await api.get(url, { timeout: 14000 });
           if (!active) return;
           const rows = Array.isArray(response.data) ? response.data : response.data?.result;
           if (!Array.isArray(rows)) throw new Error('Unexpected catalog API response');
+          rememberCatalogRows(key, rows);
           setRows(rows);
           setCatalogStatus(previous => ({ ...previous, [key]: 'ready' }));
           return;
         } catch {
           if (!active) return;
           if (attempt === 0) await pause(1600);
-          else setCatalogStatus(previous => ({ ...previous, [key]: 'error' }));
+          else setCatalogStatus(previous => ({
+            ...previous,
+            [key]: readCatalogRows(key) !== null ? 'ready' : 'error'
+          }));
         }
       }
     };
     loadCatalogPart('listings', '/api/listings', setListings);
     loadCatalogPart('categories', '/api/categories', setCategories);
-    api.get('/api/subcategories', { timeout: 12000 })
-      .then(res => { if (active) setSubcategories(Array.isArray(res.data) ? res.data : res.data?.result || []); })
-      .catch(() => {});
+    if(!isCatalogCacheFresh('subcategories'))api.get('/api/subcategories', { timeout: 12000 })
+      .then(res => {
+        if (!active) return;
+        const rows=Array.isArray(res.data) ? res.data : res.data?.result || [];
+        rememberCatalogRows('subcategories',rows);
+        setSubcategories(rows);
+      }).catch(() => {});
     api.get('/api/confi/GetConfiList', { timeout: 12000 })
       .then(res => { if (active) setConfig(res.data?.result?.[0] || {}); })
       .catch(() => {});
-    api.get('/api/videos', { timeout: 12000 })
-      .then(res => { if (active) setVideos(Array.isArray(res.data) ? res.data : res.data?.result || []); })
-      .catch(() => {});
+    if(!isCatalogCacheFresh('videos'))api.get('/api/videos', { timeout: 12000 })
+      .then(res => {
+        if (!active) return;
+        const rows=Array.isArray(res.data) ? res.data : res.data?.result || [];
+        rememberCatalogRows('videos',rows);
+        setVideos(rows);
+      }).catch(() => {});
     return () => {
       active = false;
       pendingTimers.forEach(window.clearTimeout);
@@ -109,6 +130,7 @@ export default function Home() {
   const catalogFailed = catalogStatus.listings === 'error' || catalogStatus.categories === 'error';
   const catalogPending = catalogStatus.listings === 'loading' || catalogStatus.categories === 'loading';
   const retryCatalog = () => {
+    clearCatalogCache();
     setSelectedCategory(null);
     setSelectedSubcategory(null);
     setCatalogStatus({ listings: 'loading', categories: 'loading' });
@@ -211,6 +233,23 @@ export default function Home() {
     return ()=>{window.clearTimeout(timer);controller.abort();};
   },[catalogReady,distinctProducts,feedSeed,interests,categoryById]);
 
+
+  // Keep the reader's position after leaving a pin; the catalog is already cached.
+  useEffect(() => {
+    if(!catalogReady || !listings.length) return undefined;
+    let saved=0;
+    try {
+      saved=Number(sessionStorage.getItem('sk-home-scroll-position')||0);
+      sessionStorage.removeItem('sk-home-scroll-position');
+    }catch{}
+    if(!Number.isFinite(saved)||saved<100)return undefined;
+    let timer=0;
+    const frame=window.requestAnimationFrame(()=>{
+      window.scrollTo({top:saved,behavior:'instant'});
+      timer=window.setTimeout(()=>window.scrollTo({top:saved,behavior:'instant'}),120);
+    });
+    return ()=>{window.cancelAnimationFrame(frame);window.clearTimeout(timer);};
+  },[catalogReady]);
 
   // Scroll-aware shopping bar: disappears as customers browse down, reappears
   // as they scroll up or approach the start/end. No floating More/Top buttons.
