@@ -48,6 +48,8 @@ const Favorites      = lazy(() => import('./components/Favorites'));
 const ProductListing = lazy(() => import('./pages/ProductListing'));
 const ProductDetail  = lazy(() => import('./pages/ProductDetail'));
 const Checkout = lazy(() => import('./pages/Checkout'));
+const TrackOrder = lazy(() => import('./pages/TrackOrder'));
+const OrderInformation = lazy(() => import('./pages/OrderInformation'));
 
 const PageWithSeo = ({ children }) => {
   const { pathname } = useLocation();
@@ -150,6 +152,8 @@ function AppRoutes() {
           {/* Direct Buy Now checkout; legacy cart remains a catalog redirect. */}
           <Route path="/cart"      element={<Navigate to="/products" replace />} />
           <Route path="/checkout"  element={<Checkout />} />
+          <Route path="/track-order" element={<TrackOrder />} />
+          <Route path="/order-information" element={<OrderInformation />} />
           <Route path="/home"      element={<Navigate to={localStorage.getItem('User_name') ? '/admin' : '/'} replace />} />
           <Route path="/product"   element={<Navigate to="/products" replace />} />
           <Route path="/all-listing" element={<Navigate to="/allListing" replace />} />
