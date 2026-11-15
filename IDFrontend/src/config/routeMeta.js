@@ -66,6 +66,15 @@ export const routeMeta = {
     description: 'Review selected products before placing your order.',
     noIndex: true,
   },
+  '/track-order': {
+    title: 'Track Your Printing Order',
+    description: 'Privately check your SANJU SK Digital production and artwork approval status.',
+    noIndex: true,
+  },
+  '/order-information': {
+    title: 'Ordering and Delivery Information',
+    description: 'Learn how SANJU SK Digital handles custom order quotations, artwork approval and delivery.',
+  },
   '/checkout': {
     title: 'Checkout',
     description: 'Complete your order safely with secure checkout options.',
