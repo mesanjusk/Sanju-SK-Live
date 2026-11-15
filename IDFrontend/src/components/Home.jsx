@@ -1,4 +1,5 @@
-import { useDeferredValue, useEffect, useMemo, useState } from 'react';
+import { useCallback, useDeferredValue, useEffect, useMemo, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { FaArrowRight, FaChevronDown, FaPlay } from 'react-icons/fa';
 import api from '../api';
 import seo from '../config/local-seo.json';
@@ -8,7 +9,6 @@ import { uniqueDesigns } from './mobile/uniqueDesigns.mjs';
 import {freshFeedSeed,getDesignInterests,rankDesigns,productId,categoryId} from './mobile/interestRank.mjs';
 import './mobile/festive-home.css';
 import './mobile/pinterest-storefront.css';
-import { getCategoryTheme } from './mobile/categoryThemes';
 import CategorySeoBlurb from './mobile/CategorySeoBlurb';
 import VideoFeedCard from './mobile/VideoFeedCard';
 import MobileBottomNav from './mobile/MobileBottomNav';
@@ -20,6 +20,8 @@ import ServiceGallery from './ServiceGallery';
 const idOf = (value) => String(value?._id || value?.category_uuid || value || '');
 
 export default function Home() {
+  const navigate = useNavigate();
+  const location = useLocation();
   const [listings, setListings] = useState([]);
   const [categories, setCategories] = useState([]);
   const [subcategories, setSubcategories] = useState([]);
@@ -37,18 +39,27 @@ export default function Home() {
   const [searchTerm, setSearchTerm] = useState('');
   const [searchOpen, setSearchOpen] = useState(() =>
     typeof window !== 'undefined' && new URLSearchParams(window.location.search).has('search'));
+  const handleSearchVisibility = useCallback((open) => {
+    setSearchOpen(open);
+    if (!open && new URLSearchParams(location.search).has('search')) {
+      const params = new URLSearchParams(location.search);
+      params.delete('search');
+      navigate({pathname:'/',search:params.toString() ? '?' + params.toString() : ''},
+        {replace:true});
+    }
+  }, [location.search, navigate]);
   const [showVideos, setShowVideos] = useState(false);
   const [showBottomNav, setShowBottomNav] = useState(true);
   const deferredSearch = useDeferredValue(searchTerm);
   // All public enquiry links use the verified Gondia business WhatsApp number.
   const whatsappNumber = String(seo.phone || '+919372333633').replace(/\D/g, '');
   const phoneNumber = seo.phone;
-  const activeTheme = getCategoryTheme(selectedCategory?.name);
+  // One consistent public color system across categories; only imagery varies.
   const merchStyles = {
-    '--sk-theme-bg': activeTheme.background,
-    '--sk-theme-accent': activeTheme.accent,
-    '--sk-theme-ink': activeTheme.ink,
-    '--sk-theme-soft': activeTheme.soft,
+    '--sk-theme-bg': '#ffffff',
+    '--sk-theme-accent': '#e60023',
+    '--sk-theme-ink': '#202020',
+    '--sk-theme-soft': '#f3f3f3',
   };
 
   useEffect(() => {
@@ -281,7 +292,7 @@ export default function Home() {
         onSearchChange={handleSearchChange}
         catalogReady={catalogReady}
         searchOpen={searchOpen}
-        onSearchOpen={setSearchOpen}
+        onSearchOpen={handleSearchVisibility}
         whatsappNumber={whatsappNumber}
         phoneNumber={phoneNumber}
       />
@@ -383,7 +394,7 @@ export default function Home() {
         </details>
       </footer>
       <MobileBottomNav whatsappNumber={whatsappNumber} phoneNumber={phoneNumber}
-        visible={showBottomNav} variant="pinterest" onSearchClick={() => setSearchOpen(true)} />
+        visible={showBottomNav} variant="pinterest" onSearchClick={() => handleSearchVisibility(true)} />
     </div>
   );
 }

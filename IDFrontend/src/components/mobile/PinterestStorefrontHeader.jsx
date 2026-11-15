@@ -1,6 +1,8 @@
 import { memo, useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { FaEllipsisH, FaHeart, FaSearch, FaTimes, FaWhatsapp, FaPhoneAlt, FaHome, FaCompass } from 'react-icons/fa';
+import {
+  FaEllipsisH, FaHeart, FaSearch, FaTimes, FaWhatsapp, FaPhoneAlt, FaHome, FaCompass
+} from 'react-icons/fa';
 
 const idOf = value => String(value?._id || value?.category_uuid || value || '');
 function PinterestStorefrontHeader({
@@ -9,16 +11,8 @@ function PinterestStorefrontHeader({
   whatsappNumber = '919372333633', phoneNumber = '+919372333633',
 }) {
   const searchRef = useRef(null);
-  const desktopSearchRef = useRef(null);
   const menuRef = useRef(null);
   const [menuOpen, setMenuOpen] = useState(false);
-  const [searchFocused, setSearchFocused] = useState(false);
-  useEffect(() => {
-    if (searchOpen) {
-      const desktop = window.matchMedia('(min-width:960px)').matches;
-      (desktop ? desktopSearchRef.current : searchRef.current)?.focus();
-    }
-  }, [searchOpen]);
   useEffect(() => {
     if (!menuOpen) return undefined;
     const close = event => {
@@ -33,115 +27,128 @@ function PinterestStorefrontHeader({
     };
   }, [menuOpen]);
   useEffect(() => {
-    if (!searchFocused) return undefined;
-    const close = event => {
-      if (!event.target.closest('.sk-pin-search-row,.sk-pin-suggestions,.sk-pin-overflow')) {
-        setSearchFocused(false);
-        onSearchOpen?.(false);
-      }
+    if (!searchOpen) return undefined;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    const raf = window.requestAnimationFrame(() => searchRef.current?.focus());
+    const esc = event => {
+      if (event.key === 'Escape') onSearchOpen?.(false);
     };
-    document.addEventListener('pointerdown', close);
-    return () => document.removeEventListener('pointerdown', close);
-  }, [searchFocused, onSearchOpen]);
+    document.addEventListener('keydown', esc);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.cancelAnimationFrame(raf);
+      document.removeEventListener('keydown', esc);
+    };
+  }, [searchOpen, onSearchOpen]);
+
   const whatsapp = 'https://wa.me/' + String(whatsappNumber).replace(/\D/g, '') +
     '?text=' + encodeURIComponent('Hi SANJU SK Digital, I would like to discuss a custom design.');
-  const suggested = categories.filter(cat => cat?.name?.toLowerCase().includes(searchTerm.toLowerCase().trim()))
-    .slice(0, 6);
-  const chooseSuggested = category => {
-    onSearchChange?.('');
+  const suggested = categories.filter(category => !searchTerm.trim() ||
+    category?.name?.toLowerCase().includes(searchTerm.trim().toLowerCase())).slice(0, 7);
+  const goToResults = () => {
     onSearchOpen?.(false);
-    setSearchFocused(false);
-    onCategorySelect?.(category);
+    window.requestAnimationFrame(() =>
+      document.getElementById('sk-pin-feed')?.scrollIntoView({behavior:'smooth',block:'start'}));
   };
-  const searchBox = (mobile) => (
-    <div className={'sk-pin-search-row sk-pin-search-inline' + (searchFocused ? ' has-focus' : '')}
-      role="search">
-      <FaSearch aria-hidden="true" />
-      <input ref={mobile ? searchRef : desktopSearchRef} type="search" value={searchTerm}
-        disabled={!catalogReady} onChange={event => onSearchChange?.(event.target.value)}
-        onFocus={() => { setSearchFocused(true); onSearchOpen?.(true); }}
-        onKeyDown={event => { if (event.key === 'Escape') {
-          onSearchChange?.('');setSearchFocused(false);onSearchOpen?.(false);event.target.blur();
-        }}}
-        placeholder={catalogReady ? 'Search wedding cards, signs, gifts and more' : 'Preparing designs…'}
-        aria-label="Search custom designs"/>
-      {searchTerm && <button type="button" aria-label="Clear search"
-        onClick={() => onSearchChange?.('')}><FaTimes aria-hidden="true"/></button>}
-    </div>
-  );
+  const selectSuggestion = category => {
+    onSearchChange?.('');
+    onCategorySelect?.(category);
+    onSearchOpen?.(false);
+  };
+
   return (
-    <div className="sk-pin-top-shell">
+    <div className={'sk-pin-top-shell'+(searchOpen?' sk-pin-search-open':'')}>
       <header className="sk-pin-header">
         <Link to="/" className="sk-pin-brand" aria-label="SANJU SK Digital homepage">
           <img className="sk-pin-brand-final-logo" src="/images/sk-digital-final.svg"
             alt="SK Digital logo" width="59" height="43" />
           <span className="sk-pin-brand-name">SANJU <b>SK</b>
-            <small>DIGITAL · MAHI CREATION</small></span>
+            <small>DIGITAL · MAHI CREATION</small>
+          </span>
         </Link>
-        <div className="sk-pin-desktop-search">{searchBox(false)}</div>
         <div className="sk-pin-header-actions" ref={menuRef}>
           <Link className="sk-pin-top-action sk-pin-saved-top" to="/favorites"
-            aria-label="Your saved and liked designs"><FaHeart aria-hidden="true"/></Link>
+            aria-label="Your saved and liked designs"><FaHeart aria-hidden="true" /></Link>
           <a href={whatsapp} target="_blank" rel="noopener noreferrer"
             className="sk-pin-top-action sk-pin-whatsapp-top"
-            aria-label="Request a custom design via WhatsApp">
-            <FaWhatsapp aria-hidden="true"/>
-          </a>
+            aria-label="Ask SANJU SK Digital on WhatsApp"><FaWhatsapp aria-hidden="true" /></a>
           <button type="button" className="sk-pin-top-action" aria-label="Open website menu"
             aria-expanded={menuOpen} aria-controls="sk-pin-overflow-menu"
-            onClick={() => setMenuOpen(open => !open)}>
-            <FaEllipsisH aria-hidden="true"/>
-          </button>
-          {menuOpen && (
-            <nav id="sk-pin-overflow-menu" className="sk-pin-overflow" aria-label="Site menu">
-              <Link to="/" onClick={() => setMenuOpen(false)}><FaHome/> Home</Link>
-              <Link to="/allCategories" onClick={() => setMenuOpen(false)}><FaCompass/> Explore categories</Link>
-              <button type="button" onClick={() => {setMenuOpen(false);onSearchOpen?.(true);setSearchFocused(true);searchRef.current?.focus();}}>
-                <FaSearch/> Search designs
-              </button>
-              <Link to="/favorites" onClick={() => setMenuOpen(false)}><FaHeart/> Saved and liked designs</Link>
-              <a href={'tel:' + phoneNumber}><FaPhoneAlt/> Call our studio</a>
-              <Link to="/contact" onClick={() => setMenuOpen(false)}>Contact & directions</Link>
-              <button type="button" onClick={() => {
-                setMenuOpen(false);
-                const footer = document.getElementById('sk-business-information');
-                if (footer) { footer.open = true; footer.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
-              }}>More about SANJU SK Digital</button>
-            </nav>
-          )}
+            onClick={() => setMenuOpen(open => !open)}><FaEllipsisH aria-hidden="true" /></button>
+          {menuOpen && <nav id="sk-pin-overflow-menu" className="sk-pin-overflow" aria-label="Site menu">
+            <Link to="/" onClick={() => setMenuOpen(false)}><FaHome/> Home</Link>
+            <Link to="/allCategories" onClick={() => setMenuOpen(false)}><FaCompass/> Explore categories</Link>
+            <button type="button" onClick={() => {setMenuOpen(false);onSearchOpen?.(true);}}>
+              <FaSearch/> Search designs
+            </button>
+            <Link to="/favorites" onClick={() => setMenuOpen(false)}><FaHeart/> Saved designs</Link>
+            <a href={'tel:' + phoneNumber} onClick={() => setMenuOpen(false)}>
+              <FaPhoneAlt/> Call our studio
+            </a>
+            <Link to="/contact" onClick={() => setMenuOpen(false)}>Contact & directions</Link>
+            <button type="button" onClick={() => {
+              setMenuOpen(false);
+              const footer = document.getElementById('sk-business-information');
+              if (footer) {
+                footer.open = true;
+                footer.scrollIntoView({ behavior:'smooth', block:'start' });
+              }
+            }}>More about SANJU SK Digital</button>
+          </nav>}
         </div>
       </header>
-      <div className="sk-pin-mobile-search">{searchBox(true)}</div>
-      {searchFocused && catalogReady && (
-        <div className="sk-pin-suggestions" onMouseDown={event => event.preventDefault()}>
-          <div className="sk-pin-suggest-title">{searchTerm ? 'Matching collections' : 'Explore popular collections'}</div>
-          <div className="sk-pin-suggest-list">
-            {suggested.map(cat => <button type="button" key={idOf(cat)}
-              onClick={() => chooseSuggested(cat)}><FaSearch aria-hidden="true"/>{cat.name}</button>)}
-            {searchTerm && <button type="button" onClick={() => {
-              setSearchFocused(false);onSearchOpen?.(false);searchRef.current?.blur();
-              document.getElementById('sk-pin-feed')?.scrollIntoView({behavior:'smooth'});
-            }}><FaSearch aria-hidden="true"/>Show results for “{searchTerm}”</button>}
-          </div>
-          <button type="button" className="sk-pin-suggest-close" onClick={() => {
-            setSearchFocused(false);onSearchOpen?.(false);
-          }}>Close</button>
-        </div>
-      )}
       <nav className="sk-pin-categories" aria-label="Browse design categories">
         <button type="button" disabled={!catalogReady}
           className={'sk-pin-category-tab' + (!selectedCategory ? ' is-current' : '')}
           aria-pressed={!selectedCategory}
-          onClick={() => {setSearchFocused(false);onCategorySelect?.(null);}}>For you</button>
-        {catalogReady ? categories.map((cat, index) => (
-          <button type="button" key={idOf(cat) || index}
-            className={'sk-pin-category-tab' + (idOf(cat) === idOf(selectedCategory) ? ' is-current' : '')}
-            aria-pressed={idOf(cat) === idOf(selectedCategory)}
-            onClick={() => {setSearchFocused(false);onCategorySelect?.(cat);}}>
-            {cat.name || 'Designs'}
-          </button>
-        )) : Array.from({length:4},(_,i)=><span className="sk-pin-tab-loading" key={i} aria-hidden="true"/>)}
+          onClick={() => onCategorySelect?.(null)}>All</button>
+        {catalogReady ? categories.map((category, index) => (
+          <button type="button" key={idOf(category) || index}
+            className={'sk-pin-category-tab' +
+              (idOf(category) === idOf(selectedCategory) ? ' is-current' : '')}
+            aria-pressed={idOf(category) === idOf(selectedCategory)}
+            onClick={() => onCategorySelect?.(category)}>{category.name || 'Designs'}</button>
+        )) : Array.from({length:4},(_,i) =>
+          <span className="sk-pin-tab-loading" key={i} aria-hidden="true"/>)}
       </nav>
+      {searchOpen && (
+        <div className="sk-pin-search-overlay" role="dialog" aria-modal="true"
+          aria-labelledby="sk-pin-search-title">
+          <div className="sk-pin-search-panel">
+            <div className="sk-pin-search-modal-header">
+              <h2 id="sk-pin-search-title">Search designs</h2>
+              <button type="button" className="sk-pin-search-close"
+                aria-label="Close search" onClick={() => onSearchOpen?.(false)}>
+                <FaTimes aria-hidden="true" />
+              </button>
+            </div>
+            <form className="sk-pin-search-row sk-pin-search-inline"
+              role="search" onSubmit={event => {event.preventDefault();goToResults();}}>
+              <FaSearch aria-hidden="true" />
+              <input ref={searchRef} type="search" value={searchTerm}
+                onChange={event => onSearchChange?.(event.target.value)}
+                placeholder="Search wedding cards, signs, awards…"
+                aria-label="Search products and designs" />
+              {searchTerm && <button type="button" aria-label="Clear search"
+                onClick={() => {onSearchChange?.('');searchRef.current?.focus();}}>
+                <FaTimes aria-hidden="true" />
+              </button>}
+            </form>
+            <p className="sk-pin-suggest-title">
+              {searchTerm.trim() ? 'Matching collections' : 'Explore collections'}
+            </p>
+            <div className="sk-pin-suggest-list">
+              {suggested.map(category => <button type="button" key={idOf(category)}
+                onClick={() => selectSuggestion(category)}>
+                <FaSearch aria-hidden="true" /> {category.name}
+              </button>)}
+            </div>
+            <button type="button" className="sk-pin-search-results"
+              onClick={goToResults}>Show {searchTerm.trim() ? 'matching' : 'all'} designs</button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

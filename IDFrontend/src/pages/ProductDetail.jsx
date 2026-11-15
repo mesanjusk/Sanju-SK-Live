@@ -1,10 +1,9 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate, useLocation, Link } from 'react-router-dom';
-import { FaArrowLeft, FaChevronLeft, FaChevronRight, FaHeart, FaRegHeart, FaRegThumbsUp, FaThumbsUp, FaShare, FaWhatsapp, FaYoutube, FaEllipsisH, FaMagic } from 'react-icons/fa';
+import { FaArrowLeft, FaChevronLeft, FaChevronRight, FaChevronDown, FaHeart, FaRegHeart, FaRegThumbsUp, FaThumbsUp, FaShare, FaWhatsapp, FaYoutube, FaEllipsisH, FaMagic } from 'react-icons/fa';
 import api from '../api';
 import SEO from '../components/SEO';
 import ProductStructuredData from '../components/ProductStructuredData';
-import MobileBottomNav from '../components/mobile/MobileBottomNav';
 import PinterestPinCard from '../components/mobile/PinterestPinCard';
 import { uniqueDesigns } from '../components/mobile/uniqueDesigns.mjs';
 import {recordDesignInterest,rankDesigns,getDesignInterests,freshFeedSeed,productId,categoryId} from '../components/mobile/interestRank.mjs';
@@ -269,7 +268,16 @@ export default function ProductDetail() {
               <span>SANJU SK Digital <small>{categoryName || 'Custom made to order'}</small></span>
             </div>
             <h1>{product.title}</h1>
-            {product.description && <p>{product.description}</p>}
+            <details className="sk-pin-product-specs" id="sk-pin-product-specs">
+              <summary className="sk-pin-product-specs-summary">
+                <span>Product details &amp; quantity</span>
+                <span className="sk-pin-product-specs-price">
+                  {price !== null ? '₹' + price.toLocaleString('en-IN') + ' / piece' : 'Price on request'}
+                  <FaChevronDown aria-hidden="true" />
+                </span>
+              </summary>
+              <div className="sk-pin-product-specs-content">
+                {product.description && <p>{product.description}</p>}
             <div className="sk-pin-detail-fields">
               {product.size && <span>Size: {String(product.size)}</span>}
               {product.badge && <span>{String(product.badge)}</span>}
@@ -305,6 +313,8 @@ export default function ProductDetail() {
                   onIndexChange={setImgIdx} modelUrl={product.model3dUrl||product.modelUrl||product.glbUrl} />
               </details>
             )}
+              </div>
+            </details>
           </section>
         </div>
         {related.length>0 && <section className="sk-pin-detail-related" aria-labelledby="sk-pin-related-heading">
@@ -329,7 +339,6 @@ export default function ProductDetail() {
           </div>
         </div>}
 
-        <MobileBottomNav variant="pinterest" onSearchClick={()=>navigate('/?search=1')}/>
       </div>
     </>
   );

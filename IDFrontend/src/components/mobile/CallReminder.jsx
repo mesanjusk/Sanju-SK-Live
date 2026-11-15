@@ -1,14 +1,15 @@
 import { useEffect, useMemo, useState } from 'react';
-import { FaPhoneAlt, FaTimes } from 'react-icons/fa';
+import { useLocation } from 'react-router-dom';
+import { FaPhoneAlt } from 'react-icons/fa';
 import seo from '../../config/local-seo.json';
 import './pinterest-storefront.css';
 
-const DISMISSED_KEY = 'sk_call_reminder_dismissed';
-const FIRST_REMINDER_DELAY_MS = 15000;
-const REPEAT_REMINDER_DELAY_MS = 8000;
-const VISIBLE_FOR_MS = 4200;
+const DISMISSED_KEY = 'sk_help_call_used';
+const FIRST_SHOW_DELAY = 8000;
 
+// One unobtrusive contact control: rounded "Need help?" label above a circular call icon.
 export default function CallReminder({ phoneNumber = seo.phone }) {
+  const { pathname } = useLocation();
   const [dismissed, setDismissed] = useState(() => {
     try { return sessionStorage.getItem(DISMISSED_KEY) === '1'; }
     catch { return false; }
@@ -19,56 +20,29 @@ export default function CallReminder({ phoneNumber = seo.phone }) {
     return digits.length === 10 ? '+91' + digits :
       digits.startsWith('91') && digits.length === 12 ? '+' + digits : seo.phone;
   }, [phoneNumber]);
-  const displayNumber = dialNumber === seo.phone ? seo.displayPhone : dialNumber;
 
   useEffect(() => {
     if (dismissed) return undefined;
-    const remind = () => {
-      if (document.visibilityState === 'visible') setVisible(true);
-    };
-    let repeatTimer;
-    const firstTimer = window.setTimeout(() => {
-      remind();
-      repeatTimer = window.setInterval(remind, REPEAT_REMINDER_DELAY_MS);
-    }, FIRST_REMINDER_DELAY_MS);
-    const onVisibility = () => {
-      if (document.visibilityState !== 'visible') setVisible(false);
-    };
-    document.addEventListener('visibilitychange', onVisibility);
-    return () => {
-      window.clearTimeout(firstTimer);
-      window.clearInterval(repeatTimer);
-      document.removeEventListener('visibilitychange', onVisibility);
-    };
+    const timer = window.setTimeout(() => setVisible(true), FIRST_SHOW_DELAY);
+    return () => window.clearTimeout(timer);
   }, [dismissed]);
 
-  useEffect(() => {
-    if (!visible) return undefined;
-    const timeout = window.setTimeout(() => setVisible(false), VISIBLE_FOR_MS);
-    return () => window.clearTimeout(timeout);
-  }, [visible]);
-
-  const dismiss = () => {
+  const onCall = () => {
     setVisible(false);
     setDismissed(true);
-    try { sessionStorage.setItem(DISMISSED_KEY, '1'); } catch { /* Private browsing */ }
+    try { sessionStorage.setItem(DISMISSED_KEY, '1'); } catch {}
   };
 
-  if (!visible || dismissed) return null;
+  // Never cover checkout or account administration with a floating contact CTA.
+  if (!visible || dismissed || pathname.startsWith('/checkout') ||
+    pathname.startsWith('/admin') || pathname.startsWith('/login')) return null;
+
   return (
-    <aside role="status" aria-label="Call SANJU SK Digital" className="sk-pin-call-reminder">
-      <button type="button" className="sk-pin-call-dismiss" onClick={dismiss}
-        aria-label="Dismiss call reminders for this visit">
-        <FaTimes aria-hidden="true" />
-      </button>
-      <div className="sk-pin-call-brand">
-        <img src="/images/sk-digital-final.svg" alt="" width="42" height="30" />
-        <span>SANJU SK Digital</span>
-      </div>
-      <p className="sk-pin-call-heading">Need help choosing a design?</p>
-      <p className="sk-pin-call-subtitle">Speak to our Gondia studio</p>
-      <a href={'tel:' + dialNumber} className="sk-pin-call-cta" onClick={dismiss}>
-        <FaPhoneAlt aria-hidden="true" /> Call {displayNumber}
+    <aside className="sk-pin-help-bubble" aria-label="Quick phone assistance">
+      <a className="sk-pin-help-link" href={'tel:' + dialNumber}
+        onClick={onCall} aria-label={'Need help? Call SANJU SK Digital at ' + dialNumber}>
+        <span className="sk-pin-help-label">Need help?</span>
+        <span className="sk-pin-help-icon"><FaPhoneAlt aria-hidden="true" /></span>
       </a>
     </aside>
   );

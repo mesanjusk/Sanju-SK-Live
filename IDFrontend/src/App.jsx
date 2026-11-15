@@ -11,6 +11,7 @@ import CallReminder from './components/mobile/CallReminder';
 import PinterestDesktopRail from './components/mobile/PinterestDesktopRail';
 import Home from './components/Home';
 import './styles/public-theme.css';
+import './styles/pinterest-unified-2026.css';
 
 // Apply ?access=TOKEN from URL before anything renders
 checkAndApplyAccessToken();
