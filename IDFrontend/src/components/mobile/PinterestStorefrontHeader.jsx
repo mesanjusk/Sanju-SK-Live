@@ -1,5 +1,6 @@
 import { memo, useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
+import {isWeddingCategory} from './categoryOrder.mjs';
 import {
   FaEllipsisH, FaHeart, FaSearch, FaTimes, FaWhatsapp, FaPhoneAlt, FaHome, FaCompass
 } from 'react-icons/fa';
@@ -44,6 +45,8 @@ function PinterestStorefrontHeader({
 
   const whatsapp = 'https://wa.me/' + String(whatsappNumber).replace(/\D/g, '') +
     '?text=' + encodeURIComponent('Hi SANJU SK Digital, I would like to discuss a custom design.');
+  const firstWedding=catalogReady&&isWeddingCategory(categories[0])?categories[0]:null;
+  const remainingCategories=firstWedding?categories.slice(1):categories;
   const suggested = categories.filter(category => !searchTerm.trim() ||
     category?.name?.toLowerCase().includes(searchTerm.trim().toLowerCase())).slice(0, 7);
   const goToResults = () => {
@@ -99,11 +102,17 @@ function PinterestStorefrontHeader({
         </div>
       </header>
       <nav className="sk-pin-categories" aria-label="Browse design categories">
+        {firstWedding&&<button type="button" className={'sk-pin-category-tab'+
+          (idOf(firstWedding)===idOf(selectedCategory)?' is-current':'')}
+          aria-pressed={idOf(firstWedding)===idOf(selectedCategory)}
+          onClick={()=>onCategorySelect?.(firstWedding)}>
+          {firstWedding.name}
+        </button>}
         <button type="button" disabled={!catalogReady}
           className={'sk-pin-category-tab' + (!selectedCategory ? ' is-current' : '')}
           aria-pressed={!selectedCategory}
           onClick={() => onCategorySelect?.(null)}>All</button>
-        {catalogReady ? categories.map((category, index) => (
+        {catalogReady ? remainingCategories.map((category, index) => (
           <button type="button" key={idOf(category) || index}
             className={'sk-pin-category-tab' +
               (idOf(category) === idOf(selectedCategory) ? ' is-current' : '')}
