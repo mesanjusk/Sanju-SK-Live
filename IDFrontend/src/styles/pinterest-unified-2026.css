@@ -236,3 +236,6 @@ body:has(.sk-public-site){background:#fff!important;}
   .sk-pin-help-icon,.sk-pin-product-specs-price svg,
   .sk-public-site .sk-pin-bottom-nav .sk-mobile-bottom-link{transition:none!important;}
 }
+
+/* Opened pins rely on the back arrow, not the home feed dock. */
+.sk-public-site .sk-pin-detail-page{padding-bottom:34px!important;}
