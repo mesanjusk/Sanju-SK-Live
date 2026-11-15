@@ -2,6 +2,7 @@ import { useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } f
 import { useLocation, useNavigate } from 'react-router-dom';
 import { FaArrowRight, FaChevronDown, FaPlay } from 'react-icons/fa';
 import api from '../api';
+import {trackAnalyticsEvent,resetAnalyticsConsent} from '../hooks/useAnalytics';
 import seo from '../config/local-seo.json';
 import PinterestStorefrontHeader from './mobile/PinterestStorefrontHeader';
 import EndlessPinterestFeed from './mobile/EndlessPinterestFeed';
@@ -319,6 +320,7 @@ export default function Home() {
   }, []);
 
   const handleTabCategorySelect = (category) => {
+    if(category)trackAnalyticsEvent('category_view',{categoryId:idOf(category),categoryName:category.name});
     if (!catalogReady) return;
     setSearchTerm('');
     setSelectedSubcategory(null);
@@ -332,13 +334,20 @@ export default function Home() {
     }));
   };
   const handleCategorySelect = (category) => {
+    if(category)trackAnalyticsEvent('category_view',{categoryId:idOf(category),categoryName:category.name});
     if (!catalogReady) return;
     setSearchTerm('');
     setSelectedSubcategory(null);
     setSelectedCategory(prev => category && prev && idOf(prev) === idOf(category) ? null : category);
     if (category) scrollToProducts();
   };
-  const handleSearchChange = (value) => {
+  useEffect(()=>{
+    const term=searchTerm.trim();
+    if(term.length<3)return undefined;
+    const timer=window.setTimeout(()=>trackAnalyticsEvent('search',{keyword:term}),950);
+    return ()=>window.clearTimeout(timer);
+  },[searchTerm]);
+    const handleSearchChange = (value) => {
     setSearchTerm(value);
     setSelectedCategory(null);
     setSelectedSubcategory(null);
@@ -432,6 +441,9 @@ export default function Home() {
           <a href="/flex-banner-printing-gondia/">Flex printing</a>
           <a href="/track-order">Track order</a>
           <a href="/order-information">Ordering information</a>
+          <button type="button" onClick={resetAnalyticsConsent}>
+            Analytics preferences
+          </button>
         </nav>
             <ServiceGallery />
             {videos.length > 0 && (
