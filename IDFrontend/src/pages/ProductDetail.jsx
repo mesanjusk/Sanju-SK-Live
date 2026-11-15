@@ -9,7 +9,7 @@ import { uniqueDesigns } from '../components/mobile/uniqueDesigns.mjs';
 import {recordDesignInterest,rankDesigns,getDesignInterests,freshFeedSeed,productId,categoryId} from '../components/mobile/interestRank.mjs';
 import ProductStage from '../components/experience/ProductStage';
 import { useFavorites } from '../context/FavoritesContext';
-import { trackWhatsAppClick } from '../hooks/useAnalytics';
+import { trackWhatsAppClick,trackAnalyticsEvent } from '../hooks/useAnalytics';
 import { saveEnquiryLead, resolveCategoryName } from '../hooks/useWhatsApp';
 import '../components/mobile/pinterest-storefront.css';
 
@@ -43,6 +43,9 @@ export default function ProductDetail() {
   const [zoomOpen,setZoomOpen] = useState(false);
   const [showVideo, setShowVideo] = useState(false);
   const { favorites, liked, toggleFavorite, toggleLiked } = useFavorites();
+  useEffect(()=>{
+    if(id)trackAnalyticsEvent('product_view',{productId:String(id)});
+  },[id]);
   useEffect(()=>{
     if (!zoomOpen) return undefined;
     const onEscape = event => { if(event.key === 'Escape') setZoomOpen(false); };
