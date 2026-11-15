@@ -13,7 +13,7 @@ router.post('/login', async (req, res) => {
     if (!checkUserPassword(Password,user.Password)) return res.json({ status: 'invalid', message: 'Invalid credentials.' });
     if(!user.Password.startsWith('scrypt
 
-    const token = generateToken({ id: user._id, username: user.User_name, role: user.role });
+    const token = generateToken({ id: user._id, username: user.User_name, role: user.role, permissions: user.permissions });
     res.json({
       status: 'exist',
       token,
