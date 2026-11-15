@@ -320,12 +320,18 @@ assert(index.includes('sk-boot-desktop-rail') &&
   'SSR first paint must not flash the old search bar');
 
 const analyticsClient=readFileSync(new URL('../src/hooks/useAnalytics.js',import.meta.url),'utf8');
-const consentSource=readFileSync(new URL('../src/components/AnalyticsConsent.jsx',import.meta.url),'utf8');
+const privacyPage=readFileSync(new URL('../src/pages/OrderInformation.jsx',import.meta.url),'utf8');
 const cacheSource=readFileSync(new URL('../src/components/mobile/catalogSessionCache.mjs',import.meta.url),'utf8');
 assert(analyticsClient.includes("analyticsConsent()!=='accepted'") &&
   analyticsClient.includes('trackAnalyticsEvent') &&
-  consentSource.includes('Allow analytics') && consentSource.includes('No thanks'),
-  'Only opted-in analytics can track identifiable browser sessions');
+  analyticsClient.includes('setAnalyticsConsent') &&
+  !appSource.includes('<AnalyticsConsent') &&
+  !appSource.includes("import AnalyticsConsent") &&
+  privacyPage.includes("setAnalyticsConsent(value)") &&
+  privacyPage.includes('Allow optional analytics') &&
+  privacyPage.includes('Decline / withdraw consent') &&
+  homeSource.includes('/order-information#analytics-preferences'),
+  'Analytics collection and dashboard remain intact, with explicit privacy controls and no popup');
 assert(homeSource.includes('LANDING_KEYWORD') && homeSource.includes('RETURN_KEY') &&
   cacheSource.includes('sessionStorage.setItem(PREFIX+key'),
   'Catalog ordering and browsing position must survive checkout navigation');
