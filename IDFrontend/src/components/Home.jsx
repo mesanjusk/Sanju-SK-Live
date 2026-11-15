@@ -1,7 +1,8 @@
-import { useCallback, useDeferredValue, useEffect, useMemo, useState } from 'react';
+import { useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { FaArrowRight, FaChevronDown, FaPlay } from 'react-icons/fa';
 import api from '../api';
+import {trackAnalyticsEvent,resetAnalyticsConsent} from '../hooks/useAnalytics';
 import seo from '../config/local-seo.json';
 import PinterestStorefrontHeader from './mobile/PinterestStorefrontHeader';
 import EndlessPinterestFeed from './mobile/EndlessPinterestFeed';
@@ -11,7 +12,7 @@ import { uniqueDesigns } from './mobile/uniqueDesigns.mjs';
 import {freshFeedSeed,getDesignInterests,rankDesigns,productId,categoryId} from './mobile/interestRank.mjs';
 import './mobile/festive-home.css';
 import './mobile/pinterest-storefront.css';
-import CategorySeoBlurb from './mobile/CategorySeoBlurb';
+import {orderStoreCategories,landingKeyword} from './mobile/categoryOrder.mjs';
 import VideoFeedCard from './mobile/VideoFeedCard';
 import MobileBottomNav from './mobile/MobileBottomNav';
 import CatalogLoadingState from './mobile/CatalogLoadingState';
@@ -22,6 +23,15 @@ import ServiceGallery from './ServiceGallery';
 const idOf = (value) => String(value?._id || value?.category_uuid || value || '');
 // Stable while visiting product pages; reset/randomized on each full reload.
 const HOME_FEED_SEED=freshFeedSeed();
+const LANDING_KEYWORD=landingKeyword(typeof window!=='undefined'?window.location.search:'',
+  typeof document!=='undefined'?document.referrer:'');
+const RETURN_KEY='sk-home-browse-v2';
+function consumeBrowseState(){
+  try{const data=JSON.parse(sessionStorage.getItem(RETURN_KEY)||'null');
+    sessionStorage.removeItem(RETURN_KEY);
+    return data&&Date.now()-data.at<5*60*1000?data:null;
+  }catch{return null;}
+}
 
 export default function Home() {
   const navigate = useNavigate();
@@ -39,11 +49,19 @@ export default function Home() {
   }));
   const [catalogRetry, setCatalogRetry] = useState(0);
   const [feedSeed] = useState(() => HOME_FEED_SEED);
+  const [returnView] = useState(consumeBrowseState);
+  const browseRef=useRef(null);
   const [interests,setInterests] = useState(getDesignInterests);
   const [aiIds,setAiIds] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [selectedSubcategory, setSelectedSubcategory] = useState(null);
-  const [searchTerm, setSearchTerm] = useState('');
+
+  useEffect(()=>()=>{
+    try{sessionStorage.setItem(RETURN_KEY,JSON.stringify({...browseRef.current,at:Date.now()}));
+      sessionStorage.setItem('sk-home-scroll-position',String(Math.max(0,window.scrollY)));}catch{}
+  },[]);
+  const [searchTerm, setSearchTerm] = useState(returnView?.query||'');
+  browseRef.current={categoryId:idOf(selectedCategory),subcategoryId:idOf(selectedSubcategory),query:searchTerm};
   const [searchOpen, setSearchOpen] = useState(() =>
     typeof window !== 'undefined' && new URLSearchParams(window.location.search).has('search'));
   const handleSearchVisibility = useCallback((open) => {
@@ -137,6 +155,19 @@ export default function Home() {
     setCatalogRetry(value => value + 1);
   };
 
+  const orderedCategories=useMemo(()=>orderStoreCategories(categories,
+    {seed:feedSeed,keyword:LANDING_KEYWORD}),[categories,feedSeed]);
+  useEffect(()=>{
+    if(!returnView || !catalogReady)return;
+    if(returnView.categoryId){
+      const cat=categories.find(c=>idOf(c)===returnView.categoryId||String(c.category_uuid||'')===returnView.categoryId);
+      if(cat)setSelectedCategory(cat);
+    }
+    if(returnView.subcategoryId){
+      const sub=subcategories.find(c=>idOf(c)===returnView.subcategoryId);
+      if(sub)setSelectedSubcategory(sub);
+    }
+  },[catalogReady,categories,subcategories,returnView]);
   const categoryById = useMemo(() => {
     const index = new Map();
     for (const category of categories) {
@@ -200,7 +231,7 @@ export default function Home() {
   const distinctProducts = useMemo(() => uniqueDesigns(filteredProducts), [filteredProducts]);
   // Each visitor's page load starts with a new shuffled order; selections
   // promote real related designs without introducing duplicate records.
-  const orderedProducts = useMemo(()=>rankDesigns(distinctProducts,{seed:feedSeed,interests,aiIds}),
+  const orderedProducts = useMemo(()=>rankDesigns(distinctProducts,{seed:feedSeed,interests,aiIds,keyword:LANDING_KEYWORD}),
     [distinctProducts,feedSeed,interests,aiIds]);
   useEffect(()=>{
     const onInterest=()=>{setInterests(getDesignInterests());setAiIds([]);};
@@ -289,6 +320,7 @@ export default function Home() {
   }, []);
 
   const handleTabCategorySelect = (category) => {
+    if(category)trackAnalyticsEvent('category_view',{categoryId:idOf(category),categoryName:category.name});
     if (!catalogReady) return;
     setSearchTerm('');
     setSelectedSubcategory(null);
@@ -302,13 +334,20 @@ export default function Home() {
     }));
   };
   const handleCategorySelect = (category) => {
+    if(category)trackAnalyticsEvent('category_view',{categoryId:idOf(category),categoryName:category.name});
     if (!catalogReady) return;
     setSearchTerm('');
     setSelectedSubcategory(null);
     setSelectedCategory(prev => category && prev && idOf(prev) === idOf(category) ? null : category);
     if (category) scrollToProducts();
   };
-  const handleSearchChange = (value) => {
+  useEffect(()=>{
+    const term=searchTerm.trim();
+    if(term.length<3)return undefined;
+    const timer=window.setTimeout(()=>trackAnalyticsEvent('search',{keyword:term}),950);
+    return ()=>window.clearTimeout(timer);
+  },[searchTerm]);
+    const handleSearchChange = (value) => {
     setSearchTerm(value);
     setSelectedCategory(null);
     setSelectedSubcategory(null);
@@ -324,7 +363,7 @@ export default function Home() {
   return (
     <div className="sk-storefront sk-festive-home sk-pinterest-home sk-public-site" style={merchStyles}>
       <PinterestStorefrontHeader
-        categories={categories}
+        categories={orderedCategories}
         selectedCategory={selectedCategory}
         onCategorySelect={handleTabCategorySelect}
         searchTerm={searchTerm}
@@ -356,7 +395,6 @@ export default function Home() {
             <span>{distinctProducts.length} designs</span>
           </div>
         )}
-        {catalogReady && selectedCategory && <CategorySeoBlurb name={selectedCategory.name} />}
         {!catalogReady ? (
           <CatalogLoadingState error={catalogFailed && !catalogPending} onRetry={retryCatalog} />
         ) : distinctProducts.length ? (
@@ -403,6 +441,9 @@ export default function Home() {
           <a href="/flex-banner-printing-gondia/">Flex printing</a>
           <a href="/track-order">Track order</a>
           <a href="/order-information">Ordering information</a>
+          <button type="button" onClick={resetAnalyticsConsent}>
+            Analytics preferences
+          </button>
         </nav>
             <ServiceGallery />
             {videos.length > 0 && (

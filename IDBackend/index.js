@@ -72,7 +72,7 @@ app.use((req,res,next)=>{
   if((pathname.startsWith('/api/leads') && req.method!=='POST') ||
      (pathname.startsWith('/api/leads/') && req.method==='POST'))
     return requireRole(req,res,next,'canManageLeads');
-  if(pathname==='/api/analytics/summary')
+  if(pathname==='/api/analytics/summary' || pathname==='/api/analytics/insights')
     return requireRole(req,res,next,'canViewAnalytics');
   if(!['GET','HEAD'].includes(req.method)){
     const found=guardedWrites.find(([prefix])=>pathname.startsWith(prefix));

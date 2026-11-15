@@ -4,7 +4,7 @@ import { FaHeart, FaRegHeart, FaWhatsapp } from 'react-icons/fa';
 import { useFavorites } from '../../context/FavoritesContext';
 import { optimizedImage } from '../../utils/media';
 import {recordDesignInterest} from './interestRank.mjs';
-import { trackWhatsAppClick } from '../../hooks/useAnalytics';
+import { trackWhatsAppClick,trackAnalyticsEvent } from '../../hooks/useAnalytics';
 import { saveEnquiryLead } from '../../hooks/useWhatsApp';
 
 function PinterestPinCard({ product, index = 0, categoryName = '', whatsappNumber = '919372333633' }) {
@@ -15,6 +15,7 @@ function PinterestPinCard({ product, index = 0, categoryName = '', whatsappNumbe
       try { sessionStorage.setItem('sk-home-scroll-position', String(Math.max(0, window.scrollY))); } catch {}
     }
     recordDesignInterest(product);
+    trackAnalyticsEvent('product_click',{productId:id});
   };
   const id = String(product?._id || '');
   if (!id) return null;
@@ -51,7 +52,7 @@ function PinterestPinCard({ product, index = 0, categoryName = '', whatsappNumbe
         </a>
         <button type="button" className={'sk-pin-save' + (isSaved ? ' is-saved' : '')}
           aria-label={isSaved ? 'Remove design from saved' : 'Save this design'}
-          aria-pressed={isSaved} onClick={() => {recordDesignInterest(product,'save');toggleFavorite(product);}}>
+          aria-pressed={isSaved} onClick={() => {recordDesignInterest(product,'save');trackAnalyticsEvent('favorite_save',{productId:id});toggleFavorite(product);}}>
           {isSaved ? <FaHeart/> : <FaRegHeart/>}
         </button>
       </div>

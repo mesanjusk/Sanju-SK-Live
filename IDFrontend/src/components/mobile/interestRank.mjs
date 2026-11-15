@@ -35,12 +35,18 @@ export function similarityScore(item,history){
   });
   return max;
 }
-export function rankDesigns(products,{seed='0',interests=[],aiIds=[]}={}){
+export function rankDesigns(products,{seed='0',interests=[],aiIds=[],keyword=''}={}){
   const gemini=new Map(aiIds.map((id,i)=>[String(id),i]));
+  const intentWords=[...tokens(keyword)].slice(0,5);
+  const intentBoost=p=>{
+    if(!intentWords.length)return 0;
+    const text=tokens([p.title,p.description,p.size].filter(Boolean).join(' '));
+    return intentWords.reduce((sum,w)=>sum+(text.has(w)?22:0),0);
+  };
   return [...products].sort((a,b)=>{
     const score=p=>{
       const id=productId(p);
-      return similarityScore(p,interests)+
+      return similarityScore(p,interests)+intentBoost(p)+
         (gemini.has(id)?90-Math.min(gemini.get(id),50):0)+hash(seed+'|'+id)*20;
     };
     return score(b)-score(a);
