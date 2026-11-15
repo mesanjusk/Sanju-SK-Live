@@ -181,3 +181,53 @@
 @media(prefers-reduced-motion:reduce){
   .sk-pin-cover img,.sk-pin-hover-quote,.sk-pin-tab-loading{transition:none;animation:none;}
 }
+
+/* Pinterest-inspired 2026 mobile pin detail: immersive image, in-flow actions,
+   merchant Buy Now instead of the reference app's Save CTA. */
+.sk-pin-detail-page {position:relative;}
+.sk-pin-commerce-actions {display:flex;align-items:center;gap:8px;margin:0 0 14px;}
+.sk-pin-commerce-icon,.sk-pin-commerce-menu>summary {display:grid;place-items:center;width:43px;height:43px;
+  background:#fff;border:0;border-radius:50%;color:#202020;cursor:pointer;font-size:21px;list-style:none;}
+.sk-pin-commerce-icon:hover,.sk-pin-commerce-menu>summary:hover {background:#f2f2f2;}
+.sk-pin-commerce-icon.is-liked {color:#e60023;}
+.sk-pin-commerce-menu {position:relative;}
+.sk-pin-commerce-menu>summary::-webkit-details-marker {display:none;}
+.sk-pin-commerce-menu-panel {position:absolute;left:-55px;top:45px;z-index:52;width:215px;
+  border:1px solid #ececec;background:#fff;box-shadow:0 9px 30px #0002;
+  border-radius:15px;padding:7px;display:flex;flex-direction:column;}
+.sk-pin-commerce-menu-panel button,.sk-pin-commerce-menu-panel a {padding:12px 10px;text-align:left;
+  color:#222;text-decoration:none;font-size:13px;font-weight:650;border-radius:9px;}
+.sk-pin-commerce-menu-panel button:hover,.sk-pin-commerce-menu-panel a:hover{background:#f5f5f5;}
+.sk-pin-buy-primary {margin-left:auto;min-width:132px;min-height:53px;border-radius:999px;
+  background:#e60023;color:#fff;font-size:16px;font-weight:800;padding:13px 24px;}
+.sk-pin-buy-primary:hover {background:#bd001d;}
+.sk-pin-buy-primary:disabled {background:#aaa;cursor:not-allowed;}
+.sk-pin-detail-sticky-cta {display:none!important;}
+.sk-pin-detail-info .sk-pin-detail-quote {background:#f1f1f1;color:#242424;font-size:13px;}
+.sk-pin-detail-related {clear:both;}
+.sk-pin-detail-related h2 {font-size:19px;}
+@media(max-width:789px) {
+  .sk-pin-detail-page{padding-bottom:100px;}
+  .sk-pin-detail-head{position:absolute;z-index:38;top:8px;left:13px;right:13px;max-width:none;
+    background:transparent;padding:4px;pointer-events:none;}
+  .sk-pin-detail-head .sk-pin-round-action {pointer-events:auto;width:48px;height:48px;
+    flex-basis:48px;background:#ffffffd9;backdrop-filter:blur(7px);font-size:22px;}
+  .sk-pin-detail-head .sk-pin-detail-seller,.sk-pin-detail-head .sk-pin-detail-actions{display:none;}
+  .sk-pin-detail-grid{padding:0 8px;gap:0;}
+  .sk-pin-detail-visual{border-radius:31px;overflow:hidden;background:#f5f4f2;min-height:0;}
+  .sk-pin-detail-image-button,.sk-pin-detail-image{width:100%;}
+  .sk-pin-detail-image{max-height:none;max-width:100%;height:auto;object-fit:contain;}
+  .sk-pin-detail-info{padding:12px 14px 22px;}
+  .sk-pin-detail-info h1{font-size:25px;line-height:1.28;font-weight:760;margin:9px 0 13px;}
+  .sk-pin-detail-seller{font-size:12px;color:#555;}
+  .sk-pin-detail-related{padding:6px 7px 36px;}
+  .sk-pin-detail-related .sk-pin-masonry{columns:2;column-gap:9px;}
+  .sk-pin-commerce-actions{gap:3px;margin:0 0 13px;}
+  .sk-pin-buy-primary{min-width:116px;min-height:52px;padding:12px 18px;}
+  .sk-pin-card .sk-pin-save {display:none;} /* Saved remains in the 3-dot menu. */
+}
+@media(min-width:790px){
+  .sk-pin-commerce-actions{margin-top:5px;}
+  .sk-pin-buy-primary{min-width:140px;}
+}
+@media(prefers-reduced-motion:reduce){.sk-pin-buy-primary{transition:none;}}
