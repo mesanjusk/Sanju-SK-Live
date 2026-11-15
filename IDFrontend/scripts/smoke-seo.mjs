@@ -129,6 +129,16 @@ const pinHeaderSource=readFileSync(new URL('../src/components/mobile/PinterestSt
 const pinCardSource=readFileSync(new URL('../src/components/mobile/PinterestPinCard.jsx',import.meta.url),'utf8');
 const pinCss=readFileSync(new URL('../src/components/mobile/pinterest-storefront.css',import.meta.url),'utf8');
 const detailSource=readFileSync(new URL('../src/pages/ProductDetail.jsx',import.meta.url),'utf8');
+const galleryCss=readFileSync(new URL('../src/styles/product-gallery-fixed.css',import.meta.url),'utf8');
+const galleryMeasureSource=readFileSync(new URL('../src/components/mobile/useStableGalleryAspect.js',import.meta.url),'utf8');
+assert(detailSource.includes('useStableGalleryAspect(images,id)') &&
+  detailSource.includes("'--sk-product-gallery-aspect':'1 / '+galleryHeightRatio") &&
+  galleryMeasureSource.includes('Promise.all(images.map(probeImage))') &&
+  galleryCss.includes('aspect-ratio:var(--sk-product-gallery-aspect') &&
+  galleryCss.includes('object-fit:contain') &&
+  galleryCss.includes('height:100%'),
+  'Every product photo must share the same tallest-image gallery frame without cropping');
+
 const pinNavSource=readFileSync(new URL('../src/components/mobile/MobileBottomNav.jsx',import.meta.url),'utf8');
 const reminderSource=readFileSync(new URL('../src/components/mobile/CallReminder.jsx',import.meta.url),'utf8');
 const checkoutSource=readFileSync(new URL('../src/pages/Checkout.jsx',import.meta.url),'utf8');
