@@ -1,6 +1,6 @@
-import { memo, useState } from 'react';
-import { Link } from 'react-router-dom';
-import { FaEllipsisH, FaHeart, FaRegHeart, FaWhatsapp, FaLink } from 'react-icons/fa';
+import { memo } from 'react';
+import { Link, useLocation } from 'react-router-dom';
+import { FaHeart, FaRegHeart, FaWhatsapp } from 'react-icons/fa';
 import { useFavorites } from '../../context/FavoritesContext';
 import { optimizedImage } from '../../utils/media';
 import {recordDesignInterest} from './interestRank.mjs';
@@ -8,17 +8,25 @@ import { trackWhatsAppClick } from '../../hooks/useAnalytics';
 import { saveEnquiryLead } from '../../hooks/useWhatsApp';
 
 function PinterestPinCard({ product, index = 0, categoryName = '', whatsappNumber = '919372333633' }) {
-  const { favorites, liked, toggleFavorite, toggleLiked } = useFavorites();
-  const [menuOpen, setMenuOpen] = useState(false);
+  const { favorites, toggleFavorite } = useFavorites();
+  const location = useLocation();
+  const openPin = () => {
+    if (location.pathname === '/') {
+      try { sessionStorage.setItem('sk-home-scroll-position', String(Math.max(0, window.scrollY))); } catch {}
+    }
+    recordDesignInterest(product);
+  };
   const id = String(product?._id || '');
   if (!id) return null;
   const image = Array.isArray(product.images) ? product.images.find(Boolean) : product.images || product.imageUrl;
   const isSaved = favorites.some(item => String(item._id) === id);
-  const isLiked = liked.some(item => String(item._id) === id);
-  const levels = (Array.isArray(product.quantityPricing) ? product.quantityPricing : [])
-    .map(tier => Number(tier.price)).filter(price => Number.isFinite(price) && price > 0);
-  const price = levels.length ? 'From ₹' + Math.min(...levels).toLocaleString('en-IN')
-    : Number(product.price) > 0 ? 'From ₹' + Number(product.price).toLocaleString('en-IN') : '';
+  // The smallest eligible tier is the advertised unit price for this design.
+  const tiers = (Array.isArray(product.quantityPricing) ? product.quantityPricing : [])
+    .filter(tier => Number(tier.price) > 0 && Number(tier.minQty) > 0)
+    .sort((a,b)=>Number(a.minQty)-Number(b.minQty));
+  const price = tiers.length ? Number(tiers[0].price)
+    : Number(product.price) > 0 ? Number(product.price) : null;
+  const priceQty = tiers[0] ? Number(tiers[0].minQty) : 1;
   const url = '/products/' + id;
   const message = 'Hi SANJU SK Digital, I would like a quote for ' + product.title +
     '. Design ID: ' + id + '. https://www.sanjusk.in' + url;
@@ -27,16 +35,11 @@ function PinterestPinCard({ product, index = 0, categoryName = '', whatsappNumbe
     recordDesignInterest(product,'enquire');
     trackWhatsAppClick(id);
     saveEnquiryLead({productId:id,productName:product.title,message});
-    setMenuOpen(false);
-  };
-  const copy = () => {
-    if (navigator.clipboard?.writeText) navigator.clipboard.writeText('https://www.sanjusk.in' + url);
-    setMenuOpen(false);
   };
   return (
     <article className={'sk-pin-card sk-pin-shape-' + (index % 5)}>
       <div className="sk-pin-cover-wrap">
-        <Link to={url} state={{ product }} onClick={() => recordDesignInterest(product)} className="sk-pin-cover" aria-label={'Open ' + product.title}>
+        <Link to={url} state={{ product }} onClick={openPin} className="sk-pin-cover" aria-label={'Open ' + product.title}>
           {image ? <img src={optimizedImage(image, 540)}
             alt={product.title + ' custom design by SANJU SK Digital, Gondia'}
             loading={index < 3 ? 'eager' : 'lazy'} decoding="async" width="480" height="600"/> :
@@ -54,29 +57,15 @@ function PinterestPinCard({ product, index = 0, categoryName = '', whatsappNumbe
       </div>
       <div className="sk-pin-under">
         <div className="sk-pin-card-text">
-          <Link to={url} state={{ product }} onClick={() => recordDesignInterest(product)} className="sk-pin-card-title">{product.title}</Link>
-          {price && <p>{price}</p>}
+          <Link to={url} state={{ product }} onClick={openPin} className="sk-pin-card-title">{product.title}</Link>
         </div>
-        <div className="sk-pin-menu-container">
-          <button type="button" className="sk-pin-card-menu" aria-label={'Actions for ' + product.title}
-            aria-expanded={menuOpen} onClick={() => setMenuOpen(open => !open)}>
-            <FaEllipsisH/>
-          </button>
-          {menuOpen && (
-            <div className="sk-pin-card-actions">
-              <button type="button" onClick={() => {recordDesignInterest(product,'save');toggleFavorite(product);setMenuOpen(false);}}>
-                <FaHeart/> {isSaved ? 'Unsave' : 'Save design'}
-              </button>
-              <button type="button" onClick={() => {recordDesignInterest(product,'like');toggleLiked(product);setMenuOpen(false);}}>
-                {isLiked ? <FaHeart/> : <FaRegHeart/>} {isLiked ? 'Unlike design' : 'Like design'}
-              </button>
-              <a href={whatsapp} target="_blank" rel="noopener noreferrer" onClick={enquire}>
-                <FaWhatsapp/> Request quote
-              </a>
-              <button type="button" onClick={copy}><FaLink/> Copy link</button>
-            </div>
-          )}
-        </div>
+        <Link to={url} state={{ product }} onClick={openPin}
+          className="sk-pin-card-unit-price"
+          aria-label={price !== null ? '₹' + price + ' per piece at ' + priceQty + ' pieces' : 'Ask price for ' + product.title}
+          title={price !== null ? 'Per piece for ' + priceQty + '+ pcs' : 'Ask for price'}>
+          {price !== null ? <><span aria-hidden="true">₹</span><strong>{price.toLocaleString('en-IN')}</strong></>
+            : <strong className="sk-pin-ask-price">Quote</strong>}
+        </Link>
       </div>
     </article>
   );
