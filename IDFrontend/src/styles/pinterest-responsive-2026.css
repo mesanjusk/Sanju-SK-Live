@@ -278,3 +278,17 @@
   .sk-checkout-product img{width:105px;height:132px;}
   .sk-checkout-layout{margin-top:13px;}
 }
+
+.sk-pin-creator{display:flex;align-items:center;gap:9px;margin:8px 0 10px;font-size:14px;font-weight:750;}
+.sk-pin-creator img{width:35px;height:35px;object-fit:contain;border-radius:50%;
+  background:#f6f4f0;border:1px solid #e6e4e0;padding:3px;}
+.sk-pin-creator span{display:flex;flex-direction:column;gap:1px;}
+.sk-pin-creator small{font-size:11px;font-weight:500;color:#818181;}
+.sk-pin-related-jump{position:absolute;right:13px;bottom:13px;display:grid;
+  place-items:center;width:49px;height:49px;background:#fff;color:#1f1f1f;
+  border-radius:18px;box-shadow:0 3px 12px #0002;font-size:22px;z-index:4;}
+.sk-pin-related-jump:hover{background:#f3f3f3;}
+@media(max-width:789px){.sk-pin-detail-visual-nav{bottom:15px;left:12px;right:75px;}
+  .sk-pin-detail-info .sk-pin-creator{margin-top:3px;}
+  .sk-pin-detail-info .sk-pin-detail-qty{margin-top:8px;}
+}
