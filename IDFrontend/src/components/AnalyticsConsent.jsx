@@ -26,10 +26,12 @@ export default function AnalyticsConsent(){
       setAnalyticsConsent('declined');
       return undefined;
     }
+    // Persist 'offered' immediately, not after the delay: a refresh or
+    // navigation during the 7s delay should not restart the notice.
+    markConsentPrompted();
     let hideTimer;
     const showTimer=window.setTimeout(()=>{
       if(analyticsConsent()!=='unset')return;
-      markConsentPrompted();
       setVisible(true);
       hideTimer=window.setTimeout(()=>{
         if(analyticsConsent()==='unset')setAnalyticsConsent('declined');
