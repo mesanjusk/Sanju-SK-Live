@@ -4,6 +4,7 @@
 export const CONSENT_KEY='sk_analytics_consent_v2';
 const COOKIE_KEY='sk_analytics_choice_v2';
 const PROMPT_KEY='sk_analytics_prompt_seen_v1';
+const PROMPT_COOKIE='sk_analytics_prompt_offered_v1';
 const TTL_SECONDS=180*24*60*60;
 const valid=value=>value==='accepted'||value==='declined';
 let memoryChoice='unset';
@@ -47,13 +48,16 @@ export function forgetConsentChoice(){
 }
 export function wasConsentPrompted(){
   if(memoryPrompted)return true;
-  try{return sessionStorage.getItem(PROMPT_KEY)==='1';}catch{return false;}
+  try{if(sessionStorage.getItem(PROMPT_KEY)==='1')return true;}catch{}
+  try{return document.cookie.split('; ').some(x=>x===PROMPT_COOKIE+'=1');}catch{return false;}
 }
 export function markConsentPrompted(){
   memoryPrompted=true;
   try{sessionStorage.setItem(PROMPT_KEY,'1');}catch{}
+  try{document.cookie=PROMPT_COOKIE+'=1; Max-Age='+TTL_SECONDS+cookieOptions();}catch{}
 }
 export function allowConsentPromptAgain(){
   memoryPrompted=false;
   try{sessionStorage.removeItem(PROMPT_KEY);}catch{}
+  try{document.cookie=PROMPT_COOKIE+'=; Max-Age=0'+cookieOptions();}catch{}
 }
