@@ -3,6 +3,7 @@ import multer from 'multer';
 import mongoose from 'mongoose';
 import cloudinary from '../utils/cloudinary.js';
 import Listing from '../models/Listing.js';
+import Category from '../models/Category.js';
 import {withSeoSlug} from '../utils/productSeo.js';
 import {CloudinaryStorage} from 'multer-storage-cloudinary';
 
@@ -85,7 +86,13 @@ router.get('/:key',async(req,res)=>{
  try{
   const p=await Listing.findOne({...active,...(id?{_id:key}:{slug:key})}).lean().maxTimeMS(12000);
   if(!p)return res.status(404).json({error:'Listing not found'});
-  const data=withSeoSlug(p);setCached(cacheKey,data);
+  const categoryId=String(p.category?._id||p.category||'');
+  let categoryName='';
+  if(mongoose.isValidObjectId(categoryId)){
+   const c=await Category.findById(categoryId).select('name').lean().maxTimeMS(8000);
+   categoryName=c?.name||'';
+  }else if(categoryId && !/^[a-f0-9]{24}$/i.test(categoryId))categoryName=categoryId;
+  const data={...withSeoSlug(p),...(categoryName?{categoryName}:{})};setCached(cacheKey,data);
   res.set('Cache-Control','public, max-age=60, stale-while-revalidate=300');
   res.json(data);
  }catch(e){
