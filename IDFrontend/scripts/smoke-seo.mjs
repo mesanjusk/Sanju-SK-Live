@@ -13,7 +13,7 @@ const product={
   seoTitle:'Personalized Laser Cut Wedding Cards in Gondia',
 };
 const index=readFileSync(new URL('../index.html',import.meta.url),'utf8');
-const siteMap=readFileSync(new URL('../public/sitemap.xml',import.meta.url),'utf8');
+const siteMap=readFileSync(new URL('../public/sitemap-pages.xml',import.meta.url),'utf8');
 const appBootSource=readFileSync(new URL('../src/App.jsx',import.meta.url),'utf8');
 assert(appBootSource.includes("import Home from './components/Home'"), 'Homepage must render directly instead of flashing the suspense loader');
 assert(!appBootSource.includes("lazy(() => import('./components/Home'))"), 'Do not lazy load homepage behind a second skeleton');
@@ -562,6 +562,7 @@ function mockResponse(){
 globalThis.fetch=async url=>{
   const str=String(url);
   if(str.includes('/api/listings/'+id))return new Response(JSON.stringify(product),{status:200});
+  if(str.endsWith('/api/listings/seo-index'))return new Response(JSON.stringify([product]),{status:200});
   if(str.endsWith('/api/listings'))return new Response(JSON.stringify([product]),{status:200});
   if(str.endsWith('/'))return new Response(index,{status:200,headers:{'Content-Type':'text/html'}});
   throw Error('Unexpected mocked URL '+str);

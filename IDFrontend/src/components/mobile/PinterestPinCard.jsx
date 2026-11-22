@@ -1,5 +1,6 @@
 import { memo } from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import {productPath} from '../../utils/productUrl';
 import { FaHeart, FaRegHeart, FaWhatsapp } from 'react-icons/fa';
 import { useFavorites } from '../../context/FavoritesContext';
 import { optimizedImage } from '../../utils/media';
@@ -28,7 +29,7 @@ function PinterestPinCard({ product, index = 0, categoryName = '', whatsappNumbe
   const price = tiers.length ? Number(tiers[0].price)
     : Number(product.price) > 0 ? Number(product.price) : null;
   const priceQty = tiers[0] ? Number(tiers[0].minQty) : 1;
-  const url = '/products/' + id;
+  const url = productPath(product);
   const message = 'Hi SANJU SK Digital, I would like a quote for ' + product.title +
     '. Design ID: ' + id + '. https://www.sanjusk.in' + url;
   const whatsapp = 'https://wa.me/' + String(whatsappNumber).replace(/\D/g, '') + '?text=' + encodeURIComponent(message);

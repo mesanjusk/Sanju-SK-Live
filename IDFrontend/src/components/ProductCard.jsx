@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
+import {productPath} from '../utils/productUrl';
 import { FaWhatsapp, FaHeart, FaRegHeart, FaArrowRight } from 'react-icons/fa';
 import { useFavorites } from '../context/FavoritesContext';
 import { trackWhatsAppClick } from '../hooks/useAnalytics';
@@ -25,7 +26,7 @@ export default function ProductCard({ product, priority = false }) {
     const prices = product?.quantityPricing?.map(t => Number(t.price)).filter(p => p > 0) || [];
     return prices.length ? `From ₹${Math.min(...prices)}` : (Number(product?.price) > 0 ? `₹${product.price}` : 'Ask for price');
   }, [product]);
-  const productLink = `${window.location.origin}/products/${product?._id}`;
+  const productLink = window.location.origin + productPath(product);
   const message = `Hi, I am interested in *${product?.title}*\nProduct ID: ${product?._id}\n${price}\n`
     + (categoryName ? `Category: ${categoryName}\n` : '')
     + (images[img] ? `Image: ${images[img]}\n` : '') + `Product: ${productLink}`;
@@ -49,7 +50,7 @@ export default function ProductCard({ product, priority = false }) {
       </div>
       <div className="sk-catalog-card__body">
         <p className="sk-feed-card__muted">{categoryName || 'Custom made · Gondia'}</p>
-        <Link to={`/products/${product?._id}`} className="mt-1 block">
+        <Link to={productPath(product)} className="mt-1 block">
           <h3 className="line-clamp-2 text-lg font-extrabold tracking-tight text-[#252525]">{product?.title}</h3>
         </Link>
         <p className="mt-2 line-clamp-2 min-h-[30px] text-xs leading-5 text-[#777777]">
@@ -59,7 +60,7 @@ export default function ProductCard({ product, priority = false }) {
           <strong className="sk-price text-lg">{price}</strong>
           <a href={waHref} target="_blank" rel="noopener noreferrer" onClick={enquire} className="sk-order-button"><FaWhatsapp /> Enquire</a>
         </div>
-        <Link to={`/products/${product?._id}`} className="mt-3 inline-flex items-center gap-2 text-xs font-bold text-[#795015]">
+        <Link to={productPath(product)} className="mt-3 inline-flex items-center gap-2 text-xs font-bold text-[#795015]">
           View photos & details <FaArrowRight />
         </Link>
       </div>

@@ -362,6 +362,5 @@ Sitemap: ${seo.siteUrl}/sitemap-products.xml
 `;
 fs.mkdirSync(publicDir, { recursive: true });
 fs.writeFileSync(path.join(publicDir, 'sitemap-pages.xml'), sitemapXml);
-fs.writeFileSync(path.join(publicDir, 'sitemap.xml'), sitemapXml);
 fs.writeFileSync(path.join(publicDir, 'robots.txt'), robots);
 console.log('Generated SEO initial HTML, business graph and static sitemap for', home);

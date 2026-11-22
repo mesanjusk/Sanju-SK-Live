@@ -96,7 +96,7 @@ export default function ProductStage({
             <div className="sk-product-stage__artwork">
               {selected ? (
                 <img src={optimizedImage(selected, compact ? 720 : 1120)}
-                  alt={`${title} — view ${activeIndex + 1} of ${photos.length}`}
+                  alt={`${title} - Custom Printing & Design in Gondia, photo ${activeIndex + 1} of ${photos.length}`}
                   draggable="false" loading={priority || !compact ? 'eager' : 'lazy'}
                   fetchPriority={priority ? 'high' : 'auto'}
                   decoding="async" width="800" height="800" />

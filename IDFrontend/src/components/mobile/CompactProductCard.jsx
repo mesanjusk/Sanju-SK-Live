@@ -1,5 +1,6 @@
 import { memo, useMemo } from 'react';
 import { Link } from 'react-router-dom';
+import {productPath} from '../../utils/productUrl';
 import { FaHeart, FaRegHeart, FaWhatsapp } from 'react-icons/fa';
 import { useFavorites } from '../../context/FavoritesContext';
 import { optimizedImage } from '../../utils/media';
@@ -29,7 +30,7 @@ function CompactProductCard({ product, whatsappNumber, categoryName = '' }) {
   const message = 'Hi Sanju SK Digital, I am inquiring about ' + product.title +
     '. Product ID: ' + id + (categoryName ? '. Category: ' + categoryName : '') +
     '. Please share photos, pricing and delivery details. ' +
-    'https://www.sanjusk.in/products/' + id;
+    'https://www.sanjusk.in' + productPath(product);
   const href = 'https://wa.me/' + wa + '?text=' + encodeURIComponent(message);
   const onEnquire = () => {
     trackWhatsAppClick(id);
@@ -38,7 +39,7 @@ function CompactProductCard({ product, whatsappNumber, categoryName = '' }) {
 
   return (
     <article className="sk-gallery-product-card group relative flex h-full min-w-0 flex-col overflow-hidden rounded-[17px] border border-[#ded0ee]">
-      <Link to={'/products/' + id} className="sk-gallery-product-photo relative block overflow-hidden"
+      <Link to={productPath(product)} className="sk-gallery-product-photo relative block overflow-hidden"
         aria-label={'View ' + product.title}>
         {image ? (
           <img
@@ -61,7 +62,7 @@ function CompactProductCard({ product, whatsappNumber, categoryName = '' }) {
         {isSaved ? <FaHeart className="text-rose-500" /> : <FaRegHeart />}
       </button>
       <div className="sk-gallery-product-caption flex min-h-[126px] flex-1 flex-col p-2 sm:p-3">
-        <Link to={'/products/' + id}
+        <Link to={productPath(product)}
           className="sk-gallery-product-title block min-h-[28px] text-[11px] font-extrabold leading-tight line-clamp-2 sm:text-[13px]">
           {product.title}
         </Link>
