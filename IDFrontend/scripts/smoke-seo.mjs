@@ -239,8 +239,9 @@ assert(detailSource.includes('sk-pin-detail-visual') && detailSource.includes('s
 assert(detailSource.includes('ProductStructuredData') && detailSource.includes('saveEnquiryLead') &&
   detailSource.includes('toggleFavorite(product)') && detailSource.includes('navigator.share') &&
   detailSource.includes('getPriceForQty'), 'Details must retain SEO, saved, sharing and genuine pricing');
-assert(detailSource.includes('initial = idOf(location.state?.product)') &&
-  detailSource.includes("api.get('/api/listings/' + id"), 'Detail should render immediately using card state and refresh from backend');
+assert(detailSource.includes("String(location.state?.product?.slug || '') === String(id)") &&
+  detailSource.includes('idOf(location.state?.product) === String(id)') &&
+  detailSource.includes("api.get('/api/listings/' + id"), 'Detail should render immediately using slug or ID card state and refresh from backend');
 assert(detailSource.includes('ProductStage') && detailSource.includes('getYouTubeId'),
   'Optional 3D model and video media features should remain');
 assert(pinCss.includes('sk-pin-about-intro') && index.includes('sk-boot-bottom-nav'),
