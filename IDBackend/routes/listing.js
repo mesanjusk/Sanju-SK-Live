@@ -89,8 +89,10 @@ router.get('/:key',async(req,res)=>{
   const categoryId=String(p.category?._id||p.category||'');
   let categoryName='';
   if(mongoose.isValidObjectId(categoryId)){
-   const c=await Category.findById(categoryId).select('name').lean().maxTimeMS(8000);
-   categoryName=c?.name||'';
+   try{
+    const c=await Category.findById(categoryId).select('name').lean().maxTimeMS(4000);
+    categoryName=c?.name||'';
+   }catch(e){console.warn('Category name lookup skipped for listing',key,e.message);}
   }else if(categoryId && !/^[a-f0-9]{24}$/i.test(categoryId))categoryName=categoryId;
   const data={...withSeoSlug(p),...(categoryName?{categoryName}:{})};setCached(cacheKey,data);
   res.set('Cache-Control','public, max-age=60, stale-while-revalidate=300');
