@@ -64,11 +64,11 @@
     },
     {
       "source": "/categories/:slug",
-      "destination": "/categories/:slug/index.html"
+      "destination": "/api/catalog-page?slug=:slug"
     },
     {
       "source": "/categories/:slug/",
-      "destination": "/categories/:slug/index.html"
+      "destination": "/api/catalog-page?slug=:slug"
     },
     {
       "source": "/product-view/:id",
@@ -76,27 +76,51 @@
     },
     {
       "source": "/wedding-card-printing-gondia",
-      "destination": "/wedding-card-printing-gondia/index.html"
+      "destination": "/api/catalog-page?service=wedding-card-printing-gondia"
     },
     {
       "source": "/wedding-card-printing-gondia/",
-      "destination": "/wedding-card-printing-gondia/index.html"
+      "destination": "/api/catalog-page?service=wedding-card-printing-gondia"
     },
     {
       "source": "/digital-wedding-invitations",
-      "destination": "/digital-wedding-invitations/index.html"
+      "destination": "/api/catalog-page?service=digital-wedding-invitations"
     },
     {
       "source": "/digital-wedding-invitations/",
-      "destination": "/digital-wedding-invitations/index.html"
+      "destination": "/api/catalog-page?service=digital-wedding-invitations"
     },
     {
       "source": "/corporate-gifting-gondia",
-      "destination": "/corporate-gifting-gondia/index.html"
+      "destination": "/api/catalog-page?service=corporate-gifting-gondia"
     },
     {
       "source": "/corporate-gifting-gondia/",
-      "destination": "/corporate-gifting-gondia/index.html"
+      "destination": "/api/catalog-page?service=corporate-gifting-gondia"
+    },
+    {
+      "source": "/3d-led-sign-boards-gondia",
+      "destination": "/api/catalog-page?service=3d-led-sign-boards-gondia"
+    },
+    {
+      "source": "/3d-led-sign-boards-gondia/",
+      "destination": "/api/catalog-page?service=3d-led-sign-boards-gondia"
+    },
+    {
+      "source": "/custom-trophies-awards-gondia",
+      "destination": "/api/catalog-page?service=custom-trophies-awards-gondia"
+    },
+    {
+      "source": "/custom-trophies-awards-gondia/",
+      "destination": "/api/catalog-page?service=custom-trophies-awards-gondia"
+    },
+    {
+      "source": "/flex-banner-printing-gondia",
+      "destination": "/api/catalog-page?service=flex-banner-printing-gondia"
+    },
+    {
+      "source": "/flex-banner-printing-gondia/",
+      "destination": "/api/catalog-page?service=flex-banner-printing-gondia"
     },
     {
       "source": "/(.*)",
