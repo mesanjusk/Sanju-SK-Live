@@ -3,13 +3,13 @@ const { BACKEND, SITE_URL, esc, isId, fetchWithDeadline }=shared;
 export default async function handler(req,res) {
   if(req.method!=='GET'&&req.method!=='HEAD')return res.status(405).end();
   try {
-    const response=await fetchWithDeadline(BACKEND+'/api/listings',20000);
+    const response=await fetchWithDeadline(BACKEND+'/api/listings/seo-index',20000);
     if(!response.ok)throw Error('Product API status '+response.status);
     const body=await response.json();
     const products=Array.isArray(body)?body:Array.isArray(body?.result)?body.result:[];
     // A sitemap must not silently advertise an empty collection when the API has failed.
     if(!Array.isArray(products))throw Error('Invalid collection response');
-    const unique=[...new Set(products.map(p=>String(p?._id||'')).filter(isId))].slice(0,45000);
+    const unique=[...new Set(products.map(p=>String(p?.slug||p?._id||'')).filter(v=>/^[a-z0-9-]+$/i.test(v)))].slice(0,45000);
     const xml='<?xml version="1.0" encoding="UTF-8"?>\n'+
       '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'+
       unique.map(id=>'  <url><loc>'+esc(SITE_URL+'/products/'+id)+'</loc></url>').join('\n')+
