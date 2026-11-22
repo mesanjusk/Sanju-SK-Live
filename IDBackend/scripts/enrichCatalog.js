@@ -94,6 +94,7 @@ function display(rows,products,mode){
 }
 async function databaseModels(){
  if(!process.env.MONGO_URI)throw Error('MONGO_URI required for direct MongoDB preview or approved apply');
+ if(!process.env.MONGO_URI){try{await import('dotenv/config');}catch{}}
  const mongoose=(await import('mongoose')).default;
  const Listing=(await import('../models/Listing.js')).default;
  const Category=(await import('../models/Category.js')).default;

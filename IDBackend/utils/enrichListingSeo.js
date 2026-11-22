@@ -62,29 +62,25 @@ export function proposedTitle(p,category='',subcategory=''){
  return title;
 }
 export function proposedDescription(p,title){
- const mat=trim(p.material),size=trim(p.size),details=trim(p.customizationDetails);
+ const material=trim(p.material),size=trim(p.size),details=trim(p.customizationDetails);
  const price=merchantPrice(p);
- const intro=title+' can be personalized with names, dates, logos or photos.';
- let spec=mat?'Material: '+mat+'.':details?'Custom details: '+clipped(details,45)+'.':'';
- if(size)spec+=(spec?' ':'')+'Size: '+clipped(size,26)+'.';
- if(!spec)spec='Artwork, layout and size can be discussed for your order.';
- const pricePart=price?(price.minQty>1?
-  ' MOQ '+price.minQty+' pieces from ₹'+price.amount+' each.':
-  ' Starting at ₹'+price.amount+' per piece.'):'';
- const last=SITE_LINE+'.'+pricePart;
- // 3 sentences, or 4 with separate MOQ note when a concrete price exists.
- // Preserve facts and enforce 300 characters by trimming the optional spec.
- let description=[intro,spec,last].join(' ');
- if(description.length>300){
-  spec=mat?'Made with '+clipped(mat,25)+'.':'Available for custom orders.';
-  description=[intro,spec,last].join(' ');
- }
- if(description.length>300){
-  description=title+' can be customized with names, dates, logos or photos. '+SITE_LINE+'.'+pricePart;
- }
- if(description.length<150){
-  description=title+' is available with custom names, dates, artwork, logos or photos for your event or business. '+SITE_LINE+'.'+pricePart;
- }
+ const first=title+' can be personalized with names, dates, logos or photos.';
+ const parts=[];
+ if(material)parts.push('Material: '+clipped(material,32));
+ if(size)parts.push('size: '+clipped(size,24));
+ if(details)parts.push('custom details: '+clipped(details,42));
+ const second=parts.length?parts.join('; ')+'.':'Artwork, layout and sizing options can be discussed before printing.';
+ const priceNote=price?(price.minQty>1?
+  '; MOQ '+price.minQty+' pieces at ₹'+price.amount+' per piece':
+  '; starting at ₹'+price.amount+' per piece'):'';
+ const third=SITE_LINE+priceNote+'.';
+ let description=[first,second,third].join(' ');
+ if(description.length>300)
+  description=[first,'Artwork and sizing can be customized.',third].join(' ');
+ if(description.length>300)
+  description=[title+' can be customized with names, dates and logos.','Artwork can be adapted.',third].join(' ');
+ if(description.length<150)
+  description=[first,'Artwork, layout and sizing options are available for your event or business.',third].join(' ');
  return description.length<=300&&description.length>=150?description:null;
 }
 const categoryName=(v,map)=>map.get(String(v?._id||v||''))||(!isObjectId(v)?trim(v):'');
