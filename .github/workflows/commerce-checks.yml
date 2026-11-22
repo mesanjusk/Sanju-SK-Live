@@ -17,6 +17,9 @@ jobs:
         run: |
           node --version
           node --check IDBackend/index.js
+          node --check IDBackend/routes/googleMerchantFeed.js
+          node --check IDBackend/utils/googleMerchantFeed.js
+          node --check IDBackend/utils/googleMerchantCache.js
           node --check IDBackend/routes/orderRoutes.js
           node --check IDBackend/routes/userRoutes.js
           node --check IDBackend/models/User.js

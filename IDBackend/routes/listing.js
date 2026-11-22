@@ -4,6 +4,7 @@ import mongoose from 'mongoose';
 import cloudinary from '../utils/cloudinary.js';
 import Listing from '../models/Listing.js';
 import Category from '../models/Category.js';
+import {invalidateGoogleMerchantFeed} from '../utils/googleMerchantCache.js';
 import {withSeoSlug} from '../utils/productSeo.js';
 import {CloudinaryStorage} from 'multer-storage-cloudinary';
 
@@ -13,7 +14,7 @@ const upload=multer({storage:new CloudinaryStorage({cloudinary,params:{
  transformation:[{width:1200,height:1200,crop:'limit',quality:'auto'}]
 }})});
 const cache=new Map(),TTL=90000,STALE=86400000,LIMIT=50;
-const invalidate=()=>cache.clear();
+const invalidate=()=>{cache.clear();invalidateGoogleMerchantFeed();};
 function setCached(key,data){
  if(cache.size>=LIMIT)cache.delete(cache.keys().next().value);
  cache.set(key,{data,at:Date.now()});
@@ -25,10 +26,14 @@ function imageList(req){
 }
 function payload(req){
  const fields=['title','description','category','subcategory','religions','size','badge',
- 'youtubeUrl','instagramUrl','seoTitle','seoDescription','seoKeywords','favorite'];
+ 'youtubeUrl','instagramUrl','seoTitle','seoDescription','seoKeywords','favorite',
+ 'material','customizationDetails'];
  const data=Object.fromEntries(fields.filter(k=>req.body[k]!==undefined).map(k=>[k,req.body[k]]));
  if(req.body.price!==undefined)data.price=Number(req.body.price)||0;
  if(req.body.quantityPricing!==undefined)data.quantityPricing=JSON.parse(req.body.quantityPricing||'[]');
+ for(const key of ['active','published']){
+  if(req.body[key]!==undefined)data[key]=req.body[key]===true||req.body[key]==='true';
+ }
  data.images=imageList(req);
  return data;
 }

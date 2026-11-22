@@ -4,6 +4,7 @@ import multer from 'multer';
 import { CloudinaryStorage } from 'multer-storage-cloudinary';
 import cloudinary from '../utils/cloudinary.js';
 import Category from '../models/Category.js';
+import {invalidateGoogleMerchantFeed} from '../utils/googleMerchantCache.js';
 
 const router = express.Router();
 
@@ -34,6 +35,7 @@ router.post('/', upload.single('image'), async (req, res) => {
     const category = new Category({ name, imageUrl });
     await category.save();
 
+    invalidateGoogleMerchantFeed();
     res.status(201).json(category);
   } catch (err) {
     console.error('Error uploading category:', err);
@@ -56,6 +58,7 @@ router.get('/', async (req, res) => {
 router.delete('/:id', async (req, res) => {
   try {
     await Category.findByIdAndDelete(req.params.id);
+    invalidateGoogleMerchantFeed();
     res.json({ message: 'Category deleted' });
   } catch (err) {
     console.error('Error deleting category:', err);
@@ -75,6 +78,7 @@ router.put('/:id', upload.single('image'), async (req, res) => {
       updatedData,
       { new: true }
     );
+    invalidateGoogleMerchantFeed();
     res.json(category);
   } catch (err) {
     console.error('Error updating category:', err);

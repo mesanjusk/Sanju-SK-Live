@@ -351,6 +351,7 @@ const robots = `User-agent: *
 Allow: /
 Allow: /products/
 Allow: /categories/
+Allow: /feeds/google-merchant.xml
 Disallow: /api/
 Disallow: /admin
 Disallow: /login
