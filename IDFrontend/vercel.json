@@ -51,6 +51,10 @@
   ],
   "rewrites": [
     {
+      "source": "/feeds/google-merchant.xml",
+      "destination": "https://sanju-sk-live.onrender.com/feeds/google-merchant.xml"
+    },
+    {
       "source": "/sitemap.xml",
       "destination": "/api/sitemap"
     },

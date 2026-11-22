@@ -67,6 +67,8 @@ for(const [route,priority,freq] of requiredRoutes){
 const robots=readFileSync(new URL('../public/robots.txt',import.meta.url),'utf8');
 assert(robots.includes('User-agent: *')&&robots.includes('Allow: /'),'Robots must allow all crawlers');
 assert(robots.includes('Sitemap: https://www.sanjusk.in/sitemap.xml'),'Missing sitemap discovery');
+assert(robots.includes('Allow: /feeds/google-merchant.xml') && !robots.includes('Disallow: /feeds'),
+  'Google Merchant Center RSS path must be crawlable');
 assert(robots.includes('Sitemap: https://www.sanjusk.in/sitemap-products.xml'),'Product sitemap discovery must use the direct XML route');
 const landingSlugs=[
   '3d-led-sign-boards-gondia',
@@ -350,6 +352,9 @@ const categoryGuideData=JSON.parse(readFileSync(new URL('../src/config/category-
 const guideSource=readFileSync(new URL('../src/components/mobile/CategorySeoBlurb.jsx',import.meta.url),'utf8');
 const navSource=readFileSync(new URL('../src/components/mobile/MobileBottomNav.jsx',import.meta.url),'utf8');
 const vercelRules=JSON.parse(readFileSync(new URL('../vercel.json',import.meta.url),'utf8'));
+assert(vercelRules.rewrites.some(r=>r.source==='/feeds/google-merchant.xml' &&
+  r.destination==='https://sanju-sk-live.onrender.com/feeds/google-merchant.xml'),
+  'Public Merchant feed path must resolve to the Express backend');
 assert(categoryGuideData.length>=9,'Require authored category content for observed catalog categories');
 assert(new Set(categoryGuideData.map(g=>g.slug)).size===categoryGuideData.length,'Category SEO guide slugs must be unique');
 assert(!homeSource.includes('<CategorySeoBlurb') &&

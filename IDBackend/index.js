@@ -25,6 +25,7 @@ import videoRoutes from './routes/videoRoutes.js';
 import orderRoutes from './routes/orderRoutes.js';
 import {verifyToken} from './utils/authMiddleware.js';
 import seoRoutes from './routes/seoRoutes.js';
+import googleMerchantFeedRoutes from './routes/googleMerchantFeed.js';
 import Listing from './models/Listing.js';
 import {backfillListingSlugs} from './utils/productSeo.js';
 
@@ -85,6 +86,7 @@ app.use((req,res,next)=>{
 });
 
 app.use(seoRoutes);
+app.use('/feeds',googleMerchantFeedRoutes);
 app.use('/api/images', imageRoutes);
 app.use('/api/listings', listingRoutes);
 app.use('/api/categories', categoryRoutes);

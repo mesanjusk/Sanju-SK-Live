@@ -42,6 +42,6 @@ router.get('/sitemap.xml',async(req,res)=>{
  }catch(e){console.error('Sitemap failed',e);res.set('Retry-After','30').status(503).send('Sitemap temporarily unavailable');}
 });
 router.get('/robots.txt',(_req,res)=>{
- res.type('text/plain').send('User-agent: *\nAllow: /products/\nAllow: /categories/\nDisallow: /admin\nDisallow: /login\nDisallow: /api/\nDisallow: /upload\nSitemap: '+SITE+'/sitemap.xml\n');
+ res.type('text/plain').send('User-agent: *\nAllow: /products/\nAllow: /categories/\nAllow: /feeds/google-merchant.xml\nDisallow: /admin\nDisallow: /login\nDisallow: /api/\nDisallow: /upload\nSitemap: '+SITE+'/sitemap.xml\n');
 });
 export default router;
