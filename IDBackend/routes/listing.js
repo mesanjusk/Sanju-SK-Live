@@ -4,6 +4,9 @@ import mongoose from 'mongoose';
 import cloudinary from '../utils/cloudinary.js';
 import Listing from '../models/Listing.js';
 import Category from '../models/Category.js';
+import Subcategory from '../models/Subcategory.js';
+import {needsSeoEnrichment,createSeoPreview} from '../utils/enrichListingSeo.js';
+import {bumpCatalogCacheRevision,readCatalogCacheRevision} from '../utils/catalogCacheRevision.js';
 import {invalidateGoogleMerchantFeed} from '../utils/googleMerchantCache.js';
 import {withSeoSlug} from '../utils/productSeo.js';
 import {CloudinaryStorage} from 'multer-storage-cloudinary';
@@ -15,6 +18,38 @@ const upload=multer({storage:new CloudinaryStorage({cloudinary,params:{
 }})});
 const cache=new Map(),TTL=90000,STALE=86400000,LIMIT=50;
 const invalidate=()=>{cache.clear();invalidateGoogleMerchantFeed();};
+let observedCatalogRevision=null;
+async function ensureCatalogVersion(){
+ const revision=await readCatalogCacheRevision();
+ if(observedCatalogRevision!==revision){observedCatalogRevision=revision;invalidate();}
+}
+async function afterCatalogWrite(){
+ invalidate();
+ try{observedCatalogRevision=await bumpCatalogCacheRevision();}
+ catch(error){console.error('Catalog revision bump failed after successful mutation',error);}
+}
+const categoryName=async(id,model)=>{
+ if(!mongoose.isValidObjectId(id))return String(id||'');
+ const row=await model.findById(id).select('name').lean().maxTimeMS(4000);
+ return row?.name||'';
+};
+async function enrichNewListing(p){
+ if(!needsSeoEnrichment({...p.toObject(),slug:'new-product'}))return;
+ const [category,subcategory]=await Promise.all([
+  categoryName(p.category,Category),categoryName(p.subcategory,Subcategory)
+ ]);
+ const existing=await Listing.find({category:p.category}).select('_id title slug category originalTitle').lean().maxTimeMS(6000);
+ const docs=[...existing,{...p.toObject(),slug:'new-product'}];
+ const plan=createSeoPreview(docs,[{_id:p.category,name:category}],[{_id:p.subcategory,name:subcategory}]);
+ const proposed=plan.find(r=>r.id===String(p._id));
+ if(!proposed)return;
+ p.originalTitle=p.title;
+ p.originalDescription=p.description||'';
+ p.title=proposed.afterTitle;
+ if(proposed.changeDescription)p.description=proposed.afterDescription;
+ p.seoEnrichmentVersion='upload-v1';
+ p.seoEnrichedAt=new Date();
+}
 function setCached(key,data){
  if(cache.size>=LIMIT)cache.delete(cache.keys().next().value);
  cache.set(key,{data,at:Date.now()});
@@ -38,7 +73,14 @@ function payload(req){
  return data;
 }
 router.post('/',upload.array('images',4),async(req,res)=>{
- try {const p=await new Listing(payload(req)).save();invalidate();res.status(201).json(p);}
+ try {
+  const p=new Listing(payload(req));
+  // Only brand-new generic products are enriched. The listing model generates
+  // the permanent slug once, from the final title, on initial validation.
+  await enrichNewListing(p);
+  await p.save();await afterCatalogWrite();
+  res.status(201).json(p);
+}
  catch(e){res.status(500).json({error:e.message});}
 });
 router.get('/',async(req,res)=>{
@@ -71,6 +113,7 @@ router.get('/',async(req,res)=>{
  }
 });
 router.get('/seo-index',async(_req,res)=>{
+ try{await ensureCatalogVersion();}catch(e){return res.status(503).json({error:'Catalog revision check unavailable'});}
  const key='seo-index',item=cache.get(key);
  if(item && Date.now()-item.at<TTL)return res.json(item.data);
  try{
@@ -111,11 +154,11 @@ router.put('/:id',upload.array('images',4),async(req,res)=>{
  try{
   const p=await Listing.findByIdAndUpdate(req.params.id,{$set:{...payload(req),updatedAt:new Date()}},{new:true,runValidators:true});
   if(!p)return res.status(404).json({error:'Listing not found'});
-  invalidate();res.json(p);
+  await afterCatalogWrite();res.json(p);
  }catch(e){res.status(500).json({error:e.message});}
 });
 router.delete('/:id',async(req,res)=>{
- try{await Listing.findByIdAndDelete(req.params.id);invalidate();res.json({success:true});}
+ try{await Listing.findByIdAndDelete(req.params.id);await afterCatalogWrite();res.json({success:true});}
  catch(e){res.status(500).json({error:e.message});}
 });
 export default router;

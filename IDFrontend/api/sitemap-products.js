@@ -15,7 +15,7 @@ export default async function handler(req,res) {
       unique.map(id=>'  <url><loc>'+esc(SITE_URL+'/products/'+id)+'</loc></url>').join('\n')+
       '\n</urlset>\n';
     res.setHeader('Content-Type','application/xml; charset=utf-8');
-    res.setHeader('Cache-Control','public, s-maxage=900, stale-while-revalidate=3600');
+    res.setHeader('Cache-Control','no-store');
     res.setHeader('X-Content-Type-Options','nosniff');
     return res.status(200).send(req.method==='HEAD'?'':xml);
   }catch(error){
