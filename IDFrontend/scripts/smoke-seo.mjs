@@ -366,8 +366,8 @@ assert(navSource.includes('sk-floating-actions') && navSource.includes('visible=
   'Floating actions must keep scroll-aware show/hide state');
 const newPages=categoryGuideData.filter(g=>!g.existingUrl);
 assert(newPages.length>=7,'Require new helpful indexable pages in addition to existing service pages');
-assert(vercelRules.rewrites.some(r=>r.source==='/categories/:slug/' && r.destination==='/categories/:slug/index.html'),
-  'Vercel must serve generated category pages rather than React fallback');
+assert(vercelRules.rewrites.some(r=>r.source==='/categories/:slug/' && r.destination==='/api/catalog-page?slug=:slug'),
+  'Vercel must serve server-rendered category pages with product links rather than React fallback');
 for(const guide of newPages) {
   const canonical='https://www.sanjusk.in/categories/'+guide.slug+'/';
   const html=readFileSync(new URL('../public/categories/'+guide.slug+'/index.html',import.meta.url),'utf8');
