@@ -3,6 +3,7 @@ import { useParams, useNavigate, useLocation, Link } from 'react-router-dom';
 import { FaArrowLeft, FaChevronLeft, FaChevronRight, FaHeart, FaRegHeart, FaRegThumbsUp, FaThumbsUp, FaShare, FaWhatsapp, FaYoutube, FaEllipsisH, FaMagic } from 'react-icons/fa';
 import api from '../api';
 import SEO from '../components/SEO';
+import {productPath,productAbsoluteUrl} from '../utils/productUrl';
 import ProductStructuredData from '../components/ProductStructuredData';
 import PinterestPinCard from '../components/mobile/PinterestPinCard';
 import { uniqueDesigns } from '../components/mobile/uniqueDesigns.mjs';
@@ -33,7 +34,7 @@ export default function ProductDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
-  const initial = idOf(location.state?.product) === String(id) ? location.state.product : null;
+  const initial = (String(location.state?.product?.slug || '') === String(id) || idOf(location.state?.product) === String(id)) ? location.state.product : null;
   const [product, setProduct] = useState(initial);
   const [loading, setLoading] = useState(!initial);
   const [loadError, setLoadError] = useState(false);
@@ -63,7 +64,7 @@ export default function ProductDetail() {
 
   useEffect(() => {
     let active = true;
-    const preview = idOf(location.state?.product) === String(id) ? location.state.product : null;
+    const preview = (String(location.state?.product?.slug || '') === String(id) || idOf(location.state?.product) === String(id)) ? location.state.product : null;
     setProduct(preview);
     if(preview)recordDesignInterest(preview);
     setLoading(!preview);
@@ -160,22 +161,22 @@ export default function ProductDetail() {
   const price = getPriceForQty(product,initialQuantity);
   const ytId = getYouTubeId(product.youtubeUrl);
   const message = 'Hi SANJU SK Digital, please quote for *' + product.title + '*\n' +
-    'Design ID: ' + id + '\n' +
+    'Design ID: ' + product._id + '\n' +
     (price !== null ? 'Indicative unit price: ₹' + price + '\n' : '') +
     (image ? 'Design photo: ' + image + '\n' : '') +
-    'Design link: https://www.sanjusk.in/products/' + id;
+    'Design link: ' + productAbsoluteUrl(product);
   const waHref = 'https://wa.me/919372333633?text=' + encodeURIComponent(message);
   const enquire = () => {
-    trackWhatsAppClick(id);
-    saveEnquiryLead({productId:id,productName:product.title,message});
+    trackWhatsAppClick(product._id);
+    saveEnquiryLead({productId:product._id,productName:product.title,message});
   };
   const buyNow = () => {
     recordDesignInterest(product, 'enquire');
-    navigate('/checkout?product=' + encodeURIComponent(id),
+    navigate('/checkout?product=' + encodeURIComponent(product._id),
       {state:{product}});
   };
   const share = () => {
-    const url = 'https://www.sanjusk.in/products/' + id;
+    const url = productAbsoluteUrl(product);
     if (navigator.share) navigator.share({title:product.title,url}).catch(()=>{});
     else navigator.clipboard?.writeText(url)?.catch(()=>{});
   };
@@ -187,9 +188,9 @@ export default function ProductDetail() {
     <>
       <SEO title={product.seoTitle || product.title}
         description={product.seoDescription || product.description || product.title}
-        image={images[0]} pathname={'/products/' + id}
+        image={images[0]} pathname={productPath(product)}
         noIndex={location.pathname.startsWith('/product-view/')} />
-      <ProductStructuredData product={product} />
+      <ProductStructuredData product={product} categoryName={categoryName} />
       <div className="sk-pinterest-home sk-pin-detail-page sk-public-site">
         <header className="sk-pin-detail-head">
           <button type="button" className="sk-pin-round-action" aria-label="Back to designs"

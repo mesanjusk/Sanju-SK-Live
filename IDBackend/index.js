@@ -24,6 +24,9 @@ import inboxRoutes from './routes/inboxRoutes.js';
 import videoRoutes from './routes/videoRoutes.js';
 import orderRoutes from './routes/orderRoutes.js';
 import {verifyToken} from './utils/authMiddleware.js';
+import seoRoutes from './routes/seoRoutes.js';
+import Listing from './models/Listing.js';
+import {backfillListingSlugs} from './utils/productSeo.js';
 
 dotenv.config();
 
@@ -81,6 +84,7 @@ app.use((req,res,next)=>{
   next();
 });
 
+app.use(seoRoutes);
 app.use('/api/images', imageRoutes);
 app.use('/api/listings', listingRoutes);
 app.use('/api/categories', categoryRoutes);
@@ -110,8 +114,13 @@ process.on('unhandledRejection', (reason) => {
 
 mongoose
   .connect(MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
-  .then(() => {
+  .then(async () => {
     console.log('✅ Connected to MongoDB');
+    try {
+      const count=await backfillListingSlugs(Listing);
+      if(count)console.log('SEO migrated product slugs:',count);
+    }catch(error){console.error('SEO slug backfill failed; ID links remain available',error);}
+
     console.log('✅ Routes registered: leads, inbox, confi/effective-wa-number, webhook');
     app.listen(PORT, '0.0.0.0', () => console.log(`🚀 Server running on 0.0.0.0:${PORT}`));
   })

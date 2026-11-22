@@ -1,5 +1,6 @@
 import { memo, useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
+import {productPath} from '../../utils/productUrl';
 import { FaHeart, FaRegHeart, FaShare, FaWhatsapp, FaArrowRight } from 'react-icons/fa';
 import { useFavorites } from '../../context/FavoritesContext';
 import { trackWhatsAppClick } from '../../hooks/useAnalytics';
@@ -38,7 +39,7 @@ function ProductFeedCard({ product, whatsappNumber, onView, priority = false }) 
   }, [product]);
 
   const wa = String(whatsappNumber || '919372333633').replace(/\D/g, '');
-  const productLink = `${window.location.origin}/products/${product._id}`;
+  const productLink = window.location.origin + productPath(product);
   const message = `Hi! I'm interested in *${product.title}*\n🆔 Product ID: ${product._id}\n💰 ${displayPrice}\n`
     + (categoryName ? `📂 Category: ${categoryName}\n` : '')
     + (images[imgIdx] ? `🖼️ Image: ${images[imgIdx]}\n` : '')
@@ -57,7 +58,7 @@ function ProductFeedCard({ product, whatsappNumber, onView, priority = false }) 
   return (
     <article className="sk-feed-card" ref={cardRef}>
       <div className="sk-feed-card__header">
-        <Link to={`/products/${product._id}`} className="flex min-w-0 items-center gap-2.5">
+        <Link to={productPath(product)} className="flex min-w-0 items-center gap-2.5">
           <div className="h-10 w-10 shrink-0 overflow-hidden rounded-xl border border-white bg-[#eef1ec] shadow-sm">
             {images[0] && <img className="h-full w-full object-cover" src={optimizedImage(images[0], 100)} alt="" loading="lazy" decoding="async" width="40" height="40" />}
           </div>
@@ -81,7 +82,7 @@ function ProductFeedCard({ product, whatsappNumber, onView, priority = false }) 
             {isFav ? <FaHeart className="text-rose-500" /> : <FaRegHeart />}
           </button>
           <button type="button" aria-label={`Share ${product.title}`} onClick={handleShare} className="sk-glass-button !h-9 !w-9"><FaShare /></button>
-          <Link to={`/products/${product._id}`} className="inline-flex items-center gap-1.5 text-xs font-bold text-[#365b4a]">
+          <Link to={productPath(product)} className="inline-flex items-center gap-1.5 text-xs font-bold text-[#365b4a]">
             Details <FaArrowRight className="text-[10px]" />
           </Link>
         </div>

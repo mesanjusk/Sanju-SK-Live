@@ -13,7 +13,7 @@ const product={
   seoTitle:'Personalized Laser Cut Wedding Cards in Gondia',
 };
 const index=readFileSync(new URL('../index.html',import.meta.url),'utf8');
-const siteMap=readFileSync(new URL('../public/sitemap.xml',import.meta.url),'utf8');
+const siteMap=readFileSync(new URL('../public/sitemap-pages.xml',import.meta.url),'utf8');
 const appBootSource=readFileSync(new URL('../src/App.jsx',import.meta.url),'utf8');
 assert(appBootSource.includes("import Home from './components/Home'"), 'Homepage must render directly instead of flashing the suspense loader');
 assert(!appBootSource.includes("lazy(() => import('./components/Home'))"), 'Do not lazy load homepage behind a second skeleton');
@@ -239,8 +239,9 @@ assert(detailSource.includes('sk-pin-detail-visual') && detailSource.includes('s
 assert(detailSource.includes('ProductStructuredData') && detailSource.includes('saveEnquiryLead') &&
   detailSource.includes('toggleFavorite(product)') && detailSource.includes('navigator.share') &&
   detailSource.includes('getPriceForQty'), 'Details must retain SEO, saved, sharing and genuine pricing');
-assert(detailSource.includes('initial = idOf(location.state?.product)') &&
-  detailSource.includes("api.get('/api/listings/' + id"), 'Detail should render immediately using card state and refresh from backend');
+assert(detailSource.includes("String(location.state?.product?.slug || '') === String(id)") &&
+  detailSource.includes('idOf(location.state?.product) === String(id)') &&
+  detailSource.includes("api.get('/api/listings/' + id"), 'Detail should render immediately using slug or ID card state and refresh from backend');
 assert(detailSource.includes('ProductStage') && detailSource.includes('getYouTubeId'),
   'Optional 3D model and video media features should remain');
 assert(pinCss.includes('sk-pin-about-intro') && index.includes('sk-boot-bottom-nav'),
@@ -365,8 +366,8 @@ assert(navSource.includes('sk-floating-actions') && navSource.includes('visible=
   'Floating actions must keep scroll-aware show/hide state');
 const newPages=categoryGuideData.filter(g=>!g.existingUrl);
 assert(newPages.length>=7,'Require new helpful indexable pages in addition to existing service pages');
-assert(vercelRules.rewrites.some(r=>r.source==='/categories/:slug/' && r.destination==='/categories/:slug/index.html'),
-  'Vercel must serve generated category pages rather than React fallback');
+assert(vercelRules.rewrites.some(r=>r.source==='/categories/:slug/' && r.destination==='/api/catalog-page?slug=:slug'),
+  'Vercel must serve server-rendered category pages with product links rather than React fallback');
 for(const guide of newPages) {
   const canonical='https://www.sanjusk.in/categories/'+guide.slug+'/';
   const html=readFileSync(new URL('../public/categories/'+guide.slug+'/index.html',import.meta.url),'utf8');
@@ -562,6 +563,7 @@ function mockResponse(){
 globalThis.fetch=async url=>{
   const str=String(url);
   if(str.includes('/api/listings/'+id))return new Response(JSON.stringify(product),{status:200});
+  if(str.endsWith('/api/listings/seo-index'))return new Response(JSON.stringify([product]),{status:200});
   if(str.endsWith('/api/listings'))return new Response(JSON.stringify([product]),{status:200});
   if(str.endsWith('/'))return new Response(index,{status:200,headers:{'Content-Type':'text/html'}});
   throw Error('Unexpected mocked URL '+str);
