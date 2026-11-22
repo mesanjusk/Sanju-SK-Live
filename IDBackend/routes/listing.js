@@ -45,8 +45,12 @@ async function enrichNewListing(p){
  if(!proposed)return;
  p.originalTitle=p.title;
  p.originalDescription=p.description||'';
+ p.originalSeoTitle=p.seoTitle||'';
+ p.originalSeoDescription=p.seoDescription||'';
  p.title=proposed.afterTitle;
  if(proposed.changeDescription)p.description=proposed.afterDescription;
+ if(proposed.changeSeoTitle)p.seoTitle=proposed.afterTitle;
+ if(proposed.changeSeoDescription)p.seoDescription=proposed.afterDescription.slice(0,158).replace(/\s+\S*$/,'').trim();
  p.seoEnrichmentVersion='upload-v1';
  p.seoEnrichedAt=new Date();
 }

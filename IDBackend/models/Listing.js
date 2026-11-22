@@ -12,6 +12,8 @@ const listingSchema = new mongoose.Schema({
   // Permanently preserve the pre-enrichment title/description for safe rollback.
   originalTitle: {type:String},
   originalDescription: {type:String},
+  originalSeoTitle: {type:String},
+  originalSeoDescription: {type:String},
   seoEnrichmentVersion: {type:String},
   seoEnrichedAt: {type:Date},
   slug: { type:String, trim:true, lowercase:true },

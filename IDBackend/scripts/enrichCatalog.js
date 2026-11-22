@@ -105,7 +105,7 @@ async function databaseModels(){
 }
 async function directData(models){
  const [products,categories,subcategories]=await Promise.all([
-  models.Listing.find({}).select('_id title description slug originalTitle originalDescription category subcategory material size customizationDetails price quantityPricing badge seoKeywords active published').lean(),
+  models.Listing.find({}).select('_id title description slug originalTitle originalDescription category subcategory material size customizationDetails price quantityPricing badge seoKeywords seoTitle seoDescription active published').lean(),
   models.Category.find({}).select('_id name').lean(),
   models.Subcategory.find({}).select('_id name').lean()
  ]);
@@ -122,10 +122,14 @@ async function applyRows(models,rows,products){
   else filter.description={$exists:false};
   const fields={
    title:row.afterTitle,originalTitle:row.beforeTitle,
-   originalDescription:original.description||'',seoEnrichmentVersion:'v1',
+   originalDescription:original.description||'',
+   originalSeoTitle:original.seoTitle||'',originalSeoDescription:original.seoDescription||'',
+   seoEnrichmentVersion:'v1',
    seoEnrichedAt:new Date(),updatedAt:new Date()
   };
   if(row.changeDescription)fields.description=row.afterDescription;
+  if(row.changeSeoTitle)fields.seoTitle=row.afterTitle;
+  if(row.changeSeoDescription)fields.seoDescription=row.afterDescription.slice(0,158).replace(/\s+\S*$/,'').trim();
   return {updateOne:{filter,update:{$set:fields}}};
  });
  const stamp=new Date().toISOString().replace(/[:.]/g,'-');
@@ -159,15 +163,15 @@ async function applyRows(models,rows,products){
 }
 async function rollback(models){
  const docs=await models.Listing.find({seoEnrichmentVersion:'v1',originalTitle:{$exists:true}})
-  .select('_id slug title description originalTitle originalDescription').lean();
+  .select('_id slug title description originalTitle originalDescription originalSeoTitle originalSeoDescription').lean();
  const backupName='seo-rollback-backup-'+new Date().toISOString().replace(/[:.]/g,'-')+'.json';
  await writeFile(backupName,JSON.stringify(docs,null,2),{flag:'wx',mode:0o600});
  let updated=0;
  for(let i=0;i<docs.length;i+=100){
   const batch=docs.slice(i,i+100).map(p=>({updateOne:{
    filter:{_id:p._id,slug:p.slug,title:p.title,seoEnrichmentVersion:'v1'},
-   update:{$set:{title:p.originalTitle,description:p.originalDescription||'',updatedAt:new Date()},
-    $unset:{originalTitle:'',originalDescription:'',seoEnrichmentVersion:'',seoEnrichedAt:''}}
+   update:{$set:{title:p.originalTitle,description:p.originalDescription||'',seoTitle:p.originalSeoTitle||'',seoDescription:p.originalSeoDescription||'',updatedAt:new Date()},
+    $unset:{originalTitle:'',originalDescription:'',originalSeoTitle:'',originalSeoDescription:'',seoEnrichmentVersion:'',seoEnrichedAt:''}}
   }}));
   const result=await models.Listing.bulkWrite(batch,{ordered:false});
   updated+=result.modifiedCount||0;

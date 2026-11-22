@@ -142,7 +142,11 @@ export function createSeoPreview(products,categories=[],subcategories=[]){
    subcategory:row.subcategory||'',beforeTitle:row.product.title,
    afterTitle:title,beforeDescription:row.product.description||'',
    afterDescription:thin?description:row.product.description||'',
-   changeDescription:thin
+   changeDescription:thin,
+   beforeSeoTitle:row.product.seoTitle||'',
+   beforeSeoDescription:row.product.seoDescription||'',
+   changeSeoTitle:trim(row.product.seoTitle).length<35,
+   changeSeoDescription:trim(row.product.seoDescription).length<110
   });
  }
  return result;
