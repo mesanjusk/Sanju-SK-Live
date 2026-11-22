@@ -3,11 +3,15 @@ import Listing from '../models/Listing.js';
 import Category from '../models/Category.js';
 import Subcategory from '../models/Subcategory.js';
 import {buildGoogleMerchantXml} from '../utils/googleMerchantFeed.js';
-import {getCachedGoogleMerchantFeed} from '../utils/googleMerchantCache.js';
+import {getCachedGoogleMerchantFeed,invalidateGoogleMerchantFeed} from '../utils/googleMerchantCache.js';
+import {readCatalogCacheRevision} from '../utils/catalogCacheRevision.js';
 
 const router=express.Router();
+let currentRevision=null;
 router.get('/google-merchant.xml',async(req,res)=>{
  try{
+  const revision=await readCatalogCacheRevision();
+  if(currentRevision!==revision){currentRevision=revision;invalidateGoogleMerchantFeed();}
   const xml=await getCachedGoogleMerchantFeed(async()=>{
    const [products,categories,subcategories]=await Promise.all([
     Listing.find({active:{$ne:false},published:{$ne:false}})

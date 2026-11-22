@@ -1,6 +1,7 @@
 import express from 'express';
 import Listing from '../models/Listing.js';
 import Category from '../models/Category.js';
+import {readCatalogCacheRevision} from '../utils/catalogCacheRevision.js';
 import {slugify,withSeoSlug} from '../utils/productSeo.js';
 const router=express.Router(),SITE='https://www.sanjusk.in';
 const guideSlugs=['visiting-cards','birthday','mementos','cutouts','name-plates','envelopes','id-cards'];
@@ -8,8 +9,10 @@ const staticPages=['/','/products','/contact','/wedding-card-printing-gondia/',
  '/3d-led-sign-boards-gondia/','/custom-trophies-awards-gondia/',
  '/flex-banner-printing-gondia/','/digital-wedding-invitations/',
  '/corporate-gifting-gondia/'];
-let snapshot,loadedAt=0;
+let snapshot,loadedAt=0,observedRevision=null;
 async function data(){
+ const revision=await readCatalogCacheRevision();
+ if(observedRevision!==revision){observedRevision=revision;snapshot=null;loadedAt=0;}
  if(snapshot && Date.now()-loadedAt<120000)return snapshot;
  try{
   const [products,categories]=await Promise.all([

@@ -9,6 +9,13 @@ const quantityPricingSchema = new mongoose.Schema({
 
 const listingSchema = new mongoose.Schema({
   title: { type: String, required: true },
+  // Permanently preserve the pre-enrichment title/description for safe rollback.
+  originalTitle: {type:String},
+  originalDescription: {type:String},
+  originalSeoTitle: {type:String},
+  originalSeoDescription: {type:String},
+  seoEnrichmentVersion: {type:String},
+  seoEnrichedAt: {type:Date},
   slug: { type:String, trim:true, lowercase:true },
   active: { type:Boolean, default:true },
   published: { type:Boolean, default:true },

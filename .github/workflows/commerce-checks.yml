@@ -20,6 +20,9 @@ jobs:
           node --check IDBackend/routes/googleMerchantFeed.js
           node --check IDBackend/utils/googleMerchantFeed.js
           node --check IDBackend/utils/googleMerchantCache.js
+          node --check IDBackend/scripts/enrichCatalog.js
+          node --check IDBackend/utils/enrichListingSeo.js
+          node --check IDBackend/utils/catalogCacheRevision.js
           node --check IDBackend/routes/orderRoutes.js
           node --check IDBackend/routes/userRoutes.js
           node --check IDBackend/models/User.js
@@ -37,6 +40,13 @@ jobs:
           node --test IDFrontend/src/components/mobile/catalogSessionCache.test.mjs
           node --test IDFrontend/src/hooks/consentPreference.test.mjs
           node --test IDFrontend/src/components/mobile/galleryAspect.test.mjs
+      - name: Print 15 safe illustrative SEO enrichment previews
+        run: node IDBackend/scripts/enrichCatalog.js --examples --limit=15
+      - name: Review up to 50 live catalog proposals (read-only QA, no writes)
+        if: github.event_name == 'pull_request'
+        continue-on-error: true
+        timeout-minutes: 3
+        run: node IDBackend/scripts/enrichCatalog.js --preview-api --limit=50
       - name: Check frontend bundle
         run: |
           npm ci --prefix IDFrontend
