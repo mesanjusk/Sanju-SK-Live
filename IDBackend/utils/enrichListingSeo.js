@@ -22,8 +22,11 @@ export function needsSeoEnrichment(p){
 }
 export function proposedTitle(p,category='',subcategory=''){
  const raw=trim(p.title),label=key(raw),context=key(category+' '+subcategory);
- const wedding=/wedding|invitation|shaadi|marriage|laser cut/.test(context);
- const signage=/sign|acrylic|name plate|letter|neon/.test(context);
+ const evidence=key([p.description,p.seoDescription,p.seoKeywords,category,subcategory].join(' '));
+ const birthday=/\bbirthday\b|\bb day\b/.test(evidence+' '+label);
+ const wedding=!birthday&&/\bwedding\b|\bshaadi\b|\bmarriage\b|\bbridal\b/.test(context+' '+evidence);
+ const invitation=/invitation|cards?/.test(context);
+ const signage=/signage|sign boards?|name plates?|channel letters?|neon|shop fronts?/.test(context+' '+evidence);
  const material=trim(p.material);
  let title='';
  if(/^(i card|icard|id card)$/.test(label)) title='Custom PVC School & Office ID Card Printing with Lanyard';
@@ -32,15 +35,20 @@ export function proposedTitle(p,category='',subcategory=''){
  else if(/^cones?$/.test(label)) title='Custom Printed Wedding Mehendi & Haldi Floral Cones';
  else if(/^welcome board$/.test(label)) title='Custom Acrylic & Sunboard Wedding Welcome Signage Board';
  else if(/^playing cards?$/.test(label)) title='Custom Personalized Wedding & Party Theme Playing Cards';
+ else if(/^floral$/.test(label)&&birthday) title='Custom Floral Birthday Invitation Cards with Photo Printing';
  else if(/^floral$/.test(label)&&wedding) title='Custom Floral Designer Wedding Invitation Card';
+ else if(/^floral$/.test(label)&&invitation) title='Custom Floral Printed Invitation Cards for Events & Parties';
  else if(/^acrylic$/.test(label)&&wedding) title='Custom Laser-Cut Acrylic Wedding Invitation Card';
  else if(/^acrylic$/.test(label)&&signage) title='Custom Laser-Cut Acrylic Signage & Personalized Name Plate';
+ else if(/^acrylic$/.test(label)) return null; // Unknown legacy category: don't invent a material/use case.
  else if(/^tag$|^tags$/.test(label)) title='Custom Printed Gift & Event Name Tags with Personalization';
  else if(/^badge$|^badges$/.test(label)) title='Custom Printed Event & Office Badges with Logo Design';
  else if(/^name plate$/.test(label)) title='Custom Acrylic Name Plate for Home & Office Signage';
  else if(/^mementos?$/.test(label)) title='Custom Engraved Corporate Mementos & Recognition Awards';
  else if(/^trophies?$/.test(label)) title='Custom Personalized Event Trophies & Corporate Awards';
  else if(/^envelopes?$/.test(label)) title='Custom Printed Wedding & Business Invitation Envelopes';
+ else if(/^birthdays?$/.test(label)) title='Custom Printed Birthday Invitation Cards with Photo & Name';
+ else if(/^invitations?$/.test(label)) title='Custom Personalized Printed Invitation Cards for Events & Parties';
  else if(/^visiting cards?$|^business cards?$/.test(label)) title='Custom Professional Business & Visiting Card Printing';
  else if(raw.length<30 && wedding && /floral|laser|royal|classic|modern|premium|traditional/i.test(raw))
   title='Custom '+proper(raw)+' Wedding Invitation Card Printing';
@@ -48,8 +56,12 @@ export function proposedTitle(p,category='',subcategory=''){
   title='Custom '+proper(raw)+' Corporate Awards & Mementos';
  else if(raw.length<30 && /sign|led|neon/.test(context))
   title='Custom '+proper(raw)+' Signage for Shops & Offices';
- else if(raw.length<30 && /wedding|invitation/.test(context))
+ else if(raw.length<30 && invitation && birthday)
+  title='Custom '+proper(raw)+' Birthday Invitation Card Printing';
+ else if(raw.length<30 && invitation && wedding)
   title='Custom '+proper(raw)+' Wedding Invitation Card Printing';
+ else if(raw.length<30 && invitation)
+  title='Custom '+proper(raw)+' Printed Invitations for Events & Parties';
  else if(raw.length<30 && /printing|stationery|corporate|design/.test(context))
   title='Custom '+proper(raw)+' Printing for Events & Businesses';
  else return null;
