@@ -27,6 +27,8 @@ export function proposedTitle(p,category='',subcategory=''){
  const wedding=!birthday&&/\bwedding\b|\bshaadi\b|\bmarriage\b|\bbridal\b/.test(context+' '+evidence);
  const invitation=/invitation|cards?/.test(context);
  const signage=/signage|sign boards?|name plates?|channel letters?|neon|shop fronts?/.test(context+' '+evidence);
+ const roomTags=/room tags?|guest room|door hangers?/.test(context+' '+evidence);
+ const weddingBadge=/wedding badges?/.test(context);
  const material=trim(p.material);
  let title='';
  if(/^(i card|icard|id card)$/.test(label)) title='Custom PVC School & Office ID Card Printing with Lanyard';
@@ -35,24 +37,29 @@ export function proposedTitle(p,category='',subcategory=''){
  else if(/^cones?$/.test(label)) title='Custom Printed Wedding Mehendi & Haldi Floral Cones';
  else if(/^welcome board$/.test(label)) title='Custom Acrylic & Sunboard Wedding Welcome Signage Board';
  else if(/^playing cards?$/.test(label)) title='Custom Personalized Wedding & Party Theme Playing Cards';
+ else if(/^floral$/.test(label)&&roomTags) title='Custom Floral Wedding Guest Room Tags with Name Printing';
  else if(/^floral$/.test(label)&&birthday) title='Custom Floral Birthday Invitation Cards with Photo Printing';
  else if(/^floral$/.test(label)&&wedding) title='Custom Floral Designer Wedding Invitation Card';
  else if(/^floral$/.test(label)&&invitation) title='Custom Floral Printed Invitation Cards for Events & Parties';
  else if(/^acrylic$/.test(label)&&wedding) title='Custom Laser-Cut Acrylic Wedding Invitation Card';
  else if(/^acrylic$/.test(label)&&signage) title='Custom Laser-Cut Acrylic Signage & Personalized Name Plate';
  else if(/^acrylic$/.test(label)) return null; // Unknown legacy category: don't invent a material/use case.
+ else if(/^tag$|^tags$/.test(label)&&roomTags) title='Custom Printed Wedding Guest Room Tags with Names & Details';
  else if(/^tag$|^tags$/.test(label)) title='Custom Printed Gift & Event Name Tags with Personalization';
+ else if(/^badge$|^badges$/.test(label)&&weddingBadge) title='Custom Printed Wedding Guest Badges with Personalization';
  else if(/^badge$|^badges$/.test(label)) title='Custom Printed Event & Office Badges with Logo Design';
  else if(/^name plate$/.test(label)) title='Custom Acrylic Name Plate for Home & Office Signage';
  else if(/^mementos?$/.test(label)) title='Custom Engraved Corporate Mementos & Recognition Awards';
  else if(/^trophies?$/.test(label)) title='Custom Personalized Event Trophies & Corporate Awards';
  else if(/^envelopes?$/.test(label)) title='Custom Printed Wedding & Business Invitation Envelopes';
  else if(/^menu cards?$/.test(label)) title='Custom Printed Wedding & Event Menu Cards with Personalization';
+ else if(/^thank(?:[ -]?u|[ -]?you) cards?$/.test(label)) title='Custom Printed Thank You Cards for Wedding Guests & Gifts';
+ else if(/^scratch cards?$/.test(label)) title='Custom Personalized Scratch Cards for Wedding & Party Games';
  else if(/^reception cards?$/.test(label)) title='Custom Printed Reception Invitation Cards with Names and Dates';
- else if(/^co?cktail cards?$/.test(label)) title='Custom Printed Cocktail Party Invitation Cards for Events';
+ else if(/^(?:cocktail|coctail) cards?$/.test(label)) title='Custom Printed Cocktail Party Invitation Cards for Events';
  else if(/^birthdays?$/.test(label)) title='Custom Printed Birthday Invitation Cards with Photo & Name';
  else if(/^invitations?$/.test(label)&&/reception/.test(context)) title='Custom Printed Reception Invitation Cards with Names and Dates';
- else if(/^invitations?$/.test(label)&&/co?cktail/.test(context)) title='Custom Printed Cocktail Party Invitation Cards for Events';
+ else if(/^invitations?$/.test(label)&&/cocktail|coctail/.test(context)) title='Custom Printed Cocktail Party Invitation Cards for Events';
  else if(/^invitations?$/.test(label)&&birthday) title='Custom Printed Birthday Invitation Cards with Photo & Name';
  else if(/^invitations?$/.test(label)&&wedding) title='Custom Designer Wedding Invitation Card with Personalization';
  else if(/^invitations?$/.test(label)) title='Custom Personalized Printed Invitation Cards for Events & Parties';
@@ -74,6 +81,14 @@ export function proposedTitle(p,category='',subcategory=''){
  else return null;
  if(material&&material.length<22&&!key(title).includes(key(material))&&title.length+material.length+3<=85)
   title=proper(material)+' '+title;
+ // Only differentiate using attributes already written in product metadata.
+ // This takes precedence over anonymous Design 01 when an actual style exists.
+ const match=(trim(p.description)+' '+trim(p.seoKeywords)+' '+trim(p.badge))
+  .match(/\b(gold foil|die[ -]?cut|matte|glossy|luxury|modern|minimalist|traditional|creative|elegant)\b/i);
+ if(match && !key(title).includes(key(match[1]))){
+  const styled=title.replace(/^Custom\s+/,'Custom '+proper(match[1])+' ');
+  if(styled.length<=85)title=styled;
+ }
  title=title.replace(/\s+/g,' ').trim();
  if(title.length>85)title=clipped(title,85);
  // Don't write vague copy just to reach a character count.
@@ -83,7 +98,15 @@ export function proposedTitle(p,category='',subcategory=''){
 export function proposedDescription(p,title){
  const material=trim(p.material),size=trim(p.size),details=trim(p.customizationDetails);
  const price=merchantPrice(p);
- const first=title+' can be personalized with names, dates, logos or photos.';
+ let options='names, dates, logos or photos';
+ if(/housie|tambola/i.test(title))options='event names, ticket numbers, dates and themes';
+ else if(/cones|mehendi/i.test(title))options='event names, colors and floral patterns';
+ else if(/visiting card|business card/i.test(title))options='business names, logos and contact details';
+ else if(/guest room tags?/i.test(title))options='guest names, room numbers and wedding artwork';
+ else if(/badges?/i.test(title))options='names, logos and event artwork';
+ else if(/scratch card/i.test(title))options='names, game messages and themed artwork';
+ else if(/thank you card/i.test(title))options='names, messages and matching gift designs';
+ const first=title+' can be personalized with '+options+'.';
  const parts=[];
  if(material)parts.push('Material: '+clipped(material,32));
  if(size)parts.push('size: '+clipped(size,24));
