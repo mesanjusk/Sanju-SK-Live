@@ -3,6 +3,7 @@ import Listing from '../models/Listing.js';
 import Category from '../models/Category.js';
 import {slugify,withSeoSlug} from '../utils/productSeo.js';
 const router=express.Router(),SITE='https://www.sanjusk.in';
+const guideSlugs=['visiting-cards','birthday','mementos','cutouts','name-plates','envelopes','id-cards'];
 const staticPages=['/','/products','/contact','/wedding-card-printing-gondia/',
  '/3d-led-sign-boards-gondia/','/custom-trophies-awards-gondia/',
  '/flex-banner-printing-gondia/','/digital-wedding-invitations/',
@@ -31,7 +32,7 @@ router.get('/sitemap.xml',async(req,res)=>{
  try{
   const {products,categories}=await data();
   const urls=[...staticPages.map(p=>entry(p,null,p==='/'?'weekly':'monthly',p==='/'?'1.0':'0.7')),
-   ...categories.map(c=>entry('/categories/'+encodeURIComponent(slugify(c.name))+'/',null,'weekly','0.6')),
+   ...[...new Set([...guideSlugs,...categories.map(c=>slugify(c.name))])].map(slug=>entry('/categories/'+encodeURIComponent(slug)+'/',null,'weekly','0.6')),
    ...products.map(p=>entry('/products/'+encodeURIComponent(p.slug),p.updatedAt||p.createdAt,'weekly','0.6'))];
   const xml='<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'+urls.join('\n')+'\n</urlset>\n';
   res.set('Content-Type','application/xml; charset=utf-8');
