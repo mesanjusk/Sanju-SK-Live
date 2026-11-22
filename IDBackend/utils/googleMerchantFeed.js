@@ -91,7 +91,7 @@ export function merchantItem(raw,categories=new Map(),subcategories=new Map()){
  const id=String(product._id||'').trim();
  const title=merchantTitle(product.title);
  const slug=String(product.slug||'');
- const image=merchantImage(product.images||product.imageUrl);
+ const image=merchantImage([...(Array.isArray(product.images)?product.images:[product.images]),product.imageUrl]);
  const price=merchantPrice(product);
  if(!id||id.length>50||!title||!slug||slug.length>150||
   !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)||!image||!price)return null;
