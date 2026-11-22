@@ -47,7 +47,14 @@ export function proposedTitle(p,category='',subcategory=''){
  else if(/^mementos?$/.test(label)) title='Custom Engraved Corporate Mementos & Recognition Awards';
  else if(/^trophies?$/.test(label)) title='Custom Personalized Event Trophies & Corporate Awards';
  else if(/^envelopes?$/.test(label)) title='Custom Printed Wedding & Business Invitation Envelopes';
+ else if(/^menu cards?$/.test(label)) title='Custom Printed Wedding & Event Menu Cards with Personalization';
+ else if(/^reception cards?$/.test(label)) title='Custom Printed Reception Invitation Cards with Names and Dates';
+ else if(/^co?cktail cards?$/.test(label)) title='Custom Printed Cocktail Party Invitation Cards for Events';
  else if(/^birthdays?$/.test(label)) title='Custom Printed Birthday Invitation Cards with Photo & Name';
+ else if(/^invitations?$/.test(label)&&/reception/.test(context)) title='Custom Printed Reception Invitation Cards with Names and Dates';
+ else if(/^invitations?$/.test(label)&&/co?cktail/.test(context)) title='Custom Printed Cocktail Party Invitation Cards for Events';
+ else if(/^invitations?$/.test(label)&&birthday) title='Custom Printed Birthday Invitation Cards with Photo & Name';
+ else if(/^invitations?$/.test(label)&&wedding) title='Custom Designer Wedding Invitation Card with Personalization';
  else if(/^invitations?$/.test(label)) title='Custom Personalized Printed Invitation Cards for Events & Parties';
  else if(/^visiting cards?$|^business cards?$/.test(label)) title='Custom Professional Business & Visiting Card Printing';
  else if(raw.length<30 && wedding && /floral|laser|royal|classic|modern|premium|traditional/i.test(raw))

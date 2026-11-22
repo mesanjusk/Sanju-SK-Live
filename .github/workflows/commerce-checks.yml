@@ -46,7 +46,7 @@ jobs:
         if: github.event_name == 'pull_request'
         continue-on-error: true
         timeout-minutes: 3
-        run: node IDBackend/scripts/enrichCatalog.js --preview-api --limit=15
+        run: node IDBackend/scripts/enrichCatalog.js --preview-api --limit=50
       - name: Check frontend bundle
         run: |
           npm ci --prefix IDFrontend
