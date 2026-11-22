@@ -13,7 +13,7 @@ const proper=v=>trim(v).toLowerCase().replace(/\b[a-z]/g,x=>x.toUpperCase())
 const clipped=(value,max)=>String(value).length<=max?value:value.slice(0,max+1).replace(/\s+\S*$/,'').replace(/[- ,;/]+$/,'').trim();
 
 export function needsSeoEnrichment(p){
- if(!p||typeof p.title!=='string'||Object.hasOwn(p,'originalTitle'))return false;
+ if(!p||p.active===false||p.published===false||typeof p.title!=='string'||Object.hasOwn(p,'originalTitle'))return false;
  const t=trim(p.title);
  if(!t||!p.slug||typeof p.slug!=='string'||!isObjectId(p._id))return false;
  // Never touch existing long descriptive titles or medium titles unless

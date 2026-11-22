@@ -42,7 +42,7 @@ jobs:
           node --test IDFrontend/src/components/mobile/galleryAspect.test.mjs
       - name: Print 15 safe illustrative SEO enrichment previews
         run: node IDBackend/scripts/enrichCatalog.js --examples --limit=15
-      - name: Attempt read-only 15-product live catalog preview (no writes)
+      - name: Review up to 50 live catalog proposals (read-only QA, no writes)
         if: github.event_name == 'pull_request'
         continue-on-error: true
         timeout-minutes: 3

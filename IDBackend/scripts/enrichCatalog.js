@@ -105,7 +105,7 @@ async function databaseModels(){
 }
 async function directData(models){
  const [products,categories,subcategories]=await Promise.all([
-  models.Listing.find({}).select('_id title description slug originalTitle originalDescription category subcategory material size customizationDetails price quantityPricing badge seoKeywords seoTitle seoDescription active published').lean(),
+  models.Listing.find({active:{$ne:false},published:{$ne:false}}).select('_id title description slug originalTitle originalDescription category subcategory material size customizationDetails price quantityPricing badge seoKeywords seoTitle seoDescription active published').lean(),
   models.Category.find({}).select('_id name').lean(),
   models.Subcategory.find({}).select('_id name').lean()
  ]);
