@@ -346,9 +346,12 @@ const sitemapXml = '<?xml version="1.0" encoding="UTF-8"?>\n' +
   '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' +
   xmlPages.join('\n') + '\n</urlset>\n';
 // Keep the old sitemap-pages URL working for integrations that already use it.
-// The root /sitemap.xml is the canonical static sitemap requested for GSC.
+// The root /sitemap.xml is served dynamically from MongoDB via the Vercel function.
 const robots = `User-agent: *
 Allow: /
+Allow: /products/
+Allow: /categories/
+Disallow: /api/
 Disallow: /admin
 Disallow: /login
 Disallow: /upload
