@@ -10,6 +10,7 @@ import EditIcon from '@mui/icons-material/Edit';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import YouTubeIcon from '@mui/icons-material/YouTube';
 import InstagramIcon from '@mui/icons-material/Instagram';
+import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import api from '../../api';
 import { ConfirmDialog, Toast } from '../../components/admin/AdminUiKit';
 
@@ -30,6 +31,9 @@ function PlatformToggle({ value, onChange }) {
       <ToggleButton value="instagram" sx={{ gap: 0.5, textTransform: 'none', px: 2 }}>
         <InstagramIcon sx={{ color: '#dd2a7b', fontSize: 18 }} /> Instagram
       </ToggleButton>
+      <ToggleButton value="upload" sx={{ gap: 0.5, textTransform: 'none', px: 2 }}>
+        <CloudUploadIcon sx={{color:'#333',fontSize:18}}/> Upload Video
+      </ToggleButton>
     </ToggleButtonGroup>
   );
 }
@@ -38,6 +42,8 @@ export default function VideoManager() {
   const [videos, setVideos] = useState([]);
   const [form, setForm] = useState(EMPTY_FORM);
   const [loading, setLoading] = useState(false);
+  const [selectedFile,setSelectedFile]=useState(null);
+  const [uploadProgress,setUploadProgress]=useState(0);
   const [confirm, setConfirm] = useState({ open: false, id: null });
   const [editDialog, setEditDialog] = useState({ open: false, id: null, ...EMPTY_FORM });
   const [editLoading, setEditLoading] = useState(false);
@@ -53,13 +59,21 @@ export default function VideoManager() {
   };
   useEffect(() => { fetchVideos(); }, []);
 
-  const validate = (data) => {
+  const validate = (data,isEdit=false) => {
     if (!data.title.trim()) { showToast('Title is required', 'error'); return false; }
     if (data.platform === 'youtube' && !getYouTubeId(data.youtubeUrl)) {
       showToast('Enter a valid YouTube URL', 'error'); return false;
     }
     if (data.platform === 'instagram' && !data.instagramUrl.trim()) {
       showToast('Enter an Instagram URL', 'error'); return false;
+    }
+    if(data.platform==='upload'&&!isEdit){
+      if(!selectedFile){showToast('Choose an MP4 or WebM video','error');return false;}
+      if(!['video/mp4','video/webm'].includes(selectedFile.type)||
+        !/\.(mp4|webm)$/i.test(selectedFile.name)){
+        showToast('Only MP4 / WebM supported','error');return false;
+      }
+      if(selectedFile.size>50*1024*1024){showToast('Maximum size is 50 MB','error');return false;}
     }
     return true;
   };
@@ -87,7 +101,7 @@ export default function VideoManager() {
   };
 
   const handleUpdate = async () => {
-    if (!validate(editDialog)) return;
+    if (!validate(editDialog,true)) return;
     setEditLoading(true);
     try {
       await api.put(`/api/videos/${editDialog.id}`, editDialog);
@@ -108,7 +122,11 @@ export default function VideoManager() {
 
   return (
     <Box sx={{ maxWidth: 900, mx: 'auto' }}>
-      <Typography variant="h5" fontWeight={600} mb={3}>Video Manager</Typography>
+      <Typography variant="h5" fontWeight={600} mb={1}>Video Manager</Typography>
+      <Typography variant="body2" color="text.secondary" mb={3}>
+        Upload MP4/WebM reels directly, or add YouTube/Instagram links.
+        Videos appear in the Pinterest-style home gallery.
+      </Typography>
 
       {/* ── Add form ── */}
       <Paper elevation={0} variant="outlined" sx={{ p: 3, mb: 4, borderRadius: 3 }}>
