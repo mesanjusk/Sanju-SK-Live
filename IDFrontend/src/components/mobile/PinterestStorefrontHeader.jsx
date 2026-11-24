@@ -64,8 +64,9 @@ function PinterestStorefrontHeader({
     <div className={'sk-pin-top-shell'+(searchOpen?' sk-pin-search-open':'')}>
       <header className="sk-pin-header">
         <Link to="/" className="sk-pin-brand" aria-label="SANJU SK Digital homepage">
-          <span className="sk-pin-brand-name">SANJU <b>SK</b>
-            <small>DIGITAL · MAHI CREATION</small>
+          <span className="sk-pin-brand-name">
+            <strong>SANJU SK DIGITAL</strong>
+            <small>MAHI CREATION - 9372333633</small>
           </span>
         </Link>
         <div className="sk-pin-header-actions" ref={menuRef}>

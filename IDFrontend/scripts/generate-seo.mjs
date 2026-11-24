@@ -149,7 +149,7 @@ const rootMarkup = [
   '<a href="/favorites" aria-label="Saved designs">♡</a></nav>',
   '<header class="sk-boot-header sk-boot-container">',
   '<a href="/" class="sk-boot-brand" aria-label="SANJU SK Digital homepage">',
-  '<span>SANJU <strong>SK</strong> DIGITAL</span></a>',
+  '<span class="sk-boot-brand-name"><strong>SANJU SK DIGITAL</strong><small>MAHI CREATION - 9372333633</small></span></a>',
   '<div class="sk-boot-header-actions"><a class="sk-boot-whatsapp-link" href="' + quoteUrl + '" aria-label="WhatsApp SANJU SK Digital">',  '<svg viewBox="0 0 32 32" width="27" height="27" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M9 26l-4 2 1.5-5.3A12.5 12.5 0 1 1 10 27"/><path d="M11.5 9.5c-.8.7-.5 2.7.7 4.8 1.5 2.6 3.4 4.1 5.7 5 .8.3 2.7 0 3.5-1.3l-3.1-1.8-1.5 1.5c-2-.8-3.4-2.4-4.3-4.3l1.4-1.7-1.7-3Z"/></svg></a>',
   '<a href="/contact" aria-label="Website menu">•••</a></div>',
   '</header>',
