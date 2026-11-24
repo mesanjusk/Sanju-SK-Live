@@ -397,7 +397,7 @@ assert(!homeSource.includes('<CategorySeoBlurb') &&
   homeSource.includes('orderStoreCategories(categories,') &&
   pinHeaderSource.includes('firstWedding') &&
   pinHeaderSource.indexOf('>All</button>') < pinHeaderSource.indexOf('{firstWedding&&<button') &&
-  endlessSource.includes('categoryById.get(itemKey(product.category))'),
+  endlessSource.includes('categoryById.get(itemKey(item.product.category))'),
   'Category feed must hide sales copy while keeping Wedding first and names resolved');
 assert(guideSource.includes('getCategoryGuide') && guideSource.includes('Browse ' + "' + name + '"),
   'Every unknown live category needs a relevant no-fabrication fallback description');
