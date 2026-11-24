@@ -2,7 +2,7 @@ import express from 'express';
 import multer from 'multer';
 import Video from '../models/Video.js';
 import cloudinary from '../utils/cloudinary.js';
-import {MAX_VIDEO_BYTES,isSupportedVideo,isSafeVideoLink} from '../utils/videoUploadValidation.js';
+import {MAX_VIDEO_BYTES,isSupportedVideo,isSafeVideoLink,hasVideoSignature} from '../utils/videoUploadValidation.js';
 
 const router=express.Router();
 const directUpload=multer({
@@ -56,6 +56,8 @@ router.post('/upload',(req,res,next)=>{
  });
 },async(req,res)=>{
  if(!req.file)return res.status(400).json({message:'Select an MP4 or WebM video'});
+ if(!hasVideoSignature(req.file))
+  return res.status(400).json({message:'The uploaded file is not a valid MP4 or WebM video'});
  const title=String(req.body.title||'').trim().slice(0,140);
  const description=String(req.body.description||'').trim().slice(0,600);
  if(!title)return res.status(400).json({message:'Video title is required'});

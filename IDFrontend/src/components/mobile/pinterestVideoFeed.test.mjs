@@ -19,6 +19,10 @@ test('adding another batch preserves earlier items and skips insecure video sour
  assert.deepEqual(next.slice(0,one.length),one);
  const unsafe=interleavePinterestVideos(products,[{_id:'bad',platform:'upload',videoUrl:'http://example.com/x.mp4'}],8);
  assert.equal(unsafe.filter(x=>x.kind==='video').length,0);
+ const badSocial=interleavePinterestVideos(products,[{
+   _id:'hack',platform:'instagram',instagramUrl:'javascript:alert(1)'
+ }],8);
+ assert.equal(badSocial.filter(x=>x.kind==='video').length,0);
 });
 test('the feed remains products-only with no videos, and no duplicate video IDs',()=>{
  assert.equal(interleavePinterestVideos(products,[]).length,18);

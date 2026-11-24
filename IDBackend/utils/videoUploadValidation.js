@@ -23,3 +23,13 @@ export function isSafeVideoLink(value,platform){
   return false;
  }catch{return false;}
 }
+
+export function hasVideoSignature(file){
+ const b=file?.buffer;
+ if(!b||b.length<12)return false;
+ if(file.mimetype==='video/mp4')
+  return b.toString('ascii',4,8)==='ftyp';
+ if(file.mimetype==='video/webm')
+  return b[0]===0x1a&&b[1]===0x45&&b[2]===0xdf&&b[3]===0xa3;
+ return false;
+}
