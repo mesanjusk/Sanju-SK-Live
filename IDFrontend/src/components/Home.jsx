@@ -312,12 +312,14 @@ export default function Home() {
   // the already-visible masonry pins or jump the visitor's scroll position.
   const orderedProducts=useMemo(()=>{
     const result=[];
-    for(let i=0;i<distinctProducts.length;i+=FEED_PAGE_SIZE){
-      result.push(...rankDesigns(distinctProducts.slice(i,i+FEED_PAGE_SIZE),
+    // Use raw page boundaries, not deduplicated length, so newly arriving
+    // pages never change the ranking of already-rendered cards.
+    for(let i=0;i<listings.length;i+=FEED_PAGE_SIZE){
+      result.push(...rankDesigns(listings.slice(i,i+FEED_PAGE_SIZE),
         {seed:feedSeed,interests,aiIds,keyword:LANDING_KEYWORD}));
     }
-    return result;
-  },[distinctProducts,feedSeed,interests,aiIds]);
+    return uniqueDesigns(result);
+  },[listings,feedSeed,interests,aiIds]);
   useEffect(()=>{
     const onInterest=()=>{setInterests(getDesignInterests());setAiIds([]);};
     window.addEventListener('sk-design-interest',onInterest);

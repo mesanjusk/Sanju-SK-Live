@@ -150,7 +150,7 @@ const appSource=readFileSync(new URL('../src/App.jsx',import.meta.url),'utf8');
 const festiveCss=readFileSync(new URL('../src/components/mobile/festive-home.css',import.meta.url),'utf8');
 
 assert(homeSource.includes('<PinterestStorefrontHeader') && homeSource.includes('<EndlessPinterestFeed') &&
-  homeSource.includes('filteredProducts'), 'Homepage must use Pinterest header and endlessly looping real product masonry');
+  homeSource.includes("paged:'1'") && homeSource.includes('loadMore'), 'Homepage must show real Pinterest masonry with server-side paginated loading');
 assert(!homeSource.includes('<FestiveStorefrontHero') && !homeSource.includes('<CategoryProductCarousel'),
   'Previous promotional hero and grouped category carousels must not render');
 assert(pinHeaderSource.includes('sk-pin-categories') &&
@@ -178,15 +178,15 @@ assert(pinCss.includes('prefers-reduced-motion:reduce'), 'Motion accessibility m
 const endlessSource=readFileSync(new URL('../src/components/mobile/EndlessPinterestFeed.jsx',import.meta.url),'utf8');
 const loadingSource=readFileSync(new URL('../src/components/mobile/CatalogLoadingState.jsx',import.meta.url),'utf8');
 assert(endlessSource.includes('uniqueDesigns') && endlessSource.includes('IntersectionObserver') &&
-  endlessSource.includes('uniqueProducts.slice(0, visibleCount)') &&
-  endlessSource.includes('BATCH_SIZE = 18'),
-  'Pinterest feed must show unique designs in progressive, finite batches');
+  endlessSource.includes('onLoadMore') && !endlessSource.includes('visibleCount') &&
+  homeSource.includes('FEED_PAGE_SIZE=18') && homeSource.includes('fetchFeedPage'),
+  'Pinterest feed must request separate 18-item API pages, not download the full catalog');
 assert(!endlessSource.includes('shuffleNextCycle') && !endlessSource.includes('cursor.cycle'),
   'Do not reintroduce repeated shuffled design cycles');
 assert(!endlessSource.includes("You've seen all") &&
   !endlessSource.includes('Explore another category') &&
-  endlessSource.includes(') : null}'),
-  'End the feed silently without repeating designs or showing a count banner');
+  endlessSource.includes('hasMore&&('),
+  'End the feed silently when the API reports no further products');
 const duplicates=[
   {_id:'A',images:['https://res.cloudinary.com/demo/image/upload/v1/card.jpg']},
   {_id:'B',images:['https://res.cloudinary.com/demo/image/upload/v1/card.jpg?width=400']},
@@ -287,11 +287,23 @@ assert(checkoutSource.includes('sk-checkout-quantity-tiers') &&
 assert(catalogCacheSource.includes('MAX_AGE_MS') &&
   catalogCacheSource.includes('readCatalogRows') &&
   catalogCacheSource.includes('isCatalogCacheFresh') &&
-  homeSource.includes("readCatalogRows('listings')") &&
-  homeSource.includes("rememberCatalogRows(key, rows)") &&
+  homeSource.includes('readCatalogRows(FEED_CACHE_KEY)') &&
+  homeSource.includes('rememberCatalogRows(FEED_CACHE_KEY') &&
   homeSource.includes('sk-home-scroll-position') &&
-  endlessSource.includes('rememberedVisibleCount'),
-  'Home must show previously cached designs immediately and restore scroll/feed depth');
+  homeSource.includes('feedMeta.page'),
+  'Home must cache only pages already requested and restore scroll/feed depth');
+const pinterestLoadingSource=readFileSync(new URL('../src/components/mobile/PinterestFeedLoading.jsx',import.meta.url),'utf8');
+const productPageSource=readFileSync(new URL('../src/pages/ProductListing.jsx',import.meta.url),'utf8');
+assert(pinterestLoadingSource.includes('sk-pin-skeleton-cover') &&
+  pinterestLoadingSource.includes('sk-pin-spinner') &&
+  endlessSource.includes('sk-pin-loading-inline') &&
+  pinCss.includes('sk-pin-load-shimmer') &&
+  pinCss.includes('prefers-reduced-motion:reduce'),
+  'Initial masonry skeletons and compact Pinterest spinner must respect reduced motion');
+assert(productPageSource.includes("paged:'1'") &&
+  productPageSource.includes('totalProducts') &&
+  !productPageSource.includes("api.get('/api/listings', { params, timeout: 30000 })"),
+  'Product search/catalog pagination must be server-side, not client array slicing');
 assert(reminderSource.includes('VISIBLE_DURATION = 4500') &&
   reminderSource.includes('FIRST_SHOW_DELAY + VISIBLE_DURATION'),
   'Need help bubble must auto-dismiss after a short timed appearance');
