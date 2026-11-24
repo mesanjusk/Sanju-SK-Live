@@ -11,6 +11,8 @@ function PinterestVideoPin({video}){
  const playerRef=useRef(null);
  const [inView,setInView]=useState(false);
  const [paused,setPaused]=useState(false);
+ const [activated,setActivated]=useState(false);
+ const [userPlayed,setUserPlayed]=useState(false);
  const [muted,setMuted]=useState(true);
  const [failed,setFailed]=useState(false);
  const [reduceMotion]=useState(()=>typeof window!=='undefined'&&
@@ -29,7 +31,8 @@ function PinterestVideoPin({video}){
   observer.observe(cardRef.current);
   return ()=>observer.disconnect();
  },[]);
- const play=Boolean(inView&&!paused&&!reduceMotion);
+ useEffect(()=>{if(inView)setActivated(true);},[inView]);
+ const play=Boolean(inView&&!paused&&(!reduceMotion||userPlayed));
  useEffect(()=>{
   if(!uploaded||!playerRef.current)return;
   const node=playerRef.current;
@@ -38,7 +41,8 @@ function PinterestVideoPin({video}){
   else node.pause();
  },[uploaded,play,muted]);
  const togglePlay=()=>{
-  setPaused(current=>!current);
+  if(reduceMotion&&!userPlayed){setUserPlayed(true);setPaused(false);}
+  else setPaused(current=>!current);
  };
  const link=instagram?video.instagramUrl:video.youtubeUrl;
  return(
@@ -48,7 +52,7 @@ function PinterestVideoPin({video}){
     {uploaded ? (
      <>
       <video ref={playerRef} className="sk-video-pin-player"
-       src={inView||!paused?video.videoUrl:undefined}
+       src={activated?video.videoUrl:undefined}
        poster={video.posterUrl||undefined}
        muted={muted} playsInline loop preload="none"
        onClick={togglePlay} onError={()=>setFailed(true)}

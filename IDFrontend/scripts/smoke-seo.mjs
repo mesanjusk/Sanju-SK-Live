@@ -217,13 +217,15 @@ assert(pinCss.includes('.sk-pinterest-home .sk-catalog-loading'),
   'The SK logo printing animation must still be available');
 assert(pinHeaderSource.includes('FaWhatsapp aria-hidden') && !pinHeaderSource.includes('<FaPlus'),
   'Header must keep existing WhatsApp action, not substitute a plus button');
-assert(pinHeaderSource.includes('sk-pin-brand-final-logo') &&
-  homeSource.includes('sk-store-footer-final-logo'), 'Use the final SK logo in header and footer');
+assert(!pinHeaderSource.includes('sk-pin-brand-final-logo') &&
+  homeSource.includes('sk-store-footer-final-logo'),
+  'Keep footer branding but remove the graphic logo from top navbar');
 const finalLogo=readFileSync(new URL('../public/images/sk-digital-final.svg',import.meta.url),'utf8');
 assert(finalLogo.includes('viewBox="0 0 590 429"') &&
   finalLogo.includes('fill-rule="evenodd"'), 'Finalized monogram SVG asset missing');
-assert(index.includes('sk-boot-real-logo') && index.includes('sk-boot-whatsapp-link') &&
-  index.includes('href="/images/sk-digital-final.svg"'), 'SEO initial paint must show the real logo and WhatsApp link');
+assert(!index.includes('sk-boot-real-logo') && index.includes('sk-boot-whatsapp-link') &&
+  index.includes('href="/images/sk-digital-final.svg"'),
+  'Initial navbar must be logo-free; retain favicon and WhatsApp branding');
 assert(homeSource.indexOf('sk-pin-about-intro') > homeSource.indexOf('sk-store-footer-expanded') &&
   homeSource.includes('GONDIA DESIGN STUDIO · SINCE 2006') &&
   homeSource.includes('Wedding cards, signage &amp;'),
