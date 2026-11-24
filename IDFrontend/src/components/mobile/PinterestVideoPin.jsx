@@ -34,12 +34,12 @@ function PinterestVideoPin({video}){
  useEffect(()=>{if(inView)setActivated(true);},[inView]);
  const play=Boolean(inView&&!paused&&(!reduceMotion||userPlayed));
  useEffect(()=>{
-  if(!uploaded||!playerRef.current)return;
+  if(!uploaded||!playerRef.current||!activated)return;
   const node=playerRef.current;
   node.muted=muted;
   if(play)node.play().catch(()=>setPaused(true));
   else node.pause();
- },[uploaded,play,muted]);
+ },[uploaded,activated,play,muted]);
  const togglePlay=()=>{
   if(reduceMotion&&!userPlayed){setUserPlayed(true);setPaused(false);}
   else setPaused(current=>!current);
