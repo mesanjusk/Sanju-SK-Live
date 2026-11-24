@@ -18,6 +18,8 @@ jobs:
           node --version
           node --check IDBackend/index.js
           node --check IDBackend/routes/googleMerchantFeed.js
+          node --check IDBackend/routes/videoRoutes.js
+          node --check IDBackend/utils/videoUploadValidation.js
           node --check IDBackend/utils/googleMerchantFeed.js
           node --check IDBackend/utils/googleMerchantCache.js
           node --check IDBackend/utils/listingPagination.js
@@ -39,6 +41,7 @@ jobs:
         run: |
           node --test IDFrontend/src/components/mobile/categoryOrder.test.mjs
           node --test IDFrontend/src/components/mobile/catalogSessionCache.test.mjs
+          node --test IDFrontend/src/components/mobile/pinterestVideoFeed.test.mjs
           node --test IDFrontend/src/hooks/consentPreference.test.mjs
           node --test IDFrontend/src/components/mobile/galleryAspect.test.mjs
       - name: Print 15 safe illustrative SEO enrichment previews

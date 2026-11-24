@@ -176,6 +176,28 @@ assert(pinCss.includes('columns:2') && pinCss.includes('break-inside:avoid') &&
   'Two-column mobile masonry and related designs styling must exist');
 assert(pinCss.includes('prefers-reduced-motion:reduce'), 'Motion accessibility must be retained');
 const endlessSource=readFileSync(new URL('../src/components/mobile/EndlessPinterestFeed.jsx',import.meta.url),'utf8');
+
+const uploadedPinSource=readFileSync(new URL('../src/components/mobile/PinterestVideoPin.jsx',import.meta.url),'utf8');
+const videoAdminSource=readFileSync(new URL('../src/pages/admin/VideoManager.jsx',import.meta.url),'utf8');
+assert(!pinHeaderSource.includes('sk-pin-brand-final-logo') &&
+  !index.includes('sk-boot-real-logo'),
+  'Top navigation must not show a graphic SK logo on React or initial paint');
+assert(homeSource.includes('videos={videos}') &&
+  endlessSource.includes('interleavePinterestVideos') &&
+  endlessSource.includes('<PinterestVideoPin'),
+  'Uploaded and linked videos must appear between photo pins, not only in footer');
+assert(uploadedPinSource.includes('IntersectionObserver') &&
+  uploadedPinSource.includes('node.pause()') &&
+  uploadedPinSource.includes('playsInline') &&
+  uploadedPinSource.includes('muted={muted}') &&
+  uploadedPinSource.includes('src={activated?video.videoUrl:undefined}'),
+  'Video should lazy-load, autoplay muted in view and pause off-screen');
+assert(videoAdminSource.includes("api.post('/api/videos/upload'") &&
+  videoAdminSource.includes('type="file"') &&
+  videoAdminSource.includes('50 MB') &&
+  videoAdminSource.includes('onUploadProgress'),
+  'Admin must support direct MP4/WebM uploads and display progress');
+
 const loadingSource=readFileSync(new URL('../src/components/mobile/CatalogLoadingState.jsx',import.meta.url),'utf8');
 assert(endlessSource.includes('uniqueDesigns') && endlessSource.includes('IntersectionObserver') &&
   endlessSource.includes('onLoadMore') && !endlessSource.includes('visibleCount') &&

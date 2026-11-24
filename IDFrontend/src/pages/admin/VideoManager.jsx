@@ -12,6 +12,7 @@ import YouTubeIcon from '@mui/icons-material/YouTube';
 import InstagramIcon from '@mui/icons-material/Instagram';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import api from '../../api';
+import {forgetCatalogRows} from '../../components/mobile/catalogSessionCache.mjs';
 import { ConfirmDialog, Toast } from '../../components/admin/AdminUiKit';
 
 const getYouTubeId = (url) => {
@@ -97,6 +98,7 @@ export default function VideoManager() {
       }else{
         await api.post('/api/videos',form);
       }
+      forgetCatalogRows('videos');
       setForm(EMPTY_FORM);setSelectedFile(null);setUploadProgress(0);
       await fetchVideos();showToast('Video added successfully');
     }catch(error){showToast(error.response?.data?.message||'Failed to upload video','error');}
@@ -106,6 +108,7 @@ export default function VideoManager() {
   const handleDelete = async () => {
     try {
       await api.delete(`/api/videos/${confirm.id}`);
+      forgetCatalogRows('videos');
       setConfirm({ open: false, id: null });
       await fetchVideos();
       showToast('Video deleted');
@@ -117,6 +120,7 @@ export default function VideoManager() {
     setEditLoading(true);
     try {
       await api.put(`/api/videos/${editDialog.id}`, editDialog);
+      forgetCatalogRows('videos');
       setEditDialog({ open: false, id: null, ...EMPTY_FORM });
       await fetchVideos();
       showToast('Video updated');
