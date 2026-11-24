@@ -20,6 +20,7 @@ jobs:
           node --check IDBackend/routes/googleMerchantFeed.js
           node --check IDBackend/utils/googleMerchantFeed.js
           node --check IDBackend/utils/googleMerchantCache.js
+          node --check IDBackend/utils/listingPagination.js
           node --check IDBackend/scripts/enrichCatalog.js
           node --check IDBackend/utils/enrichListingSeo.js
           node --check IDBackend/utils/catalogCacheRevision.js

@@ -37,7 +37,7 @@ export function rememberCatalogRows(key,rows,now=Date.now()){
 export function clearCatalogCache(){
   cache.clear();
   if(typeof sessionStorage!=='undefined'){
-    try{for(const key of ['listings','categories','subcategories','videos'])
+    try{for(const key of ['listings','categories','subcategories','videos','home-paged-feed-v1'])
       sessionStorage.removeItem(PREFIX+key);}catch{}
   }
 }

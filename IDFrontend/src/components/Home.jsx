@@ -15,7 +15,7 @@ import './mobile/pinterest-storefront.css';
 import {orderStoreCategories,landingKeyword} from './mobile/categoryOrder.mjs';
 import VideoFeedCard from './mobile/VideoFeedCard';
 import MobileBottomNav from './mobile/MobileBottomNav';
-import CatalogLoadingState from './mobile/CatalogLoadingState';
+import PinterestFeedLoading from './mobile/PinterestFeedLoading';
 import FAQSection from './FAQSection';
 import LocalContactFooter from './LocalContactFooter';
 import ServiceGallery from './ServiceGallery';
@@ -26,6 +26,8 @@ const HOME_FEED_SEED=freshFeedSeed();
 const LANDING_KEYWORD=landingKeyword(typeof window!=='undefined'?window.location.search:'',
   typeof document!=='undefined'?document.referrer:'');
 const RETURN_KEY='sk-home-browse-v2';
+const FEED_CACHE_KEY='home-paged-feed-v1';
+const FEED_PAGE_SIZE=18;
 function consumeBrowseState(){
   try{const data=JSON.parse(sessionStorage.getItem(RETURN_KEY)||'null');
     sessionStorage.removeItem(RETURN_KEY);
@@ -36,25 +38,44 @@ function consumeBrowseState(){
 export default function Home() {
   const navigate = useNavigate();
   const location = useLocation();
-  const [listings, setListings] = useState(() => readCatalogRows('listings') || []);
+  const [feedSeed] = useState(() => HOME_FEED_SEED);
+  const [returnView] = useState(consumeBrowseState);
+  // Cache only the pages actually visited, not the entire MongoDB collection.
+  // The random feed seed survives client-side navigation but resets on reload.
+  const [initialFeedCache] = useState(() => {
+    const saved = readCatalogRows(FEED_CACHE_KEY)?.[0];
+    return saved?.seed === HOME_FEED_SEED ? saved : null;
+  });
+  const [listings, setListings] = useState(() => initialFeedCache?.rows || []);
+  const [feedMeta, setFeedMeta] = useState(() => initialFeedCache?.meta ||
+    {page:0,total:0,hasMore:true});
+  const [loadedFeedKey,setLoadedFeedKey] = useState(initialFeedCache?.key || '');
+  const [loadingMore,setLoadingMore] = useState(false);
+  const [moreFailed,setMoreFailed] = useState(false);
+  const feedBusyRef=useRef(false);
+  const feedAbortRef=useRef(null);
+  const feedKeyRef=useRef('');
   const [categories, setCategories] = useState(() => readCatalogRows('categories') || []);
   const [subcategories, setSubcategories] = useState(() => readCatalogRows('subcategories') || []);
   const [videos, setVideos] = useState(() => readCatalogRows('videos') || []);
   const [config, setConfig] = useState({});
-  // Load categories and products independently, but do not expose clickable
-  // category controls until both API responses are ready.
   const [catalogStatus, setCatalogStatus] = useState(() => ({
-    listings: readCatalogRows('listings') !== null ? 'ready' : 'loading',
+    listings: initialFeedCache ? 'ready' : 'loading',
     categories: readCatalogRows('categories') !== null ? 'ready' : 'loading',
   }));
   const [catalogRetry, setCatalogRetry] = useState(0);
-  const [feedSeed] = useState(() => HOME_FEED_SEED);
-  const [returnView] = useState(consumeBrowseState);
   const browseRef=useRef(null);
   const [interests,setInterests] = useState(getDesignInterests);
   const [aiIds,setAiIds] = useState([]);
-  const [selectedCategory, setSelectedCategory] = useState(null);
-  const [selectedSubcategory, setSelectedSubcategory] = useState(null);
+  const [selectedCategory, setSelectedCategory] = useState(() => {
+    if(!returnView?.categoryId)return null;
+    return (readCatalogRows('categories')||[]).find(c=>idOf(c)===returnView.categoryId
+      ||String(c.category_uuid||'')===returnView.categoryId)||null;
+  });
+  const [selectedSubcategory, setSelectedSubcategory] = useState(() => {
+    if(!returnView?.subcategoryId)return null;
+    return (readCatalogRows('subcategories')||[]).find(c=>idOf(c)===returnView.subcategoryId)||null;
+  });
 
   useEffect(()=>()=>{
     try{sessionStorage.setItem(RETURN_KEY,JSON.stringify({...browseRef.current,at:Date.now()}));
@@ -119,7 +140,6 @@ export default function Home() {
         }
       }
     };
-    loadCatalogPart('listings', '/api/listings', setListings);
     loadCatalogPart('categories', '/api/categories', setCategories);
     if(!isCatalogCacheFresh('subcategories'))api.get('/api/subcategories', { timeout: 12000 })
       .then(res => {
@@ -144,15 +164,117 @@ export default function Home() {
     };
   }, [catalogRetry]);
 
-  const catalogReady = catalogStatus.listings === 'ready' && catalogStatus.categories === 'ready';
+  // Stable database order within a session; each new visit alternates between
+  // ascending and descending data sets, with locally shuffled cards per batch.
+  // All filters/search run on MongoDB BEFORE pagination, not on just page 1.
+  const queryParams=useMemo(()=>{
+    const category=[selectedCategory?._id,selectedCategory?.category_uuid]
+      .filter(Boolean).map(String);
+    return {
+      direction:Number(feedSeed)%2===0?'asc':'desc',
+      ...(category.length?{category:[...new Set(category)].join(',')}:{ }),
+      ...(selectedSubcategory?{
+        subcategory:idOf(selectedSubcategory),
+        subcategoryName:String(selectedSubcategory.name||'')
+      }:{ }),
+      ...(deferredSearch.trim()?{search:deferredSearch.trim()}:{ })
+    };
+  },[selectedCategory,selectedSubcategory,deferredSearch,feedSeed]);
+  const feedKey=JSON.stringify({seed:feedSeed,...queryParams});
+  const fetchFeedPage=useCallback(async(page,signal)=>{
+    const response=await api.get('/api/listings',{
+      params:{paged:'1',limit:FEED_PAGE_SIZE,page,...queryParams},
+      timeout:16000,signal
+    });
+    const result=response.data;
+    if(!result||!Array.isArray(result.items)||typeof result.hasMore!=='boolean'||
+      !Number.isFinite(result.total))throw new Error('Paginated catalog API unavailable');
+    return result;
+  },[queryParams]);
+  useEffect(()=>{
+    let active=true;
+    const controller=new AbortController();
+    const timers=[];
+    feedAbortRef.current?.abort();
+    feedAbortRef.current=null;
+    feedBusyRef.current=false;
+    feedKeyRef.current=feedKey;
+    setLoadingMore(false);
+    setMoreFailed(false);
+    const cached=readCatalogRows(FEED_CACHE_KEY)?.[0];
+    if(catalogRetry===0 && cached?.seed===feedSeed && cached.key===feedKey &&
+      Array.isArray(cached.rows)&&cached.meta?.page>0){
+      setListings(cached.rows);
+      setFeedMeta(cached.meta);
+      setLoadedFeedKey(feedKey);
+      setCatalogStatus(prev=>({...prev,listings:'ready'}));
+      return ()=>{active=false;controller.abort();};
+    }
+    setListings([]);
+    setFeedMeta({page:0,total:0,hasMore:true});
+    setLoadedFeedKey('');
+    setCatalogStatus(prev=>({...prev,listings:'loading'}));
+    (async()=>{
+      for(let attempt=0;attempt<2;attempt++){
+        try{
+          const result=await fetchFeedPage(1,controller.signal);
+          if(!active)return;
+          setListings(result.items);
+          setFeedMeta({page:1,total:result.total,hasMore:result.hasMore});
+          setLoadedFeedKey(feedKey);
+          setCatalogStatus(prev=>({...prev,listings:'ready'}));
+          return;
+        }catch{
+          if(!active||controller.signal.aborted)return;
+          if(attempt===0)await new Promise(resolve=>{
+            timers.push(window.setTimeout(resolve,1300));
+          });
+          else setCatalogStatus(prev=>({...prev,listings:'error'}));
+        }
+      }
+    })();
+    return ()=>{active=false;controller.abort();timers.forEach(window.clearTimeout);};
+  },[feedKey,fetchFeedPage,catalogRetry,feedSeed]);
+  const loadMore=useCallback(async()=>{
+    if(feedBusyRef.current||!feedMeta.hasMore||feedMeta.page<1||
+      loadedFeedKey!==feedKey)return;
+    feedBusyRef.current=true;
+    const controller=new AbortController();
+    feedAbortRef.current=controller;
+    setLoadingMore(true);
+    setMoreFailed(false);
+    try{
+      const next=await fetchFeedPage(feedMeta.page+1,controller.signal);
+      if(feedKeyRef.current!==feedKey||controller.signal.aborted)return;
+      setListings(previous=>{
+        const seen=new Set(previous.map(product=>String(product._id)));
+        return [...previous,...next.items.filter(product=>!seen.has(String(product._id)))];
+      });
+      setFeedMeta({page:next.page,total:next.total,hasMore:next.hasMore});
+    }catch{
+      if(!controller.signal.aborted&&feedKeyRef.current===feedKey)setMoreFailed(true);
+    }finally{
+      if(feedKeyRef.current===feedKey){
+        feedBusyRef.current=false;
+        setLoadingMore(false);
+      }
+    }
+  },[feedMeta,loadedFeedKey,feedKey,fetchFeedPage]);
+  useEffect(()=>{
+    if(loadedFeedKey!==feedKey||feedMeta.page<1||catalogStatus.listings!=='ready')return;
+    rememberCatalogRows(FEED_CACHE_KEY,[{seed:feedSeed,key:feedKey,rows:listings,meta:feedMeta}]);
+  },[feedKey,feedSeed,loadedFeedKey,feedMeta,listings,catalogStatus.listings]);
+
+  const catalogReady = catalogStatus.categories === 'ready';
+  const catalogLoaded = catalogStatus.listings === 'ready' && catalogReady;
   const catalogFailed = catalogStatus.listings === 'error' || catalogStatus.categories === 'error';
   const catalogPending = catalogStatus.listings === 'loading' || catalogStatus.categories === 'loading';
   const retryCatalog = () => {
     clearCatalogCache();
     setSelectedCategory(null);
     setSelectedSubcategory(null);
-    setCatalogStatus({ listings: 'loading', categories: 'loading' });
-    setCatalogRetry(value => value + 1);
+    setCatalogStatus({listings:'loading',categories:'loading'});
+    setCatalogRetry(value=>value+1);
   };
 
   const orderedCategories=useMemo(()=>orderStoreCategories(categories,
@@ -177,62 +299,27 @@ export default function Home() {
     return index;
   }, [categories]);
 
-  const groupedProducts = useMemo(() => {
-    const sections = categories.map((category, i) => ({
-      id: idOf(category) || 'category-' + i,
-      category, name: category.name || 'Collection',
-      products: [],
-    }));
-    const byId = new Map();
-    sections.forEach((section) => {
-      if (section.category._id) byId.set(String(section.category._id), section);
-      if (section.category.category_uuid) byId.set(String(section.category.category_uuid), section);
-    });
-    const otherProducts = [];
-    for (const product of listings) {
-      const bucket = byId.get(idOf(product.category));
-      if (bucket) bucket.products.push(product);
-      else otherProducts.push(product);
-    }
-    const populated = sections.filter(section => section.products.length > 0);
-    if (otherProducts.length) populated.push({
-      id: 'other', category: null, name: populated.length ? 'More designs' : 'Latest creations',
-      products: otherProducts,
-    });
-    return populated;
-  }, [categories, listings]);
-
   const visibleSubcategories = useMemo(() => {
     if (!selectedCategory) return [];
     const ids = [selectedCategory._id, selectedCategory.category_uuid].filter(Boolean).map(String);
     return subcategories.filter(sub => ids.includes(idOf(sub.categoryId)));
   }, [subcategories, selectedCategory]);
 
-  const filteredProducts = useMemo(() => {
-    const query = deferredSearch.trim().toLowerCase();
-    const ids = selectedCategory
-      ? [selectedCategory._id, selectedCategory.category_uuid].filter(Boolean).map(String)
-      : null;
-    return listings.filter((product) => {
-      const categoryId = idOf(product.category);
-      if (ids && !ids.includes(categoryId)) return false;
-      if (selectedSubcategory) {
-        const subId = idOf(product.subcategory);
-        const selectedId = idOf(selectedSubcategory);
-        if (subId !== selectedId && product.subcategory !== selectedSubcategory.name) return false;
-      }
-      if (!query) return true;
-      const categoryName = categoryById.get(categoryId)?.name || product.category?.name || '';
-      const searchable = [product.title, product.description, categoryName].filter(Boolean).join(' ').toLowerCase();
-      return searchable.includes(query);
-    });
-  }, [listings, deferredSearch, selectedCategory, selectedSubcategory, categoryById]);
-
-  const distinctProducts = useMemo(() => uniqueDesigns(filteredProducts), [filteredProducts]);
+  const distinctProducts = useMemo(() => uniqueDesigns(listings), [listings]);
   // Each visitor's page load starts with a new shuffled order; selections
   // promote real related designs without introducing duplicate records.
-  const orderedProducts = useMemo(()=>rankDesigns(distinctProducts,{seed:feedSeed,interests,aiIds,keyword:LANDING_KEYWORD}),
-    [distinctProducts,feedSeed,interests,aiIds]);
+  // Rank separately inside every fetched batch. New arrivals never reorder
+  // the already-visible masonry pins or jump the visitor's scroll position.
+  const orderedProducts=useMemo(()=>{
+    const result=[];
+    // Use raw page boundaries, not deduplicated length, so newly arriving
+    // pages never change the ranking of already-rendered cards.
+    for(let i=0;i<listings.length;i+=FEED_PAGE_SIZE){
+      result.push(...rankDesigns(listings.slice(i,i+FEED_PAGE_SIZE),
+        {seed:feedSeed,interests,aiIds,keyword:LANDING_KEYWORD}));
+    }
+    return uniqueDesigns(result);
+  },[listings,feedSeed,interests,aiIds]);
   useEffect(()=>{
     const onInterest=()=>{setInterests(getDesignInterests());setAiIds([]);};
     window.addEventListener('sk-design-interest',onInterest);
@@ -241,7 +328,7 @@ export default function Home() {
       window.removeEventListener('pageshow',onInterest);};
   },[]);
   useEffect(()=>{
-    if(!catalogReady||!interests.length||distinctProducts.length<2)return undefined;
+    if(!catalogLoaded||!interests.length||distinctProducts.length<2)return undefined;
     const controller=new AbortController();
     const timer=window.setTimeout(async()=>{
       try{
@@ -262,12 +349,12 @@ export default function Home() {
       }catch{/* Local similarity ranking remains in use. */}
     },350);
     return ()=>{window.clearTimeout(timer);controller.abort();};
-  },[catalogReady,distinctProducts,feedSeed,interests,categoryById]);
+  },[catalogLoaded,distinctProducts,feedSeed,interests,categoryById]);
 
 
   // Keep the reader's position after leaving a pin; the catalog is already cached.
   useEffect(() => {
-    if(!catalogReady || !listings.length) return undefined;
+    if(!catalogLoaded || !listings.length) return undefined;
     let saved=0;
     try {
       saved=Number(sessionStorage.getItem('sk-home-scroll-position')||0);
@@ -280,7 +367,7 @@ export default function Home() {
       timer=window.setTimeout(()=>window.scrollTo({top:saved,behavior:'instant'}),120);
     });
     return ()=>{window.cancelAnimationFrame(frame);window.clearTimeout(timer);};
-  },[catalogReady]);
+  },[catalogLoaded]);
 
   // Scroll-aware shopping bar: disappears as customers browse down, reappears
   // as they scroll up or approach the start/end. No floating More/Top buttons.
@@ -392,18 +479,20 @@ export default function Home() {
         {catalogReady && (
           <div className="sk-pin-feed-heading">
             <h2>{selectedCategory ? selectedCategory.name : deferredSearch.trim() ? 'Search results' : interests.length ? 'Inspired by your selections' : 'Discover designs'}</h2>
-            <span>{distinctProducts.length} designs</span>
+            <span>{feedMeta.total} designs</span>
           </div>
         )}
-        {!catalogReady ? (
-          <CatalogLoadingState error={catalogFailed && !catalogPending} onRetry={retryCatalog} />
+        {!catalogLoaded ? (
+          <PinterestFeedLoading error={catalogFailed && !catalogPending} onRetry={retryCatalog} />
         ) : distinctProducts.length ? (
           <EndlessPinterestFeed
             key={(selectedCategory ? idOf(selectedCategory) : 'all') + '|' +
               (selectedSubcategory ? idOf(selectedSubcategory) : 'all') + '|' +
               deferredSearch.trim().toLowerCase() + '|' + catalogRetry}
             products={orderedProducts} categoryById={categoryById}
-            whatsappNumber={whatsappNumber} />
+            whatsappNumber={whatsappNumber}
+            hasMore={feedMeta.hasMore} loadingMore={loadingMore}
+            loadError={moreFailed} onLoadMore={loadMore} />
         ) : (
           <div className="sk-pin-end-note">
             No designs matched. Try another category or a different search.

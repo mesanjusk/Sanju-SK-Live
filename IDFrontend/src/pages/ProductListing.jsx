@@ -36,6 +36,7 @@ export default function ProductListing() {
   const [searchParams, setSearchParams] = useSearchParams();
 
   const [products, setProducts] = useState([]);
+  const [totalProducts,setTotalProducts] = useState(0);
   const [categories, setCategories] = useState([]);
   const [subcategories, setSubcategories] = useState([]);
   const [religions, setReligions] = useState([]);
@@ -129,42 +130,40 @@ export default function ProductListing() {
   /* Load Products */
   /* ---------------------------------- */
 
-  const loadProducts = useCallback(async (f) => {
-    const requestId = ++activeProductRequest.current;
+  const loadProducts = useCallback(async(f,page)=>{
+    const requestId=++activeProductRequest.current;
     setLoading(true);
     setError('');
-    const params = {};
-    if (f.search) params.search = f.search;
-    if (f.category) params.category = f.category;
-    if (f.subcategory) params.subcategory = f.subcategory;
-    if (f.religion) params.religion = f.religion;
-    if (f.sort) params.sort = f.sort;
-
-    // Retry on Render cold start; ignore stale responses when filters change.
-    for (let attempt = 0; attempt < 2; attempt++) {
-      try {
-        const res = await api.get('/api/listings', { params, timeout: 30000 });
-        if (requestId !== activeProductRequest.current) return;
-        const data = Array.isArray(res.data) ? res.data : res.data?.result || [];
-        if (!data.length && attempt < 2 && !Object.values(params).some(Boolean)) {
-          await new Promise(resolve => setTimeout(resolve, 1500));
-          continue;
-        }
-        setProducts(data);
+    const params={paged:'1',page,limit:PRODUCTS_PER_PAGE};
+    if(f.search)params.search=f.search;
+    if(f.category)params.category=f.category;
+    if(f.subcategory)params.subcategory=f.subcategory;
+    if(f.religion)params.religion=f.religion;
+    if(f.sort)params.sort=f.sort;
+    // Retry cold starts; ignore responses from an outdated filter or page.
+    for(let attempt=0;attempt<2;attempt++){
+      try{
+        const res=await api.get('/api/listings',{params,timeout:20000});
+        if(requestId!==activeProductRequest.current)return;
+        const data=res.data;
+        if(!data||!Array.isArray(data.items)||!Number.isFinite(data.total))
+          throw Error('Paginated catalog API unavailable');
+        setProducts(data.items);
+        setTotalProducts(data.total);
         setLoading(false);
         return;
-      } catch (err) {
-        if (requestId !== activeProductRequest.current) return;
-        if (attempt === 1) {
-          console.error('Product listings request failed after retries', err);
-          setError('Our product server is currently offline. Try again, or request the catalog on WhatsApp.');
+      }catch(err){
+        if(requestId!==activeProductRequest.current)return;
+        if(attempt===1){
+          console.error('Paginated catalog request failed',err);
+          setError('Our product server is currently unavailable. Try again, or request the catalog on WhatsApp.');
           setLoading(false);
           return;
         }
-        await new Promise(resolve => setTimeout(resolve, Math.min(2000 * (attempt + 1), 10000)));
+        await new Promise(resolve=>setTimeout(resolve,1400));
       }
     }
-  }, []);
+  },[]);
 
   /* ---------------------------------- */
   /* Effects */
@@ -175,7 +174,7 @@ export default function ProductListing() {
   }, []);
 
   useEffect(() => {
-    loadProducts(filters);
+    loadProducts(filters,currentPage);
 
     const newParams = {};
 
@@ -186,13 +185,13 @@ export default function ProductListing() {
     setSearchParams(newParams, {
       replace: true,
     });
-  }, [filters, loadProducts, setSearchParams, retryTick]);
+  }, [filters, currentPage, loadProducts, setSearchParams, retryTick]);
 
   useEffect(() => {
     if (!error) return;
-    const handle = setInterval(() => loadProducts(filters), 25000);
+    const handle = setInterval(() => loadProducts(filters,currentPage), 25000);
     return () => clearInterval(handle);
-  }, [error, filters, loadProducts]);
+  }, [error, filters, currentPage, loadProducts]);
 
   /* ---------------------------------- */
   /* Helpers */
@@ -246,19 +245,9 @@ export default function ProductListing() {
   /* Pagination */
   /* ---------------------------------- */
 
-  const totalPages = Math.ceil(
-    products.length / PRODUCTS_PER_PAGE
-  );
-
-  const paginatedProducts = useMemo(() => {
-    const start =
-      (currentPage - 1) * PRODUCTS_PER_PAGE;
-
-    return products.slice(
-      start,
-      start + PRODUCTS_PER_PAGE
-    );
-  }, [products, currentPage]);
+  const totalPages=Math.max(1,Math.ceil(totalProducts/PRODUCTS_PER_PAGE));
+  // The API already returns only the requested page.
+  const paginatedProducts=products;
 
   /* ---------------------------------- */
   /* Filter Panel */
@@ -417,7 +406,7 @@ export default function ProductListing() {
           <span>THE SANJU SK COLLECTION</span>
           <h1>Made to be remembered.</h1>
           <p>Discover print, signage, invitations and corporate gifts with immersive photo previews. Tap any product to see every available angle.</p>
-          <p aria-live="polite">{loading ? 'Exploring our collection…' : `${products.length} products ready to explore`}</p>
+          <p aria-live="polite">{loading ? 'Exploring our collection…' : `${totalProducts} products to explore`}</p>
         </section>
       </div>
 
@@ -550,10 +539,16 @@ export default function ProductListing() {
           {/* Products */}
           <main className="min-w-0 flex-1">
             {loading ? (
-              <div className="sk-catalog-grid">
-                {[...Array(6)].map((_, i) => (
-                  <LoadingSkeleton key={i} />
-                ))}
+              <div role="status" aria-live="polite" aria-label="Loading product page">
+                <div className="sk-catalog-grid">
+                  {[...Array(6)].map((_, i) => (
+                    <LoadingSkeleton key={i} />
+                  ))}
+                </div>
+                <div className="sk-pin-loading-inline">
+                  <span className="sk-pin-spinner" aria-hidden="true"/>
+                  <span>Finding your designs…</span>
+                </div>
               </div>
             ) : error ? (
               <p className="rounded-xl bg-white p-8 text-center text-sm text-[#536656]">Products will be displayed here when the catalog server is back online.</p>

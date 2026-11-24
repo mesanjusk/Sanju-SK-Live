@@ -9,6 +9,7 @@ import {needsSeoEnrichment,createSeoPreview} from '../utils/enrichListingSeo.js'
 import {bumpCatalogCacheRevision,readCatalogCacheRevision} from '../utils/catalogCacheRevision.js';
 import {invalidateGoogleMerchantFeed} from '../utils/googleMerchantCache.js';
 import {withSeoSlug} from '../utils/productSeo.js';
+import {parseListingPage} from '../utils/listingPagination.js';
 import {CloudinaryStorage} from 'multer-storage-cloudinary';
 
 const router=express.Router();
@@ -88,6 +89,29 @@ router.post('/',upload.array('images',4),async(req,res)=>{
  catch(e){res.status(500).json({error:e.message});}
 });
 router.get('/',async(req,res)=>{
+ // Explicit opt-in so existing admin and SEO API consumers keep array responses.
+ // Only one bounded MongoDB page is read, never the full catalog.
+ if(req.query.paged==='1'){
+  const {page,limit,skip,filter,sort}=parseListingPage(req.query);
+  try{
+   const [total,items]=await Promise.all([
+    Listing.countDocuments(filter).maxTimeMS(12000),
+    Listing.find(filter)
+     .select('_id title slug category subcategory description images imageUrl price quantityPricing size material badge seoTitle seoDescription createdAt updatedAt')
+     .sort(sort).skip(skip).limit(limit).lean().maxTimeMS(12000)
+   ]);
+   res.set('Cache-Control','no-store');
+   return res.json({
+    items:items.map(withSeoSlug),page,pageSize:limit,total,
+    hasMore:skip+items.length<total && items.length>0,
+    nextPage:skip+items.length<total && items.length>0?page+1:null
+   });
+  }catch(error){
+   console.error('Paginated listing query failed',error);
+   return res.set('Cache-Control','no-store').set('Retry-After','30')
+    .status(503).json({error:'Catalog temporarily unavailable'});
+  }
+ }
  const {category,subcategory,search,religion,sort}=req.query;
  const filter={...active};
  if(category)filter.category=String(category);

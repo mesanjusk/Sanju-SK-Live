@@ -288,3 +288,26 @@
   .sk-pinterest-home .sk-print-spark,
   .sk-pinterest-home .sk-catalog-progress i {animation:none;}
 }
+
+
+/* Pinterest-inspired progressively loaded cards: skeleton shimmer + bottom spinner. */
+.sk-pin-skeleton-grid{pointer-events:none;}
+.sk-pin-skeleton-card{display:inline-block;break-inside:avoid;width:100%;margin:0 0 15px;}
+.sk-pin-skeleton-cover{border-radius:22px;background:linear-gradient(
+  105deg,#efefef 0%,#f7f7f7 38%,#eeeeee 62%,#f5f5f5 100%
+);background-size:250% 100%;animation:sk-pin-load-shimmer 1.55s ease-in-out infinite;}
+.sk-pin-skeleton-line{height:10px;margin:10px 5px 0;border-radius:12px;background:#eeeeee;width:83%;}
+.sk-pin-skeleton-line--short{margin-top:6px;width:46%;height:8px;}
+.sk-pin-loading-inline{display:flex;align-items:center;justify-content:center;gap:11px;
+  min-height:60px;padding:11px 15px;color:#6b6b6b;font-size:12px;font-weight:650;}
+.sk-pin-loading-inline--initial{padding-top:20px;}
+.sk-pin-spinner{display:block;flex:0 0 27px;width:27px;height:27px;border-radius:50%;
+  border:3px solid #eee;border-top-color:#e60023;border-right-color:#e60023;
+  animation:sk-pin-loading-spin .8s linear infinite;}
+.sk-pin-load-error{text-align:center;padding:36px 15px;color:#6a6a6a;font-size:13px;}
+.sk-pin-load-error p{margin-bottom:14px;}
+@keyframes sk-pin-loading-spin{to{transform:rotate(360deg);}}
+@keyframes sk-pin-load-shimmer{from{background-position:100% 0}to{background-position:-100% 0}}
+@media(prefers-reduced-motion:reduce){
+ .sk-pin-spinner,.sk-pin-skeleton-cover{animation:none;}
+}
