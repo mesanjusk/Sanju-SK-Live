@@ -2,7 +2,7 @@ import express from 'express';
 import multer from 'multer';
 import Video from '../models/Video.js';
 import cloudinary from '../utils/cloudinary.js';
-import {MAX_VIDEO_BYTES,isSupportedVideo} from '../utils/videoUploadValidation.js';
+import {MAX_VIDEO_BYTES,isSupportedVideo,isSafeVideoLink} from '../utils/videoUploadValidation.js';
 
 const router=express.Router();
 const directUpload=multer({
@@ -35,7 +35,7 @@ function uploadToCloudinary(buffer){
 router.get('/',async(_req,res)=>{
  try{
   const videos=await Video.find().sort({createdAt:-1,_id:-1}).lean().maxTimeMS(12000);
-  res.set('Cache-Control','public, max-age=30');
+  res.set('Cache-Control','no-store');
   res.json(videos);
  }catch(error){
   console.error('Error fetching videos',error);
@@ -92,8 +92,8 @@ router.post('/',async(req,res)=>{
    return res.status(400).json({message:'Use /api/videos/upload for video files'});
   const youtubeUrl=String(req.body.youtubeUrl||'').trim().slice(0,500);
   const instagramUrl=String(req.body.instagramUrl||'').trim().slice(0,500);
-  if(platform==='youtube'&&!youtubeUrl)return res.status(400).json({message:'YouTube URL required'});
-  if(platform==='instagram'&&!instagramUrl)return res.status(400).json({message:'Instagram URL required'});
+  if(!isSafeVideoLink(platform==='youtube'?youtubeUrl:instagramUrl,platform))
+   return res.status(400).json({message:'Enter a valid HTTPS YouTube or Instagram reel URL'});
   const video=await Video.create({title,youtubeUrl,instagramUrl,platform,
    description:String(req.body.description||'').trim().slice(0,600)});
   res.status(201).json(video);
@@ -119,8 +119,8 @@ router.put('/:id',async(req,res)=>{
    current.platform=platform;
    current.youtubeUrl=String(req.body.youtubeUrl||'').trim().slice(0,500);
    current.instagramUrl=String(req.body.instagramUrl||'').trim().slice(0,500);
-   if(platform==='youtube'&&!current.youtubeUrl)return res.status(400).json({message:'YouTube URL required'});
-   if(platform==='instagram'&&!current.instagramUrl)return res.status(400).json({message:'Instagram URL required'});
+   if(!isSafeVideoLink(platform==='youtube'?current.youtubeUrl:current.instagramUrl,platform))
+    return res.status(400).json({message:'Enter a valid HTTPS YouTube or Instagram reel URL'});
   }
   await current.save();
   res.json(current);

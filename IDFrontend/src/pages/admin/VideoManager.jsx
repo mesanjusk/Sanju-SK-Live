@@ -22,7 +22,7 @@ const getYouTubeId = (url) => {
 
 const EMPTY_FORM = { title: '', youtubeUrl: '', instagramUrl: '', platform: 'youtube', description: '' };
 
-function PlatformToggle({ value, onChange }) {
+function PlatformToggle({ value, onChange, allowUpload = true }) {
   return (
     <ToggleButtonGroup value={value} exclusive onChange={(_, v) => v && onChange(v)} size="small" sx={{ mb: 1 }}>
       <ToggleButton value="youtube" sx={{ gap: 0.5, textTransform: 'none', px: 2 }}>
@@ -31,9 +31,9 @@ function PlatformToggle({ value, onChange }) {
       <ToggleButton value="instagram" sx={{ gap: 0.5, textTransform: 'none', px: 2 }}>
         <InstagramIcon sx={{ color: '#dd2a7b', fontSize: 18 }} /> Instagram
       </ToggleButton>
-      <ToggleButton value="upload" sx={{ gap: 0.5, textTransform: 'none', px: 2 }}>
+      {allowUpload&&<ToggleButton value="upload" sx={{ gap: 0.5, textTransform: 'none', px: 2 }}>
         <CloudUploadIcon sx={{color:'#333',fontSize:18}}/> Upload Video
-      </ToggleButton>
+      </ToggleButton>}
     </ToggleButtonGroup>
   );
 }
@@ -274,7 +274,7 @@ export default function VideoManager() {
             <Typography variant="caption" color="text.secondary">
               This video is hosted in the cloud. Edit text here or delete and upload a replacement.
             </Typography> :
-            <PlatformToggle value={editDialog.platform} onChange={(v) => setE('platform', v)} />}
+            <PlatformToggle value={editDialog.platform} onChange={(v) => setE('platform', v)} allowUpload={false} />}
           <TextField label="Title" size="small" fullWidth autoFocus value={editDialog.title} onChange={(e) => setE('title', e.target.value)} />
           {editDialog.platform === 'youtube' ? (
             <TextField
