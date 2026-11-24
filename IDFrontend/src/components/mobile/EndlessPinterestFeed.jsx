@@ -1,5 +1,7 @@
 import {useEffect,useMemo,useRef} from 'react';
 import PinterestPinCard from './PinterestPinCard';
+import PinterestVideoPin from './PinterestVideoPin';
+import {interleavePinterestVideos} from './pinterestVideoFeed.mjs';
 import {itemKey} from './endlessOrder.mjs';
 import {uniqueDesigns} from './uniqueDesigns.mjs';
 
@@ -8,10 +10,11 @@ import {uniqueDesigns} from './uniqueDesigns.mjs';
  * at a time; this component never fetches the complete catalog or repeats pins.
  */
 export default function EndlessPinterestFeed({
-  products=[],categoryById,whatsappNumber,hasMore=false,
+  products=[],videos=[],categoryById,whatsappNumber,hasMore=false,
   loadingMore=false,loadError=false,onLoadMore
 }){
   const uniqueProducts=useMemo(()=>uniqueDesigns(products),[products]);
+  const feedItems=useMemo(()=>interleavePinterestVideos(uniqueProducts,videos),[uniqueProducts,videos]);
   const sentinelRef=useRef(null);
   useEffect(()=>{
     if(!hasMore||loadingMore||loadError||!onLoadMore||!sentinelRef.current||
@@ -27,11 +30,12 @@ export default function EndlessPinterestFeed({
   return (
     <>
       <div className="sk-pin-masonry" aria-label="Browse custom printing and design ideas">
-        {uniqueProducts.map((product,index)=>(
-          <PinterestPinCard key={itemKey(product)} product={product} index={index}
-            categoryName={categoryById.get(itemKey(product.category))?.name||product.category?.name||''}
+        {feedItems.map((item,index)=>item.kind==='video'?
+          <PinterestVideoPin key={item.key} video={item.video}/>:
+          <PinterestPinCard key={item.key} product={item.product} index={index}
+            categoryName={categoryById.get(itemKey(item.product.category))?.name||item.product.category?.name||''}
             whatsappNumber={whatsappNumber}/>
-        ))}
+        )}
       </div>
       {hasMore&&(
         <div ref={sentinelRef} className="sk-pin-feed-sentinel">
