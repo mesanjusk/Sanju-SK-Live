@@ -41,3 +41,10 @@ export function clearCatalogCache(){
       sessionStorage.removeItem(PREFIX+key);}catch{}
   }
 }
+
+export function forgetCatalogRows(key){
+ cache.delete(key);
+ if(typeof sessionStorage!=='undefined'){
+  try{sessionStorage.removeItem(PREFIX+key);}catch{}
+ }
+}

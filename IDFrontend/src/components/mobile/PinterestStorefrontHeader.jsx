@@ -64,8 +64,6 @@ function PinterestStorefrontHeader({
     <div className={'sk-pin-top-shell'+(searchOpen?' sk-pin-search-open':'')}>
       <header className="sk-pin-header">
         <Link to="/" className="sk-pin-brand" aria-label="SANJU SK Digital homepage">
-          <img className="sk-pin-brand-final-logo" src="/images/sk-digital-final.svg"
-            alt="SK Digital logo" width="59" height="43" />
           <span className="sk-pin-brand-name">SANJU <b>SK</b>
             <small>DIGITAL · MAHI CREATION</small>
           </span>

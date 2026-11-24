@@ -10,7 +10,9 @@ import EditIcon from '@mui/icons-material/Edit';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import YouTubeIcon from '@mui/icons-material/YouTube';
 import InstagramIcon from '@mui/icons-material/Instagram';
+import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import api from '../../api';
+import {forgetCatalogRows} from '../../components/mobile/catalogSessionCache.mjs';
 import { ConfirmDialog, Toast } from '../../components/admin/AdminUiKit';
 
 const getYouTubeId = (url) => {
@@ -21,7 +23,7 @@ const getYouTubeId = (url) => {
 
 const EMPTY_FORM = { title: '', youtubeUrl: '', instagramUrl: '', platform: 'youtube', description: '' };
 
-function PlatformToggle({ value, onChange }) {
+function PlatformToggle({ value, onChange, allowUpload = true }) {
   return (
     <ToggleButtonGroup value={value} exclusive onChange={(_, v) => v && onChange(v)} size="small" sx={{ mb: 1 }}>
       <ToggleButton value="youtube" sx={{ gap: 0.5, textTransform: 'none', px: 2 }}>
@@ -30,6 +32,9 @@ function PlatformToggle({ value, onChange }) {
       <ToggleButton value="instagram" sx={{ gap: 0.5, textTransform: 'none', px: 2 }}>
         <InstagramIcon sx={{ color: '#dd2a7b', fontSize: 18 }} /> Instagram
       </ToggleButton>
+      {allowUpload&&<ToggleButton value="upload" sx={{ gap: 0.5, textTransform: 'none', px: 2 }}>
+        <CloudUploadIcon sx={{color:'#333',fontSize:18}}/> Upload Video
+      </ToggleButton>}
     </ToggleButtonGroup>
   );
 }
@@ -38,6 +43,8 @@ export default function VideoManager() {
   const [videos, setVideos] = useState([]);
   const [form, setForm] = useState(EMPTY_FORM);
   const [loading, setLoading] = useState(false);
+  const [selectedFile,setSelectedFile]=useState(null);
+  const [uploadProgress,setUploadProgress]=useState(0);
   const [confirm, setConfirm] = useState({ open: false, id: null });
   const [editDialog, setEditDialog] = useState({ open: false, id: null, ...EMPTY_FORM });
   const [editLoading, setEditLoading] = useState(false);
@@ -53,13 +60,21 @@ export default function VideoManager() {
   };
   useEffect(() => { fetchVideos(); }, []);
 
-  const validate = (data) => {
+  const validate = (data,isEdit=false) => {
     if (!data.title.trim()) { showToast('Title is required', 'error'); return false; }
     if (data.platform === 'youtube' && !getYouTubeId(data.youtubeUrl)) {
       showToast('Enter a valid YouTube URL', 'error'); return false;
     }
     if (data.platform === 'instagram' && !data.instagramUrl.trim()) {
       showToast('Enter an Instagram URL', 'error'); return false;
+    }
+    if(data.platform==='upload'&&!isEdit){
+      if(!selectedFile){showToast('Choose an MP4 or WebM video','error');return false;}
+      if(!['video/mp4','video/webm'].includes(selectedFile.type)||
+        !/\.(mp4|webm)$/i.test(selectedFile.name)){
+        showToast('Only MP4 / WebM supported','error');return false;
+      }
+      if(selectedFile.size>50*1024*1024){showToast('Maximum size is 50 MB','error');return false;}
     }
     return true;
   };
@@ -69,17 +84,31 @@ export default function VideoManager() {
     if (!validate(form)) return;
     setLoading(true);
     try {
-      await api.post('/api/videos', form);
-      setForm(EMPTY_FORM);
-      await fetchVideos();
-      showToast('Video added successfully');
-    } catch { showToast('Failed to add video', 'error'); }
-    finally { setLoading(false); }
+      if(form.platform==='upload'){
+        const data=new FormData();
+        data.append('video',selectedFile);
+        data.append('title',form.title.trim());
+        data.append('description',form.description);
+        await api.post('/api/videos/upload',data,{
+          timeout:120000,
+          onUploadProgress:event=>{
+            if(event.total)setUploadProgress(Math.min(99,Math.round(event.loaded/event.total*100)));
+          }
+        });
+      }else{
+        await api.post('/api/videos',form);
+      }
+      forgetCatalogRows('videos');
+      setForm(EMPTY_FORM);setSelectedFile(null);setUploadProgress(0);
+      await fetchVideos();showToast('Video added successfully');
+    }catch(error){showToast(error.response?.data?.message||'Failed to upload video','error');}
+    finally{setLoading(false);}
   };
 
   const handleDelete = async () => {
     try {
       await api.delete(`/api/videos/${confirm.id}`);
+      forgetCatalogRows('videos');
       setConfirm({ open: false, id: null });
       await fetchVideos();
       showToast('Video deleted');
@@ -87,10 +116,11 @@ export default function VideoManager() {
   };
 
   const handleUpdate = async () => {
-    if (!validate(editDialog)) return;
+    if (!validate(editDialog,true)) return;
     setEditLoading(true);
     try {
       await api.put(`/api/videos/${editDialog.id}`, editDialog);
+      forgetCatalogRows('videos');
       setEditDialog({ open: false, id: null, ...EMPTY_FORM });
       await fetchVideos();
       showToast('Video updated');
@@ -108,13 +138,19 @@ export default function VideoManager() {
 
   return (
     <Box sx={{ maxWidth: 900, mx: 'auto' }}>
-      <Typography variant="h5" fontWeight={600} mb={3}>Video Manager</Typography>
+      <Typography variant="h5" fontWeight={600} mb={1}>Video Manager</Typography>
+      <Typography variant="body2" color="text.secondary" mb={3}>
+        Upload MP4/WebM reels directly, or add YouTube/Instagram links.
+        Videos appear in the Pinterest-style home gallery.
+      </Typography>
 
       {/* ── Add form ── */}
       <Paper elevation={0} variant="outlined" sx={{ p: 3, mb: 4, borderRadius: 3 }}>
         <Typography variant="subtitle2" fontWeight={600} mb={2}>Add Video</Typography>
         <Box component="form" onSubmit={handleAdd} sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-          <PlatformToggle value={form.platform} onChange={(v) => setF('platform', v)} />
+          <PlatformToggle value={form.platform} onChange={(v) => {
+            setF('platform',v);setSelectedFile(null);setUploadProgress(0);
+          }} />
           <TextField
             label="Title" size="small" required fullWidth
             value={form.title} onChange={(e) => setF('title', e.target.value)}
@@ -127,12 +163,31 @@ export default function VideoManager() {
               error={!!form.youtubeUrl && !getYouTubeId(form.youtubeUrl)}
               helperText={form.youtubeUrl && !getYouTubeId(form.youtubeUrl) ? 'Invalid YouTube URL' : ''}
             />
-          ) : (
+          ) : form.platform==='instagram' ? (
             <TextField
               label="Instagram Post / Reel URL" size="small" required fullWidth
               placeholder="https://www.instagram.com/p/... or /reel/..."
               value={form.instagramUrl} onChange={(e) => setF('instagramUrl', e.target.value)}
             />
+          ) : (
+            <Box sx={{p:2,border:'1px dashed #bbb',borderRadius:2}}>
+              <Typography variant="body2" fontWeight={600} mb={1}>
+                Choose MP4 or WebM · Up to 50 MB
+              </Typography>
+              <input type="file" accept="video/mp4,video/webm,.mp4,.webm"
+                aria-label="Choose a video file"
+                onChange={e=>setSelectedFile(e.target.files?.[0]||null)}/>
+              {selectedFile&&<Typography variant="caption" display="block" mt={1}>
+                {selectedFile.name} · {(selectedFile.size/1048576).toFixed(1)} MB
+              </Typography>}
+              {loading&&<Box role="status" aria-live="polite" sx={{mt:2}}>
+                <Typography variant="caption">Uploading {uploadProgress}%</Typography>
+                <progress value={uploadProgress} max="100" style={{width:'100%'}}/>
+              </Box>}
+              <Typography variant="caption" display="block" mt={1} color="text.secondary">
+                Uploaded reels autoplay muted only when visible in the Pinterest feed.
+              </Typography>
+            </Box>
           )}
           <TextField
             label="Description (optional)" size="small" fullWidth multiline rows={2}
@@ -161,11 +216,20 @@ export default function VideoManager() {
             {videos.map((v) => {
               const ytId = getYouTubeId(v.youtubeUrl);
               const isYT = (v.platform || 'youtube') === 'youtube';
+              const isUpload=v.platform==='upload';
               return (
                 <TableRow key={v._id} hover>
                   <TableCell>
                     <Box sx={{ position: 'relative', width: 64, height: 48, borderRadius: 1, overflow: 'hidden', bgcolor: isYT ? '#000' : '#dd2a7b22', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                      {isYT && ytId ? (
+                      {isUpload ? (
+                        <a href={v.videoUrl} target="_blank" rel="noopener noreferrer"
+                          aria-label={'Preview '+v.title}>
+                          {v.posterUrl?<img src={v.posterUrl} alt="" loading="lazy"
+                            style={{width:64,height:48,objectFit:'cover'}}/>:
+                            <CloudUploadIcon sx={{color:'#555',fontSize:28}}/>}
+                          <PlayArrowIcon sx={{position:'absolute',color:'white',left:21,top:12}}/>
+                        </a>
+                      ) : isYT && ytId ? (
                         <>
                           <img src={`https://img.youtube.com/vi/${ytId}/default.jpg`} alt={v.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                           <PlayArrowIcon sx={{ position: 'absolute', color: 'white', fontSize: 20 }} />
@@ -178,13 +242,13 @@ export default function VideoManager() {
                   <TableCell sx={{ maxWidth: 220 }}>
                     <Typography variant="body2" fontWeight={500} noWrap>{v.title}</Typography>
                     <Typography variant="caption" color="text.secondary" noWrap sx={{ display: 'block' }}>
-                      {isYT ? v.youtubeUrl : v.instagramUrl}
+                      {isUpload ? 'Uploaded video' : isYT ? v.youtubeUrl : v.instagramUrl}
                     </Typography>
                   </TableCell>
                   <TableCell>
                     <Chip
-                      icon={isYT ? <YouTubeIcon /> : <InstagramIcon />}
-                      label={isYT ? 'YouTube' : 'Instagram'}
+                      icon={isUpload ? <CloudUploadIcon /> : isYT ? <YouTubeIcon /> : <InstagramIcon />}
+                      label={isUpload ? 'Upload' : isYT ? 'YouTube' : 'Instagram'}
                       size="small"
                       sx={{ bgcolor: isYT ? '#FF000015' : '#dd2a7b15', color: isYT ? '#CC0000' : '#dd2a7b', fontWeight: 600, '& .MuiChip-icon': { color: 'inherit' } }}
                     />
@@ -210,7 +274,11 @@ export default function VideoManager() {
       <Dialog open={editDialog.open} onClose={() => setEditDialog({ open: false, id: null, ...EMPTY_FORM })} maxWidth="sm" fullWidth>
         <DialogTitle>Edit Video</DialogTitle>
         <DialogContent sx={{ pt: 2, display: 'flex', flexDirection: 'column', gap: 2 }}>
-          <PlatformToggle value={editDialog.platform} onChange={(v) => setE('platform', v)} />
+          {editDialog.platform==='upload' ?
+            <Typography variant="caption" color="text.secondary">
+              This video is hosted in the cloud. Edit text here or delete and upload a replacement.
+            </Typography> :
+            <PlatformToggle value={editDialog.platform} onChange={(v) => setE('platform', v)} allowUpload={false} />}
           <TextField label="Title" size="small" fullWidth autoFocus value={editDialog.title} onChange={(e) => setE('title', e.target.value)} />
           {editDialog.platform === 'youtube' ? (
             <TextField
@@ -219,9 +287,9 @@ export default function VideoManager() {
               error={!!editDialog.youtubeUrl && !getYouTubeId(editDialog.youtubeUrl)}
               helperText={editDialog.youtubeUrl && !getYouTubeId(editDialog.youtubeUrl) ? 'Invalid YouTube URL' : ''}
             />
-          ) : (
+          ) : editDialog.platform==='instagram' ? (
             <TextField label="Instagram URL" size="small" fullWidth value={editDialog.instagramUrl} onChange={(e) => setE('instagramUrl', e.target.value)} />
-          )}
+          ) : null}
           <TextField label="Description (optional)" size="small" fullWidth multiline rows={2} value={editDialog.description} onChange={(e) => setE('description', e.target.value)} />
         </DialogContent>
         <DialogActions sx={{ px: 3, pb: 2 }}>

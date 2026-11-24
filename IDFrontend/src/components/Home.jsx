@@ -489,7 +489,7 @@ export default function Home() {
             key={(selectedCategory ? idOf(selectedCategory) : 'all') + '|' +
               (selectedSubcategory ? idOf(selectedSubcategory) : 'all') + '|' +
               deferredSearch.trim().toLowerCase() + '|' + catalogRetry}
-            products={orderedProducts} categoryById={categoryById}
+            products={orderedProducts} videos={videos} categoryById={categoryById}
             whatsappNumber={whatsappNumber}
             hasMore={feedMeta.hasMore} loadingMore={loadingMore}
             loadError={moreFailed} onLoadMore={loadMore} />

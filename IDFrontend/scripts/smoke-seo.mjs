@@ -176,6 +176,28 @@ assert(pinCss.includes('columns:2') && pinCss.includes('break-inside:avoid') &&
   'Two-column mobile masonry and related designs styling must exist');
 assert(pinCss.includes('prefers-reduced-motion:reduce'), 'Motion accessibility must be retained');
 const endlessSource=readFileSync(new URL('../src/components/mobile/EndlessPinterestFeed.jsx',import.meta.url),'utf8');
+
+const uploadedPinSource=readFileSync(new URL('../src/components/mobile/PinterestVideoPin.jsx',import.meta.url),'utf8');
+const videoAdminSource=readFileSync(new URL('../src/pages/admin/VideoManager.jsx',import.meta.url),'utf8');
+assert(!pinHeaderSource.includes('sk-pin-brand-final-logo') &&
+  !index.includes('<img class="sk-boot-real-logo"'),
+  'Top navigation must not show a graphic SK logo on React or initial paint');
+assert(homeSource.includes('videos={videos}') &&
+  endlessSource.includes('interleavePinterestVideos') &&
+  endlessSource.includes('<PinterestVideoPin'),
+  'Uploaded and linked videos must appear between photo pins, not only in footer');
+assert(uploadedPinSource.includes('IntersectionObserver') &&
+  uploadedPinSource.includes('node.pause()') &&
+  uploadedPinSource.includes('playsInline') &&
+  uploadedPinSource.includes('muted={muted}') &&
+  uploadedPinSource.includes('src={activated?video.videoUrl:undefined}'),
+  'Video should lazy-load, autoplay muted in view and pause off-screen');
+assert(videoAdminSource.includes("api.post('/api/videos/upload'") &&
+  videoAdminSource.includes('type="file"') &&
+  videoAdminSource.includes('50 MB') &&
+  videoAdminSource.includes('onUploadProgress'),
+  'Admin must support direct MP4/WebM uploads and display progress');
+
 const loadingSource=readFileSync(new URL('../src/components/mobile/CatalogLoadingState.jsx',import.meta.url),'utf8');
 assert(endlessSource.includes('uniqueDesigns') && endlessSource.includes('IntersectionObserver') &&
   endlessSource.includes('onLoadMore') && !endlessSource.includes('visibleCount') &&
@@ -217,13 +239,15 @@ assert(pinCss.includes('.sk-pinterest-home .sk-catalog-loading'),
   'The SK logo printing animation must still be available');
 assert(pinHeaderSource.includes('FaWhatsapp aria-hidden') && !pinHeaderSource.includes('<FaPlus'),
   'Header must keep existing WhatsApp action, not substitute a plus button');
-assert(pinHeaderSource.includes('sk-pin-brand-final-logo') &&
-  homeSource.includes('sk-store-footer-final-logo'), 'Use the final SK logo in header and footer');
+assert(!pinHeaderSource.includes('sk-pin-brand-final-logo') &&
+  homeSource.includes('sk-store-footer-final-logo'),
+  'Keep footer branding but remove the graphic logo from top navbar');
 const finalLogo=readFileSync(new URL('../public/images/sk-digital-final.svg',import.meta.url),'utf8');
 assert(finalLogo.includes('viewBox="0 0 590 429"') &&
   finalLogo.includes('fill-rule="evenodd"'), 'Finalized monogram SVG asset missing');
-assert(index.includes('sk-boot-real-logo') && index.includes('sk-boot-whatsapp-link') &&
-  index.includes('href="/images/sk-digital-final.svg"'), 'SEO initial paint must show the real logo and WhatsApp link');
+assert(!index.includes('<img class="sk-boot-real-logo"') && index.includes('sk-boot-whatsapp-link') &&
+  index.includes('href="/images/sk-digital-final.svg"'),
+  'Initial navbar must be logo-free; retain favicon and WhatsApp branding');
 assert(homeSource.indexOf('sk-pin-about-intro') > homeSource.indexOf('sk-store-footer-expanded') &&
   homeSource.includes('GONDIA DESIGN STUDIO · SINCE 2006') &&
   homeSource.includes('Wedding cards, signage &amp;'),
@@ -373,7 +397,7 @@ assert(!homeSource.includes('<CategorySeoBlurb') &&
   homeSource.includes('orderStoreCategories(categories,') &&
   pinHeaderSource.includes('firstWedding') &&
   pinHeaderSource.indexOf('>All</button>') < pinHeaderSource.indexOf('{firstWedding&&<button') &&
-  endlessSource.includes('categoryById.get(itemKey(product.category))'),
+  endlessSource.includes('categoryById.get(itemKey(item.product.category))'),
   'Category feed must hide sales copy while keeping Wedding first and names resolved');
 assert(guideSource.includes('getCategoryGuide') && guideSource.includes('Browse ' + "' + name + '"),
   'Every unknown live category needs a relevant no-fabrication fallback description');
