@@ -411,15 +411,16 @@ for(const guide of categoryGuideData) {
 const loadingComponentSource=readFileSync(new URL('../src/components/mobile/CatalogLoadingState.jsx',import.meta.url),'utf8');
 assert(homeSource.includes("catalogStatus") && homeSource.includes("catalogReady") && homeSource.includes("catalogPending") && homeSource.includes("catalogFailed"),
   'Category and listing endpoints must track separate loading outcomes');
-assert(homeSource.includes("loadCatalogPart('listings'") && homeSource.includes("loadCatalogPart('categories'"),
-  'Loading state must wait for the two live catalog resources');
+assert(homeSource.includes('fetchFeedPage(1,controller.signal)') &&
+  homeSource.includes("loadCatalogPart('categories'"),
+  'Initial page and category metadata should load independently');
 assert(homeSource.includes("if (!catalogReady) return;"), 'Category actions must be gated until the catalog is ready');
-assert(homeSource.includes('<CatalogLoadingState error={catalogFailed && !catalogPending} onRetry={retryCatalog} />'),
-  'Show printing animation during pending state and manual retry after failure');
+assert(homeSource.includes('<PinterestFeedLoading error={catalogFailed && !catalogPending} onRetry={retryCatalog} />'),
+  'Show Pinterest masonry skeletons during initial loading and manual retry after failure');
 assert(pinHeaderSource.includes('disabled={!catalogReady}') && pinHeaderSource.includes('sk-pin-tab-loading'),
   'Search and category tabs must be non-interactive while waiting for catalog data');
-assert(homeSource.includes('<CatalogLoadingState error={catalogFailed && !catalogPending} onRetry={retryCatalog} />'),
-  'CSS print animation must replace the masonry gallery while metadata or products are pending');
+assert(homeSource.includes('<PinterestFeedLoading error={catalogFailed && !catalogPending} onRetry={retryCatalog} />'),
+  'Pinterest shimmer should replace the masonry while metadata or the first batch is pending');
 assert(loadingComponentSource.includes('sk-print-press') && loadingComponentSource.includes('sk-print-paper') &&
   loadingComponentSource.includes('Try loading again'), 'Loader must use printing motif and an accessible retry');
 assert(festiveCss.includes('@keyframes sk-paper-print') && festiveCss.includes('@media (prefers-reduced-motion:reduce)'),
