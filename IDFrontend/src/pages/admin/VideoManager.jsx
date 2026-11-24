@@ -212,11 +212,20 @@ export default function VideoManager() {
             {videos.map((v) => {
               const ytId = getYouTubeId(v.youtubeUrl);
               const isYT = (v.platform || 'youtube') === 'youtube';
+              const isUpload=v.platform==='upload';
               return (
                 <TableRow key={v._id} hover>
                   <TableCell>
                     <Box sx={{ position: 'relative', width: 64, height: 48, borderRadius: 1, overflow: 'hidden', bgcolor: isYT ? '#000' : '#dd2a7b22', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                      {isYT && ytId ? (
+                      {isUpload ? (
+                        <a href={v.videoUrl} target="_blank" rel="noopener noreferrer"
+                          aria-label={'Preview '+v.title}>
+                          {v.posterUrl?<img src={v.posterUrl} alt="" loading="lazy"
+                            style={{width:64,height:48,objectFit:'cover'}}/>:
+                            <CloudUploadIcon sx={{color:'#555',fontSize:28}}/>}
+                          <PlayArrowIcon sx={{position:'absolute',color:'white',left:21,top:12}}/>
+                        </a>
+                      ) : isYT && ytId ? (
                         <>
                           <img src={`https://img.youtube.com/vi/${ytId}/default.jpg`} alt={v.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                           <PlayArrowIcon sx={{ position: 'absolute', color: 'white', fontSize: 20 }} />
@@ -229,13 +238,13 @@ export default function VideoManager() {
                   <TableCell sx={{ maxWidth: 220 }}>
                     <Typography variant="body2" fontWeight={500} noWrap>{v.title}</Typography>
                     <Typography variant="caption" color="text.secondary" noWrap sx={{ display: 'block' }}>
-                      {isYT ? v.youtubeUrl : v.instagramUrl}
+                      {isUpload ? 'Uploaded video' : isYT ? v.youtubeUrl : v.instagramUrl}
                     </Typography>
                   </TableCell>
                   <TableCell>
                     <Chip
-                      icon={isYT ? <YouTubeIcon /> : <InstagramIcon />}
-                      label={isYT ? 'YouTube' : 'Instagram'}
+                      icon={isUpload ? <CloudUploadIcon /> : isYT ? <YouTubeIcon /> : <InstagramIcon />}
+                      label={isUpload ? 'Upload' : isYT ? 'YouTube' : 'Instagram'}
                       size="small"
                       sx={{ bgcolor: isYT ? '#FF000015' : '#dd2a7b15', color: isYT ? '#CC0000' : '#dd2a7b', fontWeight: 600, '& .MuiChip-icon': { color: 'inherit' } }}
                     />
@@ -261,7 +270,11 @@ export default function VideoManager() {
       <Dialog open={editDialog.open} onClose={() => setEditDialog({ open: false, id: null, ...EMPTY_FORM })} maxWidth="sm" fullWidth>
         <DialogTitle>Edit Video</DialogTitle>
         <DialogContent sx={{ pt: 2, display: 'flex', flexDirection: 'column', gap: 2 }}>
-          <PlatformToggle value={editDialog.platform} onChange={(v) => setE('platform', v)} />
+          {editDialog.platform==='upload' ?
+            <Typography variant="caption" color="text.secondary">
+              This video is hosted in the cloud. Edit text here or delete and upload a replacement.
+            </Typography> :
+            <PlatformToggle value={editDialog.platform} onChange={(v) => setE('platform', v)} />}
           <TextField label="Title" size="small" fullWidth autoFocus value={editDialog.title} onChange={(e) => setE('title', e.target.value)} />
           {editDialog.platform === 'youtube' ? (
             <TextField
@@ -270,9 +283,9 @@ export default function VideoManager() {
               error={!!editDialog.youtubeUrl && !getYouTubeId(editDialog.youtubeUrl)}
               helperText={editDialog.youtubeUrl && !getYouTubeId(editDialog.youtubeUrl) ? 'Invalid YouTube URL' : ''}
             />
-          ) : (
+          ) : editDialog.platform==='instagram' ? (
             <TextField label="Instagram URL" size="small" fullWidth value={editDialog.instagramUrl} onChange={(e) => setE('instagramUrl', e.target.value)} />
-          )}
+          ) : null}
           <TextField label="Description (optional)" size="small" fullWidth multiline rows={2} value={editDialog.description} onChange={(e) => setE('description', e.target.value)} />
         </DialogContent>
         <DialogActions sx={{ px: 3, pb: 2 }}>
