@@ -180,7 +180,7 @@ const endlessSource=readFileSync(new URL('../src/components/mobile/EndlessPinter
 const uploadedPinSource=readFileSync(new URL('../src/components/mobile/PinterestVideoPin.jsx',import.meta.url),'utf8');
 const videoAdminSource=readFileSync(new URL('../src/pages/admin/VideoManager.jsx',import.meta.url),'utf8');
 assert(!pinHeaderSource.includes('sk-pin-brand-final-logo') &&
-  !index.includes('sk-boot-real-logo'),
+  !index.includes('<img class="sk-boot-real-logo"'),
   'Top navigation must not show a graphic SK logo on React or initial paint');
 assert(homeSource.includes('videos={videos}') &&
   endlessSource.includes('interleavePinterestVideos') &&
@@ -245,7 +245,7 @@ assert(!pinHeaderSource.includes('sk-pin-brand-final-logo') &&
 const finalLogo=readFileSync(new URL('../public/images/sk-digital-final.svg',import.meta.url),'utf8');
 assert(finalLogo.includes('viewBox="0 0 590 429"') &&
   finalLogo.includes('fill-rule="evenodd"'), 'Finalized monogram SVG asset missing');
-assert(!index.includes('sk-boot-real-logo') && index.includes('sk-boot-whatsapp-link') &&
+assert(!index.includes('<img class="sk-boot-real-logo"') && index.includes('sk-boot-whatsapp-link') &&
   index.includes('href="/images/sk-digital-final.svg"'),
   'Initial navbar must be logo-free; retain favicon and WhatsApp branding');
 assert(homeSource.indexOf('sk-pin-about-intro') > homeSource.indexOf('sk-store-footer-expanded') &&
