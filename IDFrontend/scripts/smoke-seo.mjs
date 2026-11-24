@@ -178,6 +178,14 @@ assert(pinCss.includes('prefers-reduced-motion:reduce'), 'Motion accessibility m
 const endlessSource=readFileSync(new URL('../src/components/mobile/EndlessPinterestFeed.jsx',import.meta.url),'utf8');
 
 const uploadedPinSource=readFileSync(new URL('../src/components/mobile/PinterestVideoPin.jsx',import.meta.url),'utf8');
+assert(pinHeaderSource.includes('<strong>SANJU SK DIGITAL</strong>') &&
+  pinHeaderSource.includes('<small>MAHI CREATION - 9372333633</small>') &&
+  !pinHeaderSource.includes('DIGITAL · MAHI CREATION'),
+  'Navbar must show exact bold SANJU SK DIGITAL and MAHI CREATION - 9372333633 lines');
+assert(index.includes('<strong>SANJU SK DIGITAL</strong><small>MAHI CREATION - 9372333633</small>') &&
+  index.includes('.sk-boot-brand-name strong') &&
+  index.includes('.sk-boot-brand-name small'),
+  'Server-rendered initial navbar must match the bold two-line brand without text flash');
 const videoAdminSource=readFileSync(new URL('../src/pages/admin/VideoManager.jsx',import.meta.url),'utf8');
 assert(!pinHeaderSource.includes('sk-pin-brand-final-logo') &&
   !index.includes('<img class="sk-boot-real-logo"'),

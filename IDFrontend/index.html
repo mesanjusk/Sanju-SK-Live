@@ -165,6 +165,22 @@
       #sk-seo-initial .sk-boot-header,#sk-seo-initial .sk-boot-shell{
         background:#fff!important;color:#202020!important;
       }
+      /* Match React's bold, two-line text-only navbar during the first paint. */
+      #sk-seo-initial .sk-boot-brand-name{display:flex;flex-direction:column;gap:4px;
+        min-width:0;white-space:nowrap;line-height:1.1;}
+      #sk-seo-initial .sk-boot-brand-name strong{font-size:18px;font-weight:900;
+        letter-spacing:-.035em;color:#141414;}
+      #sk-seo-initial .sk-boot-brand-name small{font-size:11px;font-weight:850;
+        letter-spacing:0;color:#292929;}
+      @media(max-width:480px){
+        #sk-seo-initial .sk-boot-brand-name strong{font-size:16px;}
+        #sk-seo-initial .sk-boot-brand-name small{font-size:10px;}
+        #sk-seo-initial .sk-boot-header{gap:6px;}
+      }
+      @media(max-width:350px){
+        #sk-seo-initial .sk-boot-brand-name strong{font-size:14px;}
+        #sk-seo-initial .sk-boot-brand-name small{font-size:9px;}
+      }
 </style>
     <!-- SEO GENERATED HEAD START -->
     <!-- The predev/prebuild script generates crawlable meta tags and JSON-LD here. -->

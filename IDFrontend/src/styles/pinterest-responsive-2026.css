@@ -540,3 +540,18 @@
   outline: 3px solid #b986d8;
   outline-offset: 2px;
 }
+
+
+/* Maintain two bold brand lines on narrow phones without obscuring actions. */
+.sk-public-site .sk-pin-header .sk-pin-brand {min-width:0;max-width:calc(100vw - 116px);}
+.sk-public-site .sk-pin-header .sk-pin-brand-name strong {font-weight:900;}
+.sk-public-site .sk-pin-header .sk-pin-brand-name small {font-weight:850;}
+@media(max-width:480px){
+ .sk-public-site .sk-pin-header{gap:6px;}
+ .sk-public-site .sk-pin-header .sk-pin-brand-name strong{font-size:16px;}
+ .sk-public-site .sk-pin-header .sk-pin-brand-name small{font-size:10px;}
+}
+@media(max-width:350px){
+ .sk-public-site .sk-pin-header .sk-pin-brand-name strong{font-size:14px;}
+ .sk-public-site .sk-pin-header .sk-pin-brand-name small{font-size:9px;}
+}

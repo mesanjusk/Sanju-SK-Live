@@ -347,3 +347,17 @@
 @media(prefers-reduced-motion:reduce){
  .sk-video-pin-player{scroll-behavior:auto;}
 }
+
+
+/* Two-line text-only storefront brand: exact legal/trading name and studio phone. */
+.sk-pin-header .sk-pin-brand {min-width:0;max-width:260px;line-height:1.1;}
+.sk-pin-header .sk-pin-brand-name{display:flex;flex-direction:column;gap:4px;min-width:0;
+  letter-spacing:0;white-space:nowrap;}
+.sk-pin-header .sk-pin-brand-name strong{display:block;font-size:18px;font-weight:900;
+  line-height:1.04;letter-spacing:-.035em;color:#141414;}
+.sk-pin-header .sk-pin-brand-name small{display:block;margin:0;font-size:11px;
+  line-height:1.12;font-weight:850;letter-spacing:0;color:#292929;}
+@media(max-width:380px){
+  .sk-pin-header .sk-pin-brand-name strong{font-size:15px;}
+  .sk-pin-header .sk-pin-brand-name small{font-size:10px;}
+}
