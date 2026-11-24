@@ -311,3 +311,39 @@
 @media(prefers-reduced-motion:reduce){
  .sk-pin-spinner,.sk-pin-skeleton-cover{animation:none;}
 }
+
+
+/* Real Pinterest-style inline video pins, safely paused outside the viewport. */
+.sk-video-pin-cover{
+  position:relative;overflow:hidden;border-radius:20px;
+  width:100%;aspect-ratio:4/5;min-height:180px;
+  background:#151515;color:#fff;
+}
+.sk-video-pin-player{display:block;position:absolute;inset:0;width:100%;height:100%;
+  object-fit:cover;background:#171717;border:0;cursor:pointer;}
+.sk-video-pin-under{padding:8px 3px 0;}
+.sk-video-pin-under .sk-pin-card-title{font-size:12px;line-height:1.4;}
+.sk-video-pin-label{position:absolute;top:11px;left:11px;z-index:2;pointer-events:none;
+  border-radius:999px;padding:5px 10px;background:#0009;color:#fff;
+  font-size:10px;font-weight:800;letter-spacing:.01em;}
+.sk-video-pin-play,.sk-video-pin-sound{position:absolute;z-index:5;display:grid;place-items:center;
+  width:35px;height:35px;border-radius:50%;border:0;background:#0009;color:#fff;
+  box-shadow:0 3px 12px #0003;}
+.sk-video-pin-play{left:10px;bottom:12px;font-size:12px;}
+.sk-video-pin-sound{right:10px;bottom:12px;font-size:16px;}
+.sk-video-pin-play:focus-visible,.sk-video-pin-sound:focus-visible,
+.sk-video-pin-external:focus-visible{outline:3px solid #fff;outline-offset:-4px;}
+.sk-video-pin-fallback{position:absolute;inset:0;z-index:1;display:grid;
+  place-items:center;background:#2c2c2c;color:#fff;font-size:12px;}
+.sk-video-pin-external{position:absolute;inset:0;display:flex;align-items:center;
+  justify-content:center;flex-direction:column;gap:12px;overflow:hidden;
+  text-decoration:none;color:#fff;background:#101010;}
+.sk-video-pin-external img{position:absolute;inset:0;width:100%;height:100%;
+  object-fit:cover;opacity:.67;}
+.sk-video-pin-provider{position:relative;z-index:1;font-size:38px;filter:drop-shadow(0 2px 9px #000a);}
+.sk-video-pin-watch{position:relative;z-index:1;border-radius:20px;
+  background:#fff;color:#222;font-size:11px;font-weight:800;padding:9px 15px;}
+.sk-video-pin-instagram{background:linear-gradient(145deg,#7645a5,#e34b70,#e9aa54);}
+@media(prefers-reduced-motion:reduce){
+ .sk-video-pin-player{scroll-behavior:auto;}
+}
